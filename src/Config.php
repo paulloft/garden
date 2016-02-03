@@ -47,7 +47,7 @@ class Config {
         if ($value) {
             self::$defaultPath = $value;
         } elseif (!self::$defaultPath) {
-            self::$defaultPath = PATH_ROOT.'/conf/config.json.php';
+            self::$defaultPath = PATH_CONF.'/config.json.php';
         }
         return self::$defaultPath;
     }
@@ -125,7 +125,7 @@ class Config {
      */
     public static function load($path = '', $underlay = false, $php_var = 'config') {
         if (!$path) {
-            $path = self::$defaultPath;
+            $path = self::defaultPath();
         }
 
         $loaded = array_load($path, $php_var);
