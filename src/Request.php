@@ -213,7 +213,7 @@ class Request implements JsonSerializable {
         $env['SCRIPT_NAME'] = rtrim($script_name, '/');
 
         // PATH_INFO.
-        $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
+        $path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
         // Strip the extension from the path.
         list($path, $ext) = static::splitPathExt($path);

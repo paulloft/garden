@@ -1,6 +1,0 @@
-{
-    "name": "Test Addons",
-    "description": "Some code for running tests.",
-    "type": "addon",
-    "version": "1.0a"
-}
