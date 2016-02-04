@@ -1,4 +1,5 @@
-<?php namespace Garden;
+<?php 
+namespace Garden;
 
     /**
      * Format of a porter run.

@@ -215,13 +215,14 @@ class Application {
             return null;
         }
 
+        if ($result instanceof \Exception) {
+            $response->flushHeaders();
+            throw $result;
+        }
+
         // Check for known response types.
         switch ($contentType) {
             case 'application/internal':
-                if ($result instanceof \Exception) {
-                    throw $result;
-                }
-
                 if ($response->contentAsset() === 'response') {
                     return $response;
                 } else {

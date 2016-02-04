@@ -1,5 +1,7 @@
 <?php
 
+\php_error\reportErrors(['enable_saving' => false]);
+
 /**
 * Dumps information about arguments passed to functions
 * 

@@ -28,10 +28,13 @@
 		"ext-pdo_mysql": "*",
 		"ext-Reflection": "*",
 		"lib-curl": "*",
-		"lib-pcre": "*"
+		"lib-pcre": "*",
+		"smarty/smarty": "~3.1",
+		"simplon/error": "^0.3.8"
 	},
 	"require-dev": {
-		"bobthecow/faker": "dev-master"
+		"bobthecow/faker": "dev-master",
+		"joseph-lenton/php-error": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {
@@ -40,10 +43,5 @@
 		"files": [
 			"src/functions/autoload.php"
 		]
-	},
-	"autoload-dev": {
-		"psr-4": {
-			"Garden\\Tests\\": "tests"
-		}
 	}
 }
