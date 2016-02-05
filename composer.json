@@ -30,7 +30,7 @@
 		"lib-curl": "*",
 		"lib-pcre": "*",
 		"smarty/smarty": "~3.1",
-		"simplon/error": "^0.3.8"
+		"kuria/error": "^0.2.0"
 	},
 	"require-dev": {
 		"bobthecow/faker": "dev-master",

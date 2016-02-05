@@ -72,7 +72,12 @@ class Dumphper
     static function drawScalar(&$source, &$escape = true)
     {
         if ($source === '0') $escape = False;
-        self::drawValue($escape ? self::escape($source) : $source, gettype($source));
+        $type = gettype($source);
+        // $type = $type == 'string' ? $type.'('.mb_strlen($value).')' : $type;
+        $value = $escape ? self::escape($source) : $source;
+        $value = $type == 'string' ? '<span class="strlen">('.mb_strlen($source).')</span>'.$value : $value;
+
+        self::drawValue($value, $type);
     }
     
     static function drawNULL()
@@ -283,6 +288,7 @@ class Dumphper
 .dumphper-class-def { color: #666 !important; font: bold oblique 11px  Arial !important;}
 .dumphper-head-object .dumphper-class-def { color: #bbb !important;}
 .dumphper-string { color: #a40 !important; background-image: url(data:image/gif;base64,R0lGODlhCgASAIAAAP/Qmv///yH5BAAAAAAALAAAAAAKABIAAAISjI+py+0MYkRzSQBlpvf5D34FADs=) !important; }
+.dumphper-string .strlen { display: inline-block; background: none; color: #000; font-size: 8px; margin-right: 3px; vertical-align: bottom;}
 .dumphper-integer { color: #00f !important; background-image: url(data:image/gif;base64,R0lGODlhCgASAIAAAKTC/////yH5BAAAAAAALAAAAAAKABIAAAIVjI+pqwDsGHRvRVtbThdRKoXiSC4FADs=) !important; }
 .dumphper-double { color: #f00 !important; background-image: url(data:image/gif;base64,R0lGODlhCgASAIAAAP+/v////yH5BAAAAAAALAAAAAAKABIAAAIWjI+pu+CQHJPxUXTrhI1j6zHiSJZiAQA7) !important; }
 .dumphper-resource { color: #660 !important; background-image: url(data:image/gif;base64,R0lGODlhCgASAIAAAP///8zMfyH5BAAAAAAALAAAAAAKABIAAAIVhI+py+0bYgAxSWon1Kpm6T3iSDYFADs=) !important; }

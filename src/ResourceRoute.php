@@ -311,7 +311,9 @@ class ResourceRoute extends Route {
         if ($root = $this->pattern()) {
             if (stripos($path, $root) === 0) {
                 // Strip the root off the path that we are examining.
-                $path = substr($path, strlen($root));
+                if($path != $root) {
+                    $path = substr($path, strlen($root));
+                }
             } else {
                 return null;
             }
@@ -320,7 +322,8 @@ class ResourceRoute extends Route {
         $pathParts = explode('/', trim($path, '/'));
 
         $controller = array_shift($pathParts);
-        if (!$controller) {
+
+        if (!$controller && $path != $root) {
             return null;
         }
 

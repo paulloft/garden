@@ -10,29 +10,21 @@ ini_set('track_errors', 1);
 // Define the root path of the application.
 define('PATH_ROOT', realpath(__DIR__.'/../'));
 
-// Require composer's autoloader.
-require_once PATH_ROOT.'/vendor/autoload.php';
-
 // Require bootstrap.
 require_once PATH_ROOT.'/bootstrap.php';
 
 // Instantiate the application.
 $app = new Application();
 
-// Enable addon functionality.
-Addons::bootstrap(); // enables config('addons')
-
-// Fire the bootstrap event so that overridable function files can be included.
-Event::fire('bootstrap');
-
 // Register routes to functions.
 $app->route('/hello', function () use ($app) {
     echo "Hello World!";
 });
 
+$app->route('/', 'ApiController');
 
 // Register a route to controllers.
-$app->route('/api/', '%sApiController');
+$app->route('/', '%sController');
 
 // Run the application.
 $app->run();

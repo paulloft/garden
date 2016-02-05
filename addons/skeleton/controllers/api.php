@@ -13,4 +13,9 @@ class ApiController extends Controller
     {
         echo 'construct_';
     }
+
+    public function index()
+    {
+        echo 'index method_';
+    }
 }
