@@ -11,7 +11,8 @@ if (!defined('PATH_CONF')) define('PATH_CONF', PATH_ROOT.'/conf');
 date_default_timezone_set('UTC');
 
 // Load the default config from conf/config.json.php.
-Config::load();
+Config::load(PATH_CONF.'/config-default.json');
+Config::load(PATH_CONF.'/config.json');
 
 // Enable addon functionality.
 Addons::bootstrap(); // enables config('addons')

@@ -16,12 +16,8 @@ require_once PATH_ROOT.'/bootstrap.php';
 // Instantiate the application.
 $app = new Application();
 
-// Register routes to functions.
-$app->route('/hello', function () use ($app) {
-    echo "Hello World!";
-});
-
-$app->route('/', 'ApiController');
+// Register default controller.
+$app->route('/(\?.*)?', array(ApiController::instance(), 'test'));
 
 // Register a route to controllers.
 $app->route('/', '%sController');

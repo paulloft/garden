@@ -382,7 +382,7 @@ function base64url_decode($str) {
  * @return string The config value.
  * @see config()
  */
-function c($key, $default) {
+function c($key, $default = null) {
     return config($key, $default);
 }
 
