@@ -887,7 +887,7 @@ function touchdir($dir, $mode = 0777) {
  * @return mixed The item from the array or `$default` if the array key doesn't exist.
  * @category Array Functions
  */
-function val($key, $array, $default = null) {
+function val($key, $array, $default = false) {
     if (is_array($array)) {
         // isset() is a micro-optimization - it is fast but fails for null values.
         if (isset($array[$key])) {
@@ -922,7 +922,7 @@ function val($key, $array, $default = null) {
  * @return mixed The value from the array or object.
  * @category Array Functions
  */
-function valr($keys, $array, $default = null) {
+function valr($keys, $array, $default = false) {
     if (is_string($keys)) {
         $keys = explode('.', $keys);
     }
@@ -940,4 +940,34 @@ function valr($keys, $array, $default = null) {
         }
     }
     return $value;
+}
+
+/**
+ * Set the value on an object/array.
+ *
+ * @param string $Needle The key or property name of the value.
+ * @param mixed $Haystack The array or object to set.
+ * @param mixed $Value The value to set.
+ */
+function setval($Key, &$Collection, $Value) {
+    if(is_array($Collection))
+        $Collection[$Key] = $Value;
+    elseif(is_object($Collection))
+        $Collection->$Key = $Value;
+}
+
+if (!function_exists('ErrorMessage')) {
+    /**
+     * Returns an error message formatted in a way that the custom ErrorHandler
+     * function can understand (allows a little more information to be displayed
+     * on errors).
+     *
+     * @param string The actual error message.
+     * @param string The name of the object that encountered the error.
+     * @param string The name of the method that encountered the error.
+     * @param string Any additional information that could be useful to debuggers.
+     */
+    function ErrorMessage($Message, $SenderObject, $SenderMethod, $Code = '') {
+       return $Message.' | '.$SenderObject.' | '.$SenderMethod.' | '.$Code;
+    }
 }

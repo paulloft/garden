@@ -16,7 +16,7 @@ class ApiController extends Plugin
     }
 
     public function test() {
-        p($_REQUEST);
+        // p($_REQUEST);
         // d(c('Database'));
         // Gdn::getInstance();
         // Gdn::instance();
@@ -29,11 +29,15 @@ class ApiController extends Plugin
 
         $db = Gdn::database();
 
-        $result = $db->sql()->get('php_st', array('id'=>'5'));
+        // $result = $db->sql()->get('php_st', array('id'=>'5'));
+        $result = $db->sql()
+            ->select('*')
+            ->from('php_st')
+            ->where('id<', 5)
+            ->get();
+        d($result->Result());
 
-        d($result);
-
-        d($db, $db->sql(), $db->sql()->pdo());
+        d($db, $db->SQL());
 
         // Gdn::factory('Usermodel');
 
