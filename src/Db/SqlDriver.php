@@ -1,5 +1,5 @@
 <?php
-namespace Garden\Database;
+namespace Garden\Db;
 
 /**
  * Generic SQL database driver
@@ -1683,30 +1683,30 @@ abstract class SqlDriver {
             case 2:
                 return;
         }
-        $this->_Selects            = array();
-        $this->_Froms              = array();
-        $this->_Joins              = array();
-        $this->_Wheres             = array();
-        $this->_WhereConcat      = 'and';
-        $this->_WhereConcatDefault = 'and';
-        $this->_WhereGroupCount = 0;
+        $this->_Selects             = array();
+        $this->_Froms               = array();
+        $this->_Joins               = array();
+        $this->_Wheres              = array();
+        $this->_WhereConcat         = 'and';
+        $this->_WhereConcatDefault  = 'and';
+        $this->_WhereGroupCount     = 0;
         $this->_OpenWhereGroupCount = 0;
-        $this->_GroupBys          = array();
-        $this->_Havings            = array();
-        $this->_OrderBys          = array();
-        $this->_AliasMap          = array();
+        $this->_GroupBys            = array();
+        $this->_Havings             = array();
+        $this->_OrderBys            = array();
+        $this->_AliasMap            = array();
         
-        $this->_CacheKey          = NULL;
-        $this->_CacheOperation  = NULL;
-        $this->_CacheOptions     = NULL;
-        $this->_Distinct          = FALSE;
-        $this->_Limit              = FALSE;
-        $this->_Offset             = FALSE;
-        $this->_Order              = FALSE;
+        $this->_CacheKey            = NULL;
+        $this->_CacheOperation      = NULL;
+        $this->_CacheOptions        = NULL;
+        $this->_Distinct            = FALSE;
+        $this->_Limit               = FALSE;
+        $this->_Offset              = FALSE;
+        $this->_Order               = FALSE;
         
         $this->_Sets                = array();
-        $this->_NamedParameters = array();
-        $this->_Options            = array();
+        $this->_NamedParameters     = array();
+        $this->_Options             = array();
         
         return $this;
     }

@@ -28,16 +28,16 @@ class ApiController extends Plugin
         // Factory::database();
 
         $db = Gdn::database();
-
+        
         // $result = $db->sql()->get('php_st', array('id'=>'5'));
         $result = $db->sql()
             ->select('*')
             ->from('php_st')
             ->where('id<', 5)
             ->get();
-        d($result->Result());
+        // d($result->Result());
 
-        d($db, $db->SQL());
+        d($db, $db->sql());
 
         // Gdn::factory('Usermodel');
 

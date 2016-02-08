@@ -9,7 +9,11 @@ class Gdn {
     protected static $instances;
 
     public static function database() {
-        return self::factory('Garden\Database\Database');
+        return self::factory('Garden\Db\Database');
+    }
+
+    public static function app() {
+        return self::factory('Application');
     }
 
     public static function factory($className) {
@@ -25,7 +29,7 @@ class Gdn {
     }
 
     protected static function factoryHash($className, $args = array()) {
-        return empty($args) ? $className : md5($className.json_encode($args));
+        return empty($args) ? $className : md5($className.implode('',$args));
     }
 
     /** 

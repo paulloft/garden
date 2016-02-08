@@ -1,5 +1,5 @@
 <?php 
-namespace Garden\Database;
+namespace Garden\Db;
 use PDO;
 /**
  * Database manager
@@ -393,7 +393,7 @@ class Database {
             if (empty($this->_SlaveConfig)) {
                 $this->_Slave = $this->connection();
             } else {
-                $this->_Slave = $this->NewPDO($this->_SlaveConfig['Dsn'], $this->_SlaveConfig['User'], $this->_SlaveConfig['Password']);
+                $this->_Slave = $this->NewPDO($this->_SlaveConfig['dsn'], $this->_SlaveConfig['user'], $this->_SlaveConfig['password']);
             }
         }
         
@@ -406,7 +406,7 @@ class Database {
      */
     public function SQL() {
         if(is_null($this->_sql)) {
-            $Name = '\Garden\Database\\'.$this->Engine . 'Driver';
+            $Name = '\Garden\Db\\'.$this->Engine . 'Driver';
             $this->_sql = \Garden\Gdn::Factory($Name);
             $this->_sql->Database = $this;
         }

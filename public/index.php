@@ -13,8 +13,8 @@ define('PATH_ROOT', realpath(__DIR__.'/../'));
 // Require bootstrap.
 require_once PATH_ROOT.'/bootstrap.php';
 
+$app = Gdn::app();
 // Instantiate the application.
-$app = new Application();
 
 // Register default controller.
 $app->route('/(\?.*)?', array(ApiController::instance(), 'test'));

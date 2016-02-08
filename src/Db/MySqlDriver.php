@@ -1,5 +1,5 @@
 <?php
-namespace Garden\Database;
+namespace Garden\Db;
 
 /**
  * MySQL database driver

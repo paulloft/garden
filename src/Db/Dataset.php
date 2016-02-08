@@ -1,5 +1,5 @@
 <?php
-namespace Garden\Database;
+namespace Garden\Db;
 use PDO;
 /**
  * A database-independent dataset management/manipulation class.
