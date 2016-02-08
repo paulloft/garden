@@ -1,8 +1,8 @@
 <?php
 namespace Garden\Db;
-use PDO;
+use PDO, \Garden\Gdn;
 /**
- * A database-independent dataset management/manipulation class.
+ * A database-independent Dataset management/manipulation class.
  *
  * This class is HEAVILY inspired by CodeIgniter (http://www.codeigniter.com).
  * My hat is off to them.
@@ -34,15 +34,15 @@ class Dataset implements \IteratorAggregate, \Countable {
      * @var int
      */
     private $_Cursor = -1;
-	
-	/**
+    
+    /**
      * Determines what type of result is returned from the various methods by default.
      *
      * @var int Either DATASET_TYPE_OBJECT or DATASET_TYPE_ARRAY.
      */
-	protected $_DatasetType = DATASET_TYPE_OBJECT;
-	
-	protected $_EOF = FALSE;
+    protected $_DatasetType = DATASET_TYPE_OBJECT;
+    
+    protected $_EOF = FALSE;
 
     /**
      * Contains a PDOStatement object returned by a PDO query. FALSE by default.
@@ -52,24 +52,24 @@ class Dataset implements \IteratorAggregate, \Countable {
      * @var object
      */
     private $_PDOStatement;
-	
-	/**
-	 * An array of either objects or associative arrays with the data in this dataset.
-	 * @var array
-	 */
-	protected $_Result;
+    
+    /**
+     * An array of either objects or associative arrays with the data in this Dataset.
+     * @var array
+     */
+    protected $_Result;
 
     /**
      * @todo Undocumented method.
      */
-    public function __construct($Result = NULL, $DataSetType = NULL) {
+    public function __construct($Result = NULL, $DatasetType = NULL) {
         // Set defaults
         $this->Connection = NULL;
         $this->_Cursor = -1;
         $this->_PDOStatement = NULL;
         $this->_Result = $Result;
-        if ($DataSetType !== NULL) {
-            $this->_DatasetType = $DataSetType;
+        if ($DatasetType !== NULL) {
+            $this->_DatasetType = $DatasetType;
         } elseif ($Result) {
             if (isset($Result[0]) && is_array($Result[0])) {
                 $this->_DatasetType = DATASET_TYPE_ARRAY;
@@ -86,7 +86,7 @@ class Dataset implements \IteratorAggregate, \Countable {
         $this->Connection = NULL;
         $this->FreePDOStatement(TRUE);
     }
-    
+
     /**
      * Count elements of this object. This method provides support for the countable interface.
      * 
@@ -97,65 +97,36 @@ class Dataset implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Moves the dataset's internal cursor pointer to the specified RowIndex.
+     * Moves the Dataset's internal cursor pointer to the specified RowIndex.
      *
      * @param int $RowIndex The index to seek in the result resource.
      */
     public function DataSeek($RowIndex = 0) {
         $this->_Cursor = $RowIndex;
     }
-	
-	public function DatasetType($DatasetType = FALSE) {
-		if($DatasetType !== FALSE) {
-			// Make sure the type isn't changed if the result is already fetched.
-			if(!is_null($this->_Result) && $DatasetType != $this->_DatasetType) {
-                // Loop through the dataset and switch the types.
+    
+    public function DatasetType($DatasetType = FALSE) {
+        if($DatasetType !== FALSE) {
+            // Make sure the type isn't changed if the result is already fetched.
+            if(!is_null($this->_Result) && $DatasetType != $this->_DatasetType) {
+                // Loop through the Dataset and switch the types.
                 $Count = count($this->_Result);
-				foreach($this->_Result as $Index => &$Row) {
+                foreach($this->_Result as $Index => &$Row) {
                     switch($DatasetType) {
                         case DATASET_TYPE_ARRAY:
-							$Row = (array)$Row;
-                            //$this->_Result[$Index] = (array)$this->_Result[$Index];
+                            $Row = (array)$Row;
                             break;
                         case DATASET_TYPE_OBJECT:
-							$Row = (object)$Row;
-                            //$this->_Result[$Index] = (object)$this->_Result[$Index];
+                            $Row = (object)$Row;
                             break;
                     }
                 }
-			}
-			
-			$this->_DatasetType = $DatasetType;
-			return $this;
-		} else {
-			return $this->_DatasetType;
-		}
-	}
-    
-    public function ExpandAttributes($Name = 'Attributes') {
-        $Result =& $this->Result();
-        
-        foreach ($Result as &$Row) {
-            if (is_object($Row)) {
-                if (is_string($Row->$Name)) {
-                    $Attributes = @unserialize($Row->$Name);
-                    
-                    if (is_array($Attributes)) {
-                        foreach ($Attributes as $N => $V) {
-                            $Row->$N = $V;
-                        }
-                    }
-                    unset($Row->$Name);
-                }
-            } else {
-                if (is_string($Row[$Name])) {
-                    $Attributes = @unserialize($Row[$Name]);
-                    
-                    if (is_array($Attributes))
-                        $Row = array_merge($Row, $Attributes);
-                    unset($Row[$Name]);
-                }
             }
+            
+            $this->_DatasetType = $DatasetType;
+            return $this;
+        } else {
+            return $this->_DatasetType;
         }
     }
 
@@ -166,13 +137,13 @@ class Dataset implements \IteratorAggregate, \Countable {
      * It will fill a different array depending on which type is specified.
      */
     protected function _FetchAllRows($DatasetType = FALSE) {
-		if(!is_null($this->_Result))
-			return;
+        if(!is_null($this->_Result))
+            return;
 
         if($DatasetType)
             $this->_DatasetType = $DatasetType;
-		
-		$Result = array();
+        
+        $Result = array();
         if (is_null($this->_PDOStatement)) {
             $this->_Result = $Result;
             return;
@@ -180,13 +151,8 @@ class Dataset implements \IteratorAggregate, \Countable {
 
         $Result = $this->_PDOStatement->fetchAll($this->_DatasetType == DATASET_TYPE_ARRAY ? PDO::FETCH_ASSOC : PDO::FETCH_OBJ);
 
-//		$this->_PDOStatement->setFetchMode($this->_DatasetType == DATASET_TYPE_ARRAY ? PDO::FETCH_ASSOC : PDO::FETCH_OBJ);
-//        while($Row = $this->_PDOStatement->fetch()) {
-//			$Result[] = $Row;
-//		}
-
         $this->FreePDOStatement(TRUE);
-		$this->_Result = $Result;
+        $this->_Result = $Result;
     }
 
     /**
@@ -195,27 +161,27 @@ class Dataset implements \IteratorAggregate, \Countable {
      * @param string $DatasetType The format in which the result should be returned: object or array.
      */
     public function &FirstRow($DatasetType = FALSE) {
-		$Result = &$this->Result($DatasetType);
+        $Result = &$this->Result($DatasetType);
         if(count($Result) == 0)
             return $this->_EOF;
 
         return $Result[0];
     }
-	
-	/**
-	 * Format the resultset with the given method.
-	 *
-	 * @param string $FormatMethod The method to use with Format::To().
-	 * @return Dataset $this pointer for chaining.
-	 */
-	public function Format($FormatMethod) {
-		$Result = &$this->Result();
-		foreach($Result as $Index => $Value) {
+    
+    /**
+     * Format the resultset with the given method.
+     *
+     * @param string $FormatMethod The method to use with Format::To().
+     * @return Dataset $this pointer for chaining.
+     */
+    public function Format($FormatMethod) {
+        $Result = &$this->Result();
+        foreach($Result as $Index => $Value) {
             //TODO: FIX ME!!
-			$Result[$Index] = Gdn_Format::To($Value, $FormatMethod);
-		}
-		return $this;
-	}
+            $Result[$Index] = Format::To($Value, $FormatMethod);
+        }
+        return $this;
+    }
 
     /**
      * Free's the result resource referenced by $this->_PDOStatement.
@@ -232,12 +198,12 @@ class Dataset implements \IteratorAggregate, \Countable {
      * Interface method for IteratorAggregate;
      */
     public function getIterator() {
-        return new ArrayIterator($this->Result());
+        return new \ArrayIterator($this->Result());
     }
 
     /**
      * Index a result array.
-     * @param array $Data The array to index. It is formatted similar to the array returned by DataSet::Result().
+     * @param array $Data The array to index. It is formatted similar to the array returned by Dataset::Result().
      * @param string|array $Columns The name of the column to index on or an array of columns to index on.
      * @param array $Options An array of options for the method.
      *  - <b>Sep</b>: The string to seperate index columns by. Default '|'.
@@ -290,7 +256,7 @@ class Dataset implements \IteratorAggregate, \Countable {
     public static function Join(&$Data, $Columns, $Options = array()) {
         $Options = array_change_key_case($Options);
         
-        $Sql = Gdn::SQL(); //val('sql', $Options, Gdn::SQL());
+        $Sql = Gdn::sql();
         $ResultColumns = array();
         
         // Grab the columns.
@@ -340,7 +306,7 @@ class Dataset implements \IteratorAggregate, \Countable {
                         $Options['Type'] = $Name;
                         break;
                     default:
-                        throw new Exception("DataSet::Join(): Unknown column option '$Index'.");
+                        throw new Exception("Dataset::Join(): Unknown column option '$Index'.");
                 }
             }
         }
@@ -358,7 +324,7 @@ class Dataset implements \IteratorAggregate, \Countable {
             elseif (isset($Table))
                 $ParentColumn = $Table.'ID';
             else
-                throw Exception("DataSet::Join(): Missing 'parent' argument'.");
+                throw Exception("Dataset::Join(): Missing 'parent' argument'.");
         }
         
         // Figure out some options if they weren't specified.
@@ -368,7 +334,7 @@ class Dataset implements \IteratorAggregate, \Countable {
             elseif (isset($Table))
                 $ChildColumn = $Table.'ID';
             else
-                throw Exception("DataSet::Join(): Missing 'child' argument'.");
+                throw Exception("Dataset::Join(): Missing 'child' argument'.");
         }
         
         if (!isset($ColumnPrefix) && !isset($JoinColumn)) {
@@ -454,31 +420,31 @@ class Dataset implements \IteratorAggregate, \Countable {
      *
      * @param string $DatasetType The format in which the result should be returned: object or array.
      */
-    public function &NextRow($DatasetType = FALSE	) {
+    public function &NextRow($DatasetType = FALSE) {
         $Result = &$this->Result($DatasetType);
         ++$this->_Cursor;
-		
+        
         if(isset($Result[$this->_Cursor]))
             return $Result[$this->_Cursor];
         return $this->_EOF;
     }
 
     /**
-     * Returns the number of fields in the DataSet.
+     * Returns the number of fields in the Dataset.
      */
     public function NumFields() {
         $Result = is_object($this->_PDOStatement) ? $this->_PDOStatement->columnCount() : 0;
-		return $Result;
-	}
+        return $Result;
+    }
 
     /**
-     * Returns the number of rows in the DataSet.
+     * Returns the number of rows in the Dataset.
      *
      * @param string $DatasetType The format in which the result should be returned: object or array.
      */
     public function NumRows($DatasetType = FALSE) {
-		$Result = count($this->Result($DatasetType));
-		return $Result;
+        $Result = count($this->Result($DatasetType));
+        return $Result;
     }
 
     /**
@@ -504,12 +470,12 @@ class Dataset implements \IteratorAggregate, \Countable {
      *  - <b>FALSE</b>: The current value of the DatasetType property will be used.
      */
     public function &Result($DatasetType = FALSE) {
-		$this->DatasetType($DatasetType);
+        $this->DatasetType($DatasetType);
         if(is_null($this->_Result))
-			$this->_FetchAllRows();
+            $this->_FetchAllRows();
 
-			
-		return $this->_Result;
+            
+        return $this->_Result;
     }
 
     /**
@@ -517,7 +483,7 @@ class Dataset implements \IteratorAggregate, \Countable {
      *
      */
     public function &ResultArray() {
-		return $this->Result(DATASET_TYPE_ARRAY);
+        return $this->Result(DATASET_TYPE_ARRAY);
     }
 
     /**
@@ -525,7 +491,7 @@ class Dataset implements \IteratorAggregate, \Countable {
      *
      */
     public function ResultObject($FormatType = '') {
-		return $this->Result(DATASET_TYPE_OBJECT);
+        return $this->Result(DATASET_TYPE_OBJECT);
     }
 
     /**
@@ -535,9 +501,9 @@ class Dataset implements \IteratorAggregate, \Countable {
      * @return mixed The row at the given index or FALSE if there is no row at the index.
      */
     public function &Row($RowIndex) {
-		$Result = &$this->Result();
+        $Result = &$this->Result();
         if(isset($Result[$RowIndex]))
-			return $Result[$RowIndex];
+            return $Result[$RowIndex];
         return $this->_EOF;
     }
 
@@ -552,12 +518,12 @@ class Dataset implements \IteratorAggregate, \Countable {
             $this->_Cursor = -1;
             $this->_PDOStatement = NULL;
             $FirstRow = $Resultset[0];
-			
+            
             if (is_array($FirstRow))
-				$this->_DatasetType = DATASET_TYPE_ARRAY;
-			else
-				$this->_DatasetType = DATASET_TYPE_OBJECT;
-			$this->_Result = $Resultset;
+                $this->_DatasetType = DATASET_TYPE_ARRAY;
+            else
+                $this->_DatasetType = DATASET_TYPE_OBJECT;
+            $this->_Result = $Resultset;
         }
     }
 
@@ -574,7 +540,7 @@ class Dataset implements \IteratorAggregate, \Countable {
     }
     
     /**
-     * Unserialize the fields in the dataset.
+     * Unserialize the fields in the Dataset.
      * @param array $Fields 
      * @since 2.1
      */
@@ -582,9 +548,9 @@ class Dataset implements \IteratorAggregate, \Countable {
         $Result =& $this->Result();
         $First = TRUE;
         
-        foreach ($Result as &$Row) {
+        foreach ($Result as $Row) {
             if ($First) {
-                // Check which fields are in the dataset.
+                // Check which fields are in the Dataset.
                 foreach ($Fields as $Index => $Field) {
                     if (val($Field, $Row, FALSE) === FALSE) {
                         unset($Fields[$Index]);
@@ -604,7 +570,7 @@ class Dataset implements \IteratorAggregate, \Countable {
             }
         }
     }
-    
+
     /**
      * Advances to the next row and returns the value rom a column.
      *
@@ -631,53 +597,9 @@ class Dataset implements \IteratorAggregate, \Countable {
                 elseif(is_array($Row) && array_key_exists($ColumnName, $Row))
                         return $Row[$ColumnName];
             }
-		}
+        }
         if(is_array($ColumnName))
             return array_values($ColumnName);
-		return $DefaultValue;
+        return $DefaultValue;
     }
-    
-    /**
-     * Advances to the next row and returns the value rom a column.
-     *
-     * @param mixed $ColumnName The name of the column to get the value from.
-     *  - <b>string</b>: The argument represents the column name.
-     *  - <b>array</b>: The argument is an array of column/default pairs.
-     * @param string $DefaultValue The value to return if there is no data.
-     * @return mixed The value from the column or $DefaultValue.
-     */
-//    public function Value($ColumnName, $DefaultValue = NULL) {
-//        if (is_string($ColumnName))
-//            $Columns = array($ColumnName => $DefaultValue);
-//        else
-//            $Columns = $ColumnName;
-//
-//
-//        $this->_FetchAllRows(FALSE);
-//
-//        $Rows = $this->_Result;
-//        if(array_key_exists($this->_Cursor, $Rows))
-//            $Row = $Rows[$this->_Cursor];
-//        elseif(array_key_exists(0, $Rows))
-//            $Row = $Rows[0];
-//        else
-//            $Row = array();
-//
-//
-//        $Result = array();
-//        foreach($Columns as $ColumnName2 => $DefaultValue2) {
-//            if(is_array($Row) && array_key_exists($ColumnName2, $Row))
-//                $Result[] = $Row[$ColumnName2];
-//            elseif(is_object($Row) && property_exists($Row, $ColumnName2))
-//                $Result[] = $Row->$ColumnName2;
-//            else
-//                $Result[] = $DefaultValue2;
-//        }
-//
-//        //$Result = array_values($Columns);
-//        if(count($Result) == 1)
-//            return $Result[0];
-//        else
-//            return $Result;
-//    }
 }

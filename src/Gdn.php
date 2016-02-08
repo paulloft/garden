@@ -16,6 +16,12 @@ class Gdn {
         return self::factory('Application');
     }
 
+    public static function sql() {
+        $database = self::database();
+        $result = $database->sql();
+        return $result;
+    }
+
     public static function factory($className) {
         $args = func_get_args();
         array_shift($args);

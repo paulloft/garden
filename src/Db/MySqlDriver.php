@@ -1,6 +1,5 @@
 <?php
 namespace Garden\Db;
-
 /**
  * MySQL database driver
  *
@@ -8,9 +7,6 @@ namespace Garden\Db;
  * engines. Any new database engine should have the same public and protected
  * properties and methods as this one so that they can all be treated the same
  * by the application.
- *
- * This class is HEAVILY inspired by and, in places, flat out copied from
- * CodeIgniter (http://www.codeigniter.com). My hat is off to them.
  *
  * @author Todd Burry <todd@vanillaforums.com> 
  * @copyright 2003 Vanilla Forums, Inc
@@ -45,28 +41,17 @@ class MySqLDriver extends SqlDriver {
 
             return $EscapedArray;
         }
-        // echo '<div>STRING: '.$String.'</div>';
 
-        // This function may get "item1 item2" as a string, and so
-        // we may need "`item1` `item2`" and not "`item1 item2`"
         if (ctype_alnum($String) === FALSE) {
             if (strpos($String, '.') !== FALSE) {
                 $MungedAliases = implode('.', array_keys($this->_AliasMap)).'.';
                 $TableName =  substr($String, 0, strpos($String, '.')+1);
-                //echo '<div>STRING: '.$String.'</div>';
-                //echo '<div>TABLENAME: '.$TableName.'</div>';
-                //echo '<div>ALIASES: '.$MungedAliases.'</div>';
-                // If the "TableName" isn't found in the alias list and it is a valid table name, apply the database prefix to it
-                $String = (strpos($MungedAliases, $TableName) !== FALSE || strpos($TableName, "'") !== FALSE) ? $String : $this->Database->DatabasePrefix.$String;
-                //echo '<div>RESULT: '.$String.'</div>';
 
+                $String = (strpos($MungedAliases, $TableName) !== FALSE || strpos($TableName, "'") !== FALSE) ? $String : $this->Database->DatabasePrefix.$String;
             }
 
-            // This function may get "field >= 1", and need it to return "`field` >= 1"
             $LeftBound = ($FirstWordOnly === TRUE) ? '' : '|\s|\(';
-
             $String = preg_replace('/(^'.$LeftBound.')([\w\d\-\_]+?)(\s|\)|$)/iS', '$1`$2`$3', $String);
-            //echo '<div>STRING: '.$String.'</div>';
 
         } else {
             return "`{$String}`";
@@ -160,7 +145,6 @@ class MySqLDriver extends SqlDriver {
             $Object->Name = $Field->Field;
             $Object->PrimaryKey = ($Field->Key == 'PRI' ? TRUE : FALSE);
             $Object->Type = $Type;
-            //$Object->Type2 = $Field->Type;
             $Object->Unsigned = $Unsigned;
             $Object->AllowNull = ($Field->Null == 'YES');
             $Object->Default = $Field->Default;

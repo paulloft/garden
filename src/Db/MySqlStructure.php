@@ -88,7 +88,7 @@ class MySQLStructure extends DatabaseStructure {
         // Get the schema for this table
         $OldPrefix = $this->Database->DatabasePrefix;
         $this->Database->DatabasePrefix = $this->_DatabasePrefix;
-        $Schema = $this->Database->SQL()->FetchTableSchema($this->_TableName);
+        $Schema = $this->Database->sql()->FetchTableSchema($this->_TableName);
         $this->Database->DatabasePrefix = $OldPrefix;
 
         // Get the definition for this column
@@ -161,7 +161,7 @@ class MySQLStructure extends DatabaseStructure {
         $Keys = '';
         $Sql = '';
         
-        $ForceDatabaseEngine = C('Database.ForceStorageEngine');
+        $ForceDatabaseEngine = val('forceStorageEngine', c('database'));
         if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
             $this->_TableStorageEngine = $ForceDatabaseEngine;
             $AllowFullText = $this->_SupportsFulltext();
@@ -196,11 +196,13 @@ class MySQLStructure extends DatabaseStructure {
         if (count($PrimaryKey) > 0)
             $Keys .= ",\nprimary key (`".implode('`, `', $PrimaryKey)."`)";
         // Build unique keys.
+        //TODO: FIX ME!
         if (count($UniqueKey) > 0)
-            $Keys .= ",\nunique index `".Gdn_Format::AlphaNumeric('UX_'.$this->_TableName).'` (`'.implode('`, `', $UniqueKey)."`)";
+            $Keys .= ",\nunique index `".Format::AlphaNumeric('UX_'.$this->_TableName).'` (`'.implode('`, `', $UniqueKey)."`)";
         // Build full text index.
+        //TODO: FIX ME!
         if (count($FullTextKey) > 0)
-            $Keys .= ",\nfulltext index `".Gdn_Format::AlphaNumeric('TX_'.$this->_TableName).'` (`'.implode('`, `', $FullTextKey)."`)";
+            $Keys .= ",\nfulltext index `".Format::AlphaNumeric('TX_'.$this->_TableName).'` (`'.implode('`, `', $FullTextKey)."`)";
         // Build the rest of the keys.
         foreach ($Indexes as $IndexType => $IndexGroups) {
             $CreateString = val($IndexType, array('FK' => 'key', 'IX' => 'index'));
@@ -234,7 +236,7 @@ class MySQLStructure extends DatabaseStructure {
             if ($HasFulltext)
                 $this->_TableStorageEngine = 'myisam';
             else
-                $this->_TableStorageEngine = C('Database.DefaultStorageEngine', 'innodb');
+                $this->_TableStorageEngine = val('defaultStorageEngine', c('database'), 'innodb');
             
             if (!$this->HasEngine($this->_TableStorageEngine)) {
                 $this->_TableStorageEngine = 'myisam';
@@ -259,10 +261,7 @@ class MySQLStructure extends DatabaseStructure {
         return $Result;
     }
     
-    protected function _IndexSql($Columns, $KeyType = FALSE) {
-//        if ($this->TableName() != 'Comment')
-//            return array();
-        
+    protected function _IndexSql($Columns, $KeyType = FALSE) {     
         $Result = array();
         $Keys = array();
         $Prefixes = array('key' => 'FK_', 'index' => 'IX_', 'unique' => 'UX_', 'fulltext' => 'TX_');
@@ -378,17 +377,11 @@ class MySQLStructure extends DatabaseStructure {
         $Px = $this->_DatabasePrefix;
         $AdditionalSql = array(); // statements executed at the end
 
-        // Returns an array of schema data objects for each field in the specified
-        // table. The returned array of objects contains the following properties:
-        // Name, PrimaryKey, Type, AllowNull, Default, Length, Enum.
         $ExistingColumns = $this->ExistingColumns();
         $AlterSql = array();
 
         // 1. Remove any unnecessary columns if this is an explicit modification
         if ($Explicit) {
-            // array_diff returns values from the first array that aren't present
-            // in the second array. In this example, all columns currently in the
-            // table that are NOT in $this->_Columns.
             $RemoveColumns = array_diff(array_keys($ExistingColumns), array_keys($this->_Columns));
             foreach ($RemoveColumns as $Column) {
                 $AlterSql[] = "drop column `$Column`";
@@ -399,7 +392,7 @@ class MySQLStructure extends DatabaseStructure {
         $AlterSqlPrefix = 'alter table `'.$this->_DatabasePrefix.$this->_TableName."`\n";
         
         // 2. Alter the table storage engine.
-        $ForceDatabaseEngine = C('Database.ForceStorageEngine');
+        $ForceDatabaseEngine = val('forceStorageEngine', c('database'));
         if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
             $this->_TableStorageEngine = $ForceDatabaseEngine;
         }
@@ -428,10 +421,6 @@ class MySQLStructure extends DatabaseStructure {
         }
         
         // 3. Add new columns & modify existing ones
-
-        // array_diff returns values from the first array that aren't present in
-        // the second array. In this example, all columns in $this->_Columns that
-        // are NOT in the table.
         $PrevColumnName = FALSE;
         foreach ($this->_Columns as $ColumnName => $Column) {
             if (!array_key_exists($ColumnName, $ExistingColumns)) {
@@ -442,9 +431,6 @@ class MySQLStructure extends DatabaseStructure {
                     $AddColumnSql .= " after `$PrevColumnName`";
                 
                 $AlterSql[] = $AddColumnSql;
-
-//                if (!$this->Query($AlterSqlPrefix.$AddColumnSql))
-//                    throw new Exception(sprintf(T('Failed to add the `%1$s` column to the `%1$s` table.'), $Column, $this->_DatabasePrefix.$this->_TableName));
             } else {
 				$ExistingColumn = $ExistingColumns[$ColumnName];
 
@@ -452,14 +438,9 @@ class MySQLStructure extends DatabaseStructure {
                 $ColumnDef = $this->_DefineColumn($Column);
                 $Comment = "/* Existing: $ExistingColumnDef, New: $ColumnDef */\n";
                 
-				if ($ExistingColumnDef != $ColumnDef) {  //$Column->Type != $ExistingColumn->Type || $Column->AllowNull != $ExistingColumn->AllowNull || ($Column->Length != $ExistingColumn->Length && !in_array($Column->Type, array('tinyint', 'smallint', 'int', 'bigint', 'float', 'double')))) {
-                    // The existing & new column types do not match, so modify the column.
+				if ($ExistingColumnDef != $ColumnDef) {  
                     $ChangeSql = $Comment.'change `'.$ColumnName.'` '.$this->_DefineColumn(val($ColumnName, $this->_Columns));
                     $AlterSql[] = $ChangeSql;
-//					if (!$this->Query($AlterSqlPrefix.$ChangeSql))
-//						throw new Exception(sprintf(T('Failed to modify the data type of the `%1$s` column on the `%2$s` table.'),
-//                            $ColumnName,
-//                            $this->_DatabasePrefix.$this->_TableName));
 
                     // Check for a modification from an enum to an int.
                     if(strcasecmp($ExistingColumn->Type, 'enum') == 0 && in_array(strtolower($Column->Type), $this->Types('int'))) {
@@ -495,33 +476,35 @@ class MySQLStructure extends DatabaseStructure {
         foreach($Indexes as $Name => $Sql) {
             if(array_key_exists($Name, $IndexesDb)) {
                 if($Indexes[$Name] != $IndexesDb[$Name]) {
-//                    $IndexSql[$Name][] = "/* '{$IndexesDb[$Name]}' => '{$Indexes[$Name]}' */\n";
-                    if($Name == 'PRIMARY')
+                    if($Name == 'PRIMARY') {
                         $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
-                    else
+                    } else {
                         $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
+                    }
                     $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";
                 }
                 unset($IndexesDb[$Name]);
             } else {
-                $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";    
+                $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";
             }
         }
         // Go through the indexes to drop.
         if($Explicit) {
             foreach($IndexesDb as $Name => $Sql) {
-                if($Name == 'PRIMARY')
-                    $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
-                else
-                    $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
+                if($Name == 'PRIMARY') {
+                    $IndexSql[$Name][] = $AlterSqlPrefix . "drop primary key;\n";
+                } else {
+                    $IndexSql[$Name][] = $AlterSqlPrefix . 'drop index ' . $Name . ";\n";
+                }
             }
         }
         
         // Modify all of the indexes.
         foreach($IndexSql as $Name => $Sqls) {
             foreach ($Sqls as $Sql) {
-                if(!$this->Query($Sql))
+                if(!$this->Query($Sql)) {
                     throw new Exception(sprintf(T('Error.ModifyIndex', 'Failed to add or modify the `%1$s` index in the `%2$s` table.'), $Name, $this->_TableName));
+                }
             }
         }
 

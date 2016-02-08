@@ -12,7 +12,7 @@ namespace Garden\Db;
  * @since 2.0
  */
 
-abstract class DatabaseStructure extends Gdn_Pluggable {
+abstract class DatabaseStructure extends Plugin {
 
     protected $_DatabasePrefix = '';
 
@@ -75,7 +75,7 @@ abstract class DatabaseStructure extends Gdn_Pluggable {
         parent::__construct();
         
         if(is_null($Database))
-            $this->Database = Gdn::Database();
+            $this->Database = Gdn::database();
         else
             $this->Database = $Database;
         
@@ -294,7 +294,7 @@ abstract class DatabaseStructure extends Gdn_Pluggable {
         if($TableName)
             $this->Table($TableName);
 
-        $Columns = $this->Database->SQL()->FetchTableSchema($this->_TableName);
+        $Columns = $this->Database->sql()->FetchTableSchema($this->_TableName);
         $this->_Columns = $Columns;
 
         return $this;
@@ -412,7 +412,7 @@ abstract class DatabaseStructure extends Gdn_Pluggable {
         
         $this->_TableName = $Name;
         if ($CharacterEncoding == '')
-            $CharacterEncoding = Gdn::Config('Database.CharacterEncoding', '');
+            $CharacterEncoding = val('characterEncoding', c('database'), '');
 
         $this->_CharacterEncoding = $CharacterEncoding;
         return $this;
@@ -427,7 +427,7 @@ abstract class DatabaseStructure extends Gdn_Pluggable {
                 $TableName = $this->TableName();
 
             if(strlen($TableName) > 0) {
-                $Tables = $this->Database->SQL()->FetchTables(':_'.$TableName);
+                $Tables = $this->Database->sql()->FetchTables(':_'.$TableName);
                 $Result = count($Tables) > 0;
             } else {
                 $Result = FALSE;
@@ -509,7 +509,7 @@ abstract class DatabaseStructure extends Gdn_Pluggable {
     public function ExistingColumns() {
         if($this->_ExistingColumns === NULL) {
             if($this->TableExists())
-                $this->_ExistingColumns = $this->Database->SQL()->FetchTableSchema($this->_TableName);
+                $this->_ExistingColumns = $this->Database->sql()->FetchTableSchema($this->_TableName);
             else
                 $this->_ExistingColumns = array();
         }
