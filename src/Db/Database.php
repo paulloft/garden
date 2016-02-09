@@ -320,7 +320,7 @@ class Database {
                     $StoreCacheKey, 
                     (($this->_CurrentResultSet instanceof Dataset) ? $this->_CurrentResultSet->ResultArray() : $this->_CurrentResultSet),
                     val('CacheOptions', $Options, array())
-                    );
+                );
         }
         
         return $this->_CurrentResultSet;
