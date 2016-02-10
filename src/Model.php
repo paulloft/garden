@@ -1,645 +1,448 @@
 <?php 
-namespace Garden
+namespace Garden;
+use Garden\Db\DB;
+use Garden\Db\Database;
+
 /**
  * Model base class
  * 
- * This generic model can be instantiated (with the table name it is intended to
- * represent) and used directly, or it can be extended and overridden for more
- * complicated procedures related to different tables.
  *
- * @author Mark O'Sullivan <markm@vanillaforums.com>
- * @copyright 2003 Vanilla Forums, Inc
+ * @author PaulLoft <info@paulloft.ru>
+ * @copyright 2014 Paulloft
  * @license http://www.opensource.org/licenses/gpl-2.0.php GPL
  * @package Garden
- * @since 2.0
  */
 
 class Model extends Plugin {
-
-    /**
-     * Database object
-     *
-     * @var Database The database object.
-     */
-    public $database;
-
-
-    /**
-     * The name of the field that stores the insert date for a record. This
-     * field will be automatically filled by the model if it exists.
-     *
-     * @var string
-     */
-    public $dateInserted = 'dateInserted';
-
-
-    /**
-     * The name of the field that stores the update date for a record. This
-     * field will be automatically filled by the model if it exists.
-     *
-     * @var string
-     */
-    public $dateUpdated = 'dateUpdated';
-
-
-    /**
-     * The name of the field that stores the id of the user that inserted it.
-     * This field will be automatically filled by the model if it exists and
-     * @@Session::UserID is a valid integer.
-     *
-     * @var string
-     */
-    public $insertUserID = 'insertUserID';
-
-
-    /**
-     * The name of the table that this model is intended to represent. The
-     * default value assigned to $this->name will be the name that the
-     * model was instantiated with (defined in $this->__construct()).
-     *
-     * @var string
-     */
-    public $name;
-
-
-    /**
-     * The name of the primary key field of this model. The default is 'id'. If
-     * $this->defineSchema() is called, this value will be automatically changed
-     * to any primary key discovered when examining the table schema.
-     *
-     * @var string
-     */
-    public $primaryKey = 'id';
-
-
-    /**
-     * An object that is used to store and examine database schema information
-     * related to this model. This object is defined and populated with
-     * $this->defineSchema().
-     *
-     * @var Schema
-     */
-    public $schema;
     
-    /**
-     * Contains the sql driver for the object.
-     *
-     * @var SQLDriver
-     */
-    public $sql;
+    public $_table;
+    public $_primary_key = 'id';
+    public $_allowedFields = array();
 
+    public $user_id = null;
 
-    /**
-     * The name of the field that stores the id of the user that updated it.
-     * This field will be automatically filled by the model if it exists and
-     * @@Session::UserID is a valid integer.
-     *
-     * @var string
-     */
-    public $updateUserID = 'updateUserID';
+    public $resultObject = true;
 
+    protected $_query;
 
-    /**
-     * An object that is used to manage and execute data integrity rules on this
-     * object. By default, this object only enforces maxlength, data types, and
-     * required fields (defined when $this->defineSchema() is called).
-     *
-     * @var Validation
-     */
-    public $validation;
+    protected $_insertFields = array();
+    protected $_updateFields = array();
+    protected $_insupdFields = array();
+    protected $_deleteFields = array();
+
+    protected $_b_table;
 
 
     /**
      * Class constructor. Defines the related database table name.
+     * @param string $table table name
+     */
+    public function __construct($table = null)
+    {
+        $this->setTable($table);
+        // $user = Auth::instance()->get_user();
+        $user = false;
+        if($user) {
+            $this->user_id = $user->id;
+        }
+
+        $this->_allowedFields[$table] = $this->_allowedFields;
+    }
+
+    /**
+     * Set using table
+     * @param string $table table name
+     */
+    public function setTable($table = null)
+    {
+        $this->_table = $this->_b_table = $table;
+    }
+
+    public function switchTable($table = false)
+    {
+        if(!$this->_b_table) $this->_b_table = $this->_table;
+        $this->_table = $table ?: $this->_b_table;            
+    }
+
+    /**
+     * Get the data from the table based on its primary key
      *
-     * @param string $Name An optional parameter that allows you to explicitly define the name of
-     * the table that this model represents. You can also explicitly set this
-     * value with $this->name.
+     * @param ind $id Element ID
+     * @return PDO_DataSet
      */
-    public function __construct($name = '') {
-        if ($name == '')
-            $name = get_class($this);
+    public function getID($id)
+    {
+        $query = DB::select('*')
+            ->from($this->_table)
+            ->where($this->_primary_key, '=', $id)
+            ->limit(1);
 
-        $this->database = Gdn::database();
-        $this->sql = $this->database->sql();
-        $this->validation = new Validation();
-        $this->name = $name;
+        return $query->as_object()->execute()->current(); 
     }
 
     /**
-     * A overridable function called before the various get queries.
-     */
-    protected function _beforeGet() {
-    }
-
-    /**
-     * Take all of the values that aren't in the schema and put them into the attributes column.
-     * 
-     * @param array $data
-     * @param string $Name
-     * @return array
-     */
-    // protected function CollapseAttributes($data, $Name = 'Attributes') {
-    //     $this->defineSchema();
-        
-    //     $Row = array_intersect_key($data, $this->schema->Fields());
-    //     $Attributes = array_diff_key($data, $Row);
-        
-    //     TouchValue($Name, $Row, array());
-    //     if (isset($Row[$Name]) && is_array($Row[$Name]))
-    //         $Row[$Name] = array_merge($Row[$Name], $Attributes);
-    //     else
-    //         $Row[$Name] = $Attributes;
-    //     return $Row;
-    // }
-    
-    /**
-     * Expand all of the values in the attributes column so they become part of the row.
-     * 
-     * @param array $Row
-     * @param string $Name
-     * @return array
-     * @since 2.2
-     */
-    // protected function ExpandAttributes($Row, $Name = 'Attributes') {
-    //     if (isset($Row[$Name])) {
-    //         $Attributes = $Row[$Name];
-    //         unset($Row[$Name]);
-            
-    //         if (is_string($Attributes))
-    //             $Attributes = @unserialize($Attributes);
-            
-    //         if (is_array($Attributes))
-    //             $Row = array_merge($Row, $Attributes);
-    //     }
-    //     return $Row;
-    // }
-
-    /**
-     * Connects to the database and defines the schema associated with
-     * $this->name. Also instantiates and automatically defines
-     * $$this->validation.
+     * Get a dataset for the table with a where filter.
      *
+     * @param array $where Array('field' => 'value') .
+     * @param array $order Array('order' => 'direction')
+     * @param int $limit 
+     * @param int $offset
+     * @return PDO_DataSet
      */
-    // public function DefineSchema() {
-    //     if (!isset($this->schema)) {
-    //         $this->schema = new Schema($this->name, $this->Database);
-    //         $this->primaryKey = $this->schema->primaryKey($this->name, $this->Database);
-    //         if (is_array($this->primaryKey)) {
-    //             //print_r($this->primaryKey);
-    //             $this->primaryKey = $this->primaryKey[0];
-    //         }
+    public function getWhere($where = array(), $order = array(), $limit = false, $offset = 0)
+    {
+        $this->_query = DB::select('*')->from($this->_table);
 
-    //         $$this->validation->ApplyRulesBySchema($this->schema);
-    //     }
-    // }
+        $this->_where($where);
 
+        foreach ($order as $field => $direction) {
+            $this->_query->order_by($field, $direction);
+        }
+
+        if($limit !== false) {
+            $this->_query->limit($limit);
+            $this->_query->offset($offset);
+        }
+
+        return  $this->resultObject 
+            ? $this->_query->as_object()->execute() 
+            : $this->_query->execute()->as_array(); 
+    }
+
+    public function getCount($where = array())
+    {
+        $this->_query = DB::select('*')->from($this->_table);
+
+        $this->_where($where);
+
+        return $this->_query->execute()->count();
+    }
 
     /**
-     *  Takes a set of form data ($Form->_PostValues), validates them, and
-     * inserts or updates them to the datatabase.
+     * Sets the definition of the field for the table
      *
-     * @param array $formPostValues An associative array of $field => $value pairs that represent data posted
-     * from the form in the $_POST or $_GET collection.
-     * @param array $settings If a custom model needs special settings in order to perform a save, they
-     * would be passed in using this variable as an associative array.
-     * @return unknown
+     * @param array $fields fields array
      */
-    public function save($formPostValues, $settings = false) {
-        // Define the primary key in this model's table.
-        $this->defineSchema();
-
-        // See if a primary key value was posted and decide how to save
-        $primaryKeyVal = val($this->primaryKey, $formPostValues, false);
-        $insert = $primaryKeyVal == false ? true : false;
-        if ($insert) {
-            $this->addInsertFields($formPostValues);
-        } else {
-            $this->addInsertFields($formPostValues);
-        }
-
-        // Validate the form posted values
-        if ($this->validate($formPostValues, $insert) === true) {
-            $fields = $$this->validation->validationFields();
-            $fields = unset($fields[$this->primaryKey]); // Don't try to insert or update the primary key
-            if ($insert === false) {
-                $this->update($fields, array($this->primaryKey => $primaryKeyVal));
-            } else {
-                $primaryKeyVal = $this->insert($fields);
-            }
-        } else {
-            $primaryKeyVal = false;
-        }
-        return $primaryKeyVal;
+    public function setFields($fields)
+    {
+        $this->_allowedFields[$this->_table] = $fields;
     }
-    
-    /**
-     * Update a row in the database.
-     * 
-     * @since 2.1
-     * @param int $RowID
-     * @param array|string $Property
-     * @param atom $value 
-     */
-    // public function SetField($RowID, $Property, $value = false) {
-    //     if (!is_array($Property))
-    //         $Property = array($Property => $value);
-        
-    //     $this->defineSchema();        
-    //     $Set = array_intersect_key($Property, $this->schema->Fields());
-    //     self::SerializeRow($Set);
-    //     $this->sql->Put($this->name, $Set, array($this->primaryKey => $RowID));
-    // }
-    
-    /**
-     * Serialize Attributes and Data columns in a row.
-     * 
-     * @param array $Row
-     * @since 2.1 
-     */
-    // public static function SerializeRow(&$Row) {
-    //     foreach ($Row as $Name => &$value) {
-    //         if (is_array($value) && in_array($Name, array('Attributes', 'Data')))
-    //             $value = empty($value) ? null : serialize($value);
-    //     }
-    // }
-
 
     /**
-     * @param unknown_type $fields
-     * @return unknown
-     * @todo add doc
+     * Added to the datebase POST data 
+     *
+     * @param array $data Element ID
+     * @return Record ID
      */
-    public function insert($fields) {
-        $result = false;
-        $this->addInsertFields($fields);
-        if ($this->validate($fields, true)) {
-            // Strip out fields that aren't in the schema.
-            // This is done after validation to allow custom validations to work.
-            $schemaFields = $this->schema->Fields();
-            $fields = array_intersect_key($fields, $schemaFields);
-            
-            // Quote all of the fields.
-            $quotedFields = array();
-            foreach ($fields as $name => $value) {
-                if (is_array($value) && in_array($name, array('attributes', 'data')))
-                    $value = empty($value) ? null : serialize($value);
-                
-                $quotedFields[$this->sql->quoteIdentifier(trim($Name, '`'))] = $value;
-            }
+    public function insert($data)
+    {
+        $data = $this->insertDefaultFields($data);
+        $data = $this->fixPostData($data);
+        $columns = array_keys($data);
 
-            $result = $this->sql->insert($this->name, $quotedFields);
-        }
-        return $result;
+        $query = DB::insert($this->_table, $columns)
+            ->values($data)
+            ->execute();
+
+        return val(0, $query, false);
     }
 
 
-    /**
-     * @param unknown_type $fields
-     * @param unknown_type $where
-     * @param unknown_type $limit
-     * @todo add doc
-     */
-    public function update($fields, $where = false, $limit = false) {
-        $result = false;
-
-        // primary key (always included in $where when updating) might be "required"
-        $allFields = $fields;
-        if (is_array($where))
-            $allFields = array_merge($fields, $where); 
-            
-        if ($this->validate($allFields)) {
-            $this->addInsertFields($fields);
-
-            // Strip out fields that aren't in the schema.
-            // This is done after validation to allow custom validations to work.
-            $schemaFields = $this->schema->fields();
-            $fields = array_intersect_key($fields, $schemaFields);
-
-            // Quote all of the fields.
-            $quotedFields = array();
-            foreach ($fields as $Name => $value) {
-                if (is_array($value) && in_array($Name, array('attributes', 'data')))
-                    $value = empty($value) ? null : serialize($value);
-                
-                $quotedFields[$this->sql->quoteIdentifier(trim($Name, '`'))] = $value;
-            }
-
-            $result = $this->sql->put($this->name, $quotedFields, $where, $limit);
+    protected function insertDefaultFields($data)
+    {
+        if(!val('date_inserted', $data)) {
+            $data['date_inserted'] = DB::expr('now()');
         }
-        return $result;
+
+        if(!val('user_inserted', $data)) {
+            $data['user_inserted'] = $this->user_id;
+        }
+
+        return $data;
     }
 
-
-    /**
-     * @param unknown_type $where
-     * @param unknown_type $limit
-     * @param unknown_type $resetData
-     * @todo add doc
-     */
-    public function Delete($where = '', $limit = false, $resetData = false) {
-        if(is_numeric($where))
-            $where = array($this->primaryKey => $where);
-
-        if($resetData) {
-            $result = $this->sql->delete($this->name, $where, $limit);
-        } else {
-            $result = $this->sql->noReset()->delete($this->name, $where, $limit);
+    protected function updateDefaultFields($data)
+    {
+        if(!val('date_update', $data)) {
+            $data['date_update'] = DB::expr('now()');
         }
-        return $result;
-    }
-    
-    /**
-     * Filter out any potentially insecure fields before they go to the database.
-     * @param array $data 
-     */
-    public function FilterForm($data) {
-        $data = array_diff_key($data, array('attributes' => 0, 'dateInserted' => 0, 'insertUserID' => 0, 'checkBoxes' => 0,
-                'dateUpdated' => 0, 'updateUserID' => 0, 'deliveryMethod' => 0, 'deliveryType' => 0, 'OK' => 0, 'transientKey' => 0, 'hpt' => 0));
+
+        if(!val('user_update', $data)) {
+            $data['user_update'] = $this->user_id;
+        }
+
         return $data;
     }
 
     /**
-     * Returns an array with only those keys that are actually in the schema.
+     * Update record by ID
      *
-     * @param array $data An array of key/value pairs.
-     * @return array The filtered array.
+     * @param int $id Element ID
+     * @param array $data POST data
      */
-    // public function FilterSchema($data) {
-    //     $fields = $this->schema->Fields($this->name);
+    public function update($id, $data)
+    {
+        $data = $this->updateDefaultFields($data);
+        $data = $this->fixPostData($data);
 
-    //     $result = array_intersect_key($data, $fields);
-    //     return $result;
-    // }
-
-
-    /**
-     * @param unknown_type $OrderFields
-     * @param unknown_type $OrderDirection
-     * @param unknown_type $limit
-     * @param unknown_type $Offset
-     * @return unknown
-     * @todo add doc
-     */
-    public function get($orderFields = '', $orderDirection = 'asc', $limit = false, $pageNumber = false) {
-        $this->_beforeGet();
-        return $this->sql->get($this->name, $orderFields, $orderDirection, $limit, $pageNumber);
-    }
-    
-    /**
-     * Returns a count of the # of records in the table
-     * @param array $wheres
-     */
-    public function getCount($wheres = '') {
-        $this->_beforeGet();
-        
-        $this->sql
-            ->select('*', 'count', 'count')
-            ->from($this->name);
-
-        if (is_array($wheres))
-            $this->sql->where($wheres);
-
-        $data = $this->sql
-            ->get()
-            ->firstRow();
-
-        return $data === false ? 0 : $data->count;
+        DB::update($this->_table)
+            ->set($data)
+            ->where($this->_primary_key, '=', $id)
+            ->execute();
     }
 
     /**
-     * Get the data from the model based on its primary key.
+     * Update record by filter
      *
-     * @param mixed $ID The value of the primary key in the database.
-     * @param string $datasetType The format of the result dataset.
-     * @param array $Options options to pass to the database.
-     * @return DataSet
-     * 
-     * @since 2.3 Added the $Options parameter.
+     * @param array $where Array('field' => 'value')
+     * @param array $data POST data
      */
-    public function getID($ID, $datasetType = false, $options = array()) {
-        $this->options($options);
-        $result = $this->getWhere(array($this->primaryKey => $ID))->firstRow($datasetType);
-        
-        $fields = array('attributes', 'data');
-        
-        foreach ($fields as $field) {
-            if (is_array($result)) {
-                if (isset($result[$field]) && is_string($result[$field])) {
-                    $val = unserialize($result[$field]);
-                    if ($val)
-                        $result[$field] = $val; 
-                    else
-                        $result[$field] = $val;
-                }                    
-            } elseif (is_object($result)) {
-                if (isset($result->$field) && is_string($result->$field)) {
-                    $val = unserialize($result->$field);
-                    if ($val)
-                        $result->$field = $val;
-                    else
-                        $result->$field = null;
-                }
-            }
+    public function updateWhere($where, $data)
+    {
+        $data = $this->updateDefaultFields($data);
+        $data = $this->fixPostData($data);
+
+        $this->_query = DB::update($this->_table)
+            ->set($data);
+
+        $this->_where($where);
+
+        $this->_query->execute();
+    }
+
+    /**
+     * Clears the $array of extra
+     *
+     * @param array $array
+     * @param array $fields POST data
+     * @return fixed array
+     */
+    protected function checkArray($array, $fields)
+    {
+        $result = array();
+        foreach ($array as $key => $value) {
+            if (in_array($key, $fields))
+                $result[$key] = $value;
         }
-        
+
         return $result;
     }
 
-    /**
-     * Get a dataset for the model with a where filter.
-     *
-     * @param array $where A filter suitable for passing to SQLDriver::Where().
-     * @param string $OrderFields A comma delimited string to order the data.
-     * @param string $OrderDirection One of <b>asc</b> or <b>desc</b>
-     * @param int $limit
-     * @param int $Offset
-     * @return DataSet
-     */
-    public function getWhere($where = false, $orderFields = '', $orderDirection = 'asc', $limit = false, $offset = false) {
-        $this->_beforeGet();
-        return $this->sql->getWhere($this->name, $where, $orderFields, $orderDirection, $limit, $offset);
+    public function fixPostData($post)
+    {
+        $fields = empty($this->_allowedFields[$this->_table]) ? $this->getTableFields() : $this->_allowedFields[$this->_table];
+        return $this->checkArray($post, $fields);
     }
 
-    /**
-     * Returns the $$this->validation->ValidationResults() array.
-     *
-     * @return unknown
-     * @todo add return type
-     */
-    public function validationResults() {
-        return $this->validation->results();
-    }
+    public function getTableFields()
+    {
+        $columns = DB::query(Database::SELECT, 'SHOW COLUMNS FROM `'.$this->_table.'`')
+            ->execute()
+            ->as_array();
 
 
-    /**
-     * @param unknown_type $formPostValues
-     * @param unknown_type $insert
-     * @return unknown
-     * @todo add doc
-     */
-    public function validate($formPostValues, $insert = false) {
-        $this->defineSchema();
-        return $$this->validation->Validate($formPostValues, $insert);
-    }
-
-
-    /**
-     * Adds $this->insertUserID and $this->dateInserted fields to an associative
-     * array of fieldname/values if those fields exist on the table being
-     * inserted.
-     *
-     * @param array $fields The array of fields to add the values to.
-     */
-    protected function addInsertFields(&$fields) {
-        $this->defineSchema();
-        if ($this->schema->fieldExists($this->name, $this->dateInserted)) {
-            if (!isset($fields[$this->dateInserted]))
-                $fields[$this->dateInserted] = Format::ToDateTime();
+        $result = array();
+        foreach ($columns as $col) {
+            $result[] = $col['Field'];
         }
 
-        $session = Gdn::session();
-        if ($session->UserID > 0 && $this->schema->FieldExists($this->name, $this->insertUserID))
-            if (!isset($fields[$this->insertUserID]))
-                $fields[$this->insertUserID] = $session->UserID;
+        return $result;
     }
 
+    public function _where($Field, $Value = NULL) 
+    {
+        if (!is_array($Field))
+            $Field = array($Field => $Value);
 
-    /**
-     * Adds $this->updateUserID and $this->dateUpdated fields to an associative
-     * array of fieldname/values if those fields exist on the table being
-     * updated.
-     *
-     * @param array $fields The array of fields to add the values to.
-     */
-    protected function addInsertFields(&$fields) {
-        $this->defineSchema();
-        if ($this->schema->FieldExists($this->name, $this->dateUpdated)) {
-            if (!isset($fields[$this->dateUpdated])) {
-                $fields[$this->dateUpdated] = Format::ToDateTime();
-            }
-        }
+        foreach ($Field as $SubField => $SubValue) {
+            if(is_array($SubValue) && empty($SubValue)) 
+                continue;
 
-        $session = Gdn::session();
-        if ($session->UserID > 0 && $this->schema->FieldExists($this->name, $this->updateUserID)) {
-            if (!isset($fields[$this->updateUserID])) {
-                $fields[$this->updateUserID] = $session->UserID;
-            }
-        }
-    }
-    
-    /**
-     * Gets/sets an option on the object.
-     *
-     * @param string|array $Key The key of the option.
-     * @param mixed $value The value of the option or not specified just to get the current value.
-     * @return mixed The value of the option or $this if $value is specified.
-     * @since 2.3
-     */
-    public function options($key, $value = null) {
-        if (is_array($key)) {
-            foreach ($key as $k => $v) {
-                $this->sql->options($k, $v);
-            }
-        } else {
-            $this->sql->options($key, $value);
+            $Expr = $this->conditionExpr($SubField, $SubValue);
+            $this->_query->where($Expr[0], $Expr[1], $Expr[2]);
         }
         return $this;
     }
 
-    // public function SaveToSerializedColumn($Column, $RowID, $Name, $value = '') {
+    protected function conditionExpr($Field, $Value)
+    {
+        $Expr = ''; // final expression which is built up
+        $Op = ''; // logical operator
 
-    //     if (!isset($this->schema)) $this->defineSchema();
-    //     // TODO: need to be sure that $this->primaryKey is only one primary key
-    //     $fieldName = $this->primaryKey;
-          
-    //     // Load the existing values
-    //     $Row = $this->sql
-    //         ->Select($Column)
-    //         ->From($this->name)
-    //         ->Where($fieldName, $RowID)
-    //         ->Get()
-    //         ->FirstRow();
+        // Try and split an operator out of $Field.
+        $FieldOpRegex = "/(?:\s*(=|<>|>|<|>=|<=)\s*$)|\s+(like|not\s+like)\s*$|\s+(?:(is)\s+(null)|(is\s+not)\s+(null))\s*$/i";
+        $Split = preg_split($FieldOpRegex, $Field, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        if (count($Split) > 1) {
+            list($Field, $Op) = $Split;
 
-    //     if(!$Row) throw new Exception(T('ErrorRecordNotFound'));
-    //     $values = Format::Unserialize($Row->$Column);
-          
-    //     if (is_string($values) && $values != '')
-    //         throw new Exception(T('Serialized column failed to be unserialized.'));
+            if (count($Split) > 2) {
+                $Value = null;
+            }
+        } else {
+            $Op = '=';
+        }
 
-    //     if (!is_array($values)) $values = array();
-    //     if (!is_array($Name)) $Name = array($Name => $value); // Assign the new value(s)
+        if ($Op == '=' && is_null($Value)) {
+            // This is a special case where the value SQL is checking for an is null operation.
+            $Op = 'is';
+            $Value = null;
+        }
 
-    //     $values = Format::Serialize(array_merge($values, $Name));
+        if (is_array($Value)) {
+            $Op = 'in';
+        }
 
-    //     // Save the values back to the db
-    //     return $this->sql
-    //         ->From($this->name)
-    //         ->Where($fieldName, $RowID)
-    //         ->Set($Column, $values)
-    //         ->Put();
-    // }
-    
-     
-    // public function SetProperty($RowID, $Property, $ForceValue = false) {
-    //     if (!isset($this->schema)) $this->defineSchema();
-    //     $primaryKey = $this->primaryKey;
-          
-    //     if ($ForceValue !== false) {
-    //         $value = $ForceValue;
-    //     } else {
-    //         $Row = $this->GetID($RowID);
-    //         $value = ($Row->$Property == '1' ? '0' : '1');
-    //     }
-    //     $this->sql
-    //         ->Update($this->name)
-    //         ->Set($Property, $value)
-    //         ->Where($primaryKey, $RowID)
-    //         ->Put();
-    //     return $value;
-    // }
-    
+        return array($Field, $Op, $Value);
+    }
+
     /**
-     * Get something from $Record['Attributes'] by dot-formatted key
-     * 
-     * Pass record byref
-     * 
-     * @param array $Record
-     * @param string $Attribute
-     * @param mixed $Default Optional.
-     * @return mixed
+     * save post data into table
+     *
+     * @param array $post POST data
+     * @param int $id record ID
+     * @return inserted or updated record ID
      */
-    // public static function GetRecordAttribute(&$Record, $Attribute, $Default = null) {
-    //     $RV = "Attributes.{$Attribute}";
-    //     return valr($RV, $Record, $Default);
-    // }
-    
+    public function save($post, $id = false)
+    {
+        if($id) {
+            $this->update($id, $post);
+        } else {
+            $id = $this->insert($post);
+        }
+
+        return $id;
+    }
+
+    public function delete($where = array())
+    {
+        $this->_query = DB::delete($this->_table);
+        $this->_where($where);
+        $this->_query->execute();
+    }
+
+
     /**
-     * Set something on $Record['Attributes'] by dot-formatted key
-     * 
-     * Pass record byref
-     * 
-     * @param array $Record
-     * @param string $Attribute
-     * @param mixed $value
-     * @return mixed 
+     * enqueues additionn data
+     * @param array $fields array fields
      */
-    // public static function SetRecordAttribute(&$Record, $Attribute, $value) {
-    //     if (!array_key_exists('Attributes', $Record))
-    //         $Record['Attributes'] = array();
+    public function insert_queue($fields = array())
+    {
+        $fields = $this->insertDefaultFields($fields);
+        $fields = $this->fixPostData($fields);
+        if(!empty($fields)) {
+            $this->_insertFields[] = $fields;
+        }
+    }
+
+    /**
+     * enqueues update data
+     * @param array $fields
+     * @param array $where
+     */
+    public function update_queue($fields, $where = array())
+    {
+        $fields = $this->updateDefaultFields($fields);
+        $fields = $this->fixPostData($fields);
+        if(!empty($fields)) {
+            $this->_updateFields[] = array('fields' => $fields, 'where' => $where);
+        }
+    }
+
+    /**
+     * enqueues insert or update data
+     * @param array $fields
+     * @param array $where
+     */
+    public function insupd_queue($fields)
+    {
+        $fields = $this->updateDefaultFields($fields);
+        $fields = $this->fixPostData($fields);
+        if(!empty($fields)) {
+            $this->_insupdFields[] = $fields;
+        }
+    }
+
+    /**
+     * enqueues delete data
+     * @param array $where
+     */
+    public function delete_queue($where)
+    {
+        if(!empty($where)) {
+            $this->_deleteFields[] = $where;
+        }
+    }
+
+    /**
+     * start all pending operations
+     */
+    public function start_queue($table = false)
+    {
+        $sql = "";
+        $table = $table ?: $this->_table;
+
+        foreach($this->_updateFields as $update) {
+            $fields = val('fields', $update);
+            $where  = val('where', $update);
+            $this->_query = DB::update($table)->set($fields);
+            $this->_where($where);
+            $sql .= $this->_query->compile().";\n";
+        }
         
-    //     if (!is_array($Record['Attributes'])) return null;
-        
-    //     $Work = &$Record['Attributes'];
-    //     $Parts = explode('.', $Attribute);
-    //     while ($Part = array_shift($Parts)) {
-    //         $SetValue = sizeof($Parts) ? array() : $value;
-    //         $Work[$Part] = $SetValue;
-    //         $Work = &$Work[$Part];
-    //     }
-        
-    //     return $value;
-    // }
-    
+        foreach($this->_insertFields as $fields) {
+            $columns = array_keys($fields);
+            $sql .= DB::insert($table, $columns)->values($fields)->compile().";\n";
+        }
+
+        foreach($this->_insupdFields as $fields) {
+            $columns = array_keys($fields);
+            $insert = DB::insert($table, $columns)->values($fields)->compile();
+            $update = str_replace('  SET', '', DB::update()->set($fields)->compile());
+
+            $sql .= $insert." ON DUPLICATE KEY ".$update.";\n";
+        }
+
+        foreach($this->_deleteFields as $delete) {
+            $this->_query = DB::delete($table);
+            $this->_where($delete);
+            $sql .= $this->_query->compile().";\n";
+        }
+
+        if(empty($sql)) 
+            return;
+
+        DB::query(null, $sql)->execute();
+
+        $this->_updateFields = $this->_insertFields = $this->_deleteFields = array();
+    }
+
+    public function unique($where)
+    {
+        $query = DB::select(array('COUNT("*")', 'total_count'))->from($this->_table);
+
+        foreach ($where as $field => $value) {
+            $query->where($field, '=', $value);
+        }
+
+        return (bool)$query->execute()->get('total_count');
+    }
+
+    public function convertPostDate($post, $fields)
+    {
+        if(!is_array($fields)) {
+            $fields = array($fields);
+        }
+
+        foreach ($fields as $field)  {
+            $value = val($field, $post);
+
+            if($value !== false) {
+                $new = Date::convDate($value, 'sql');
+                $post[$field] = $new ?: null;
+            }
+        }
+
+        return $post;
+    }
+
 }
-

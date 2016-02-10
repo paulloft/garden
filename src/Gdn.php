@@ -8,8 +8,8 @@ namespace Garden;
 class Gdn {
     protected static $instances;
 
-    public static function database() {
-        return Db\Database::instance();
+    public static function database($name = null, array $config = null) {
+        return Db\Database::instance($name, $config);
     }
 
     public static function app() {
