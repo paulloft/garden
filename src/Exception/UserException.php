@@ -18,4 +18,16 @@ namespace Garden\Exception;
  * The {@link UserException} will always display just its message since it represents expected behavior.
  */
 class UserException extends ClientException {
+    /**
+     * Initialize a {@link NotFoundException}.
+     *
+     * @param string $message The error message or a one word resource name.
+     * @param string $description A longer description for the error.
+     */
+    public function __construct($message, $params = array(), $code = 500, $context = []) {
+
+        $message = vsprintf($message, $params);
+
+        parent::__construct($message, $code, $context);
+    }
 }

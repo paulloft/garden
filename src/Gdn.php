@@ -9,7 +9,7 @@ class Gdn {
     protected static $instances;
 
     public static function database() {
-        return self::factory('Garden\Db\Database');
+        return Db\Database::instance();
     }
 
     public static function app() {

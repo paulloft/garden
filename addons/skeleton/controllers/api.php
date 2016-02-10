@@ -1,6 +1,6 @@
 <?php
 namespace Garden;
-
+use Garden\Db\DB;
 /**
 * 
 */
@@ -8,7 +8,7 @@ class ApiController extends Plugin
 {
     
     function __construct() {
-        echo 'construct_';
+        // echo 'construct_';
     }
 
     public function index() {
@@ -28,16 +28,23 @@ class ApiController extends Plugin
         // Factory::database();
 
         $db = Gdn::database();
+
+        $s = DB::select('*')
+            ->from('php_st')
+            ->where('id', '<', 5)
+            ->execute();
+
+        d($s);
         
         // $result = $db->sql()->get('php_st', array('id'=>'5'));
-        $result = $db->sql()
-            ->select('*')
-            ->from('php_st')
-            ->where('id<', 5)
-            ->get();
+        // $result = $db->sql()
+        //     ->select('*')
+        //     ->from('php_st')
+        //     ->where('id<', 5)
+        //     ->get();
         // d($result->Result());
 
-        d($db, $db->sql());
+        // d($db, $db->sql());
 
         // Gdn::factory('Usermodel');
 
