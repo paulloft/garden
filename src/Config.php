@@ -159,7 +159,6 @@ class Config {
             $group = val('filename', $info);
 
             if($group) {
-                echo $group . ' '.$file. "\n";
                 self::load($group, $file);
             }
         }

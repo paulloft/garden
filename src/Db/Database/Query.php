@@ -1,6 +1,7 @@
 <?php 
 namespace Garden\Db\Database;
 use Garden\Db\Database;
+use Garden\Gdn;
 /**
  * Database query wrapper.  See [Parameterized Statements](database/query/parameterized) for usage and examples.
  *
@@ -83,8 +84,7 @@ class Query {
     {
         if ($lifetime === NULL) {
             // Use the global setting
-            //TODO: Fix cache
-            // $lifetime = Kohana::$cache_life;
+            $lifetime = Gdn::cache()->lifetime;
         }
 
         $this->_force_execute = $force;
@@ -230,12 +230,11 @@ class Query {
             // Set the cache key based on the database instance name and SQL
             $cache_key = 'Database::query("'.$db.'", "'.$sql.'")';
 
-            //TODO: FIX cache
             // Read the cache first to delete a possible hit with lifetime <= 0
-            // if (($result = Kohana::cache($cache_key, NULL, $this->_lifetime)) !== NULL AND ! $this->_force_execute) {
-            //     // Return a cached result
-            //     return new Database\Result\Cached($result, $sql, $as_object, $object_params);
-            // }
+            if (($result = Gdn::cache()->get($cache_key)) !== NULL AND ! $this->_force_execute) {
+                // Return a cached result
+                return new Database\Result\Cached($result, $sql, $as_object, $object_params);
+            }
         }
 
         // Execute the query
@@ -243,8 +242,7 @@ class Query {
 
         if (isset($cache_key) AND $this->_lifetime > 0) {
             // Cache the result array
-            //TODO: FIX cache
-            // Kohana::cache($cache_key, $result->as_array(), $this->_lifetime);
+            Gdn::cache()->set($cache_key, $result->as_array(), $this->_lifetime);
         }
 
         return $result;
