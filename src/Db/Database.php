@@ -62,7 +62,7 @@ abstract class Database
         if ( !isset(Database::$instances[$name])) {
             if ($config === NULL) {
                 // Load the configuration for this database
-                $config = c('database');
+                $config = config('database');
             }
 
             $driver = val('driver', $config);

@@ -1,8 +1,8 @@
 {
-	"name": "vanilla/garden",
+	"name": "paulloft/garden",
 	"description": "The garden framework.",
 	"type": "library",
-	"keywords": ["vanilla", "garden", "framework", "vanilla forums", "php"],
+	"keywords": ["garden", "framework", "php"],
 	"license": "MIT",
 	"authors": [
 		{
@@ -14,13 +14,13 @@
 			"name": "Tim Gunter",
 			"email": "tim@vanillaforums.com",
 			"role": "developer"
+		},
+		{
+			"name": "Paul Loft",
+			"email": "info@paulloft.ru",
+			"role": "developer"
 		}
 	],
-	"support": {
-		"issues": "https://github.com/vanilla/garden/issues",
-		"forum": "http://vanillaforums.org/discussions",
-		"source": "https://github.com/vanilla/garden"
-	},
 	"require": {
 		"php": ">=5.4.0",
 		"ext-json": "*",
@@ -33,8 +33,7 @@
 		"kuria/error": "^0.2.0"
 	},
 	"require-dev": {
-		"bobthecow/faker": "dev-master",
-		"joseph-lenton/php-error": "dev-master"
+		"bobthecow/faker": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {

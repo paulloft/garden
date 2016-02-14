@@ -16,10 +16,8 @@ class Gdn {
         return self::factory('Application');
     }
 
-    public static function sql() {
-        $database = self::database();
-        $result = $database->sql();
-        return $result;
+    public static function cache() {
+        return Cache\Cache::instance();
     }
 
     public static function factory($className) {

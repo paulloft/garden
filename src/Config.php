@@ -47,7 +47,7 @@ class Config {
         if ($value) {
             self::$defaultPath = $value;
         } elseif (!self::$defaultPath) {
-            self::$defaultPath = PATH_CONF.'/config.json.php';
+            self::$defaultPath = PATH_CONF.'/config.php';
         }
         return self::$defaultPath;
     }
@@ -69,52 +69,21 @@ class Config {
      * @return mixed The value at {@link $key} or {@link $default} if the key isn't found.
      * @see \config()
      */
-    public static function get($key, $default = null) {
-        if (array_key_exists($key, self::$data)) {
-            return self::$data[$key];
+    public static function get($group, $key = false, $default = null) {
+        if (array_key_exists($group, self::$data)) {
+            $data = self::$data[$group];
+        } else {
+            return $default;
+        }
+
+        if($key === false) {
+            return $data;
+        } elseif (array_key_exists($key, $data)) {
+            return $data[$key];
         } else {
             return $default;
         }
     }
-
-    /**
-     * Encode an array in ini format.
-     * The resulting array will work with parse_ini_file() and parse_ini_string().
-     *
-     * @param array $data A flat, associative array of data.
-     * @return string The data in ini format.
-     */
-//    public static function iniEncode($data) {
-//        ksort($data, SORT_NATURAL | SORT_FLAG_CASE);
-//
-//        $result = '';
-//
-//        $lastSection = null;
-//
-//        foreach ($data as $key => $value) {
-//            $section = trim(strstr($key, '.', true), '.');
-//
-//            if ($section !== $lastSection) {
-//                if ($section) {
-//                    $result .= "\n[$section]\n";
-//                }
-//                $lastSection = $section;
-//            }
-//
-//            $result .= $key . ' = ';
-//
-//            if (is_bool($value)) {
-//                $str = $value ? 'true' : 'false';
-//            } elseif (is_numeric($value)) {
-//                $str = $value;
-//            } elseif (is_string($value)) {
-//                $str = '"' . addcslashes($value, "\"") . '"';
-//            }
-//            $result .= $str . "\n";
-//        }
-//
-//        return $result;
-//    }
 
     /**
      * Load configuration data from a file.
@@ -123,7 +92,7 @@ class Config {
      * @param string $path If true the config will be put under the current config, not over it.
      * @param string $php_var The name of the php variable to load from if using the php file type.
      */
-    public static function load($path = '', $underlay = false, $php_var = 'config') {
+    public static function load($group, $path = '', $underlay = false) {
         if (!$path) {
             $path = self::defaultPath();
         }
@@ -134,15 +103,16 @@ class Config {
             return;
         }
 
-        if (!is_array(self::$data)) {
-            self::$data = [];
+        if (!is_array(self::$data[$group])) {
+            self::$data[$group] = [];
         }
 
         if ($underlay) {
-            self::$data = array_replace($loaded, self::$data);
+            $data = array_replace($loaded, self::$data[$group]);
         } else {
-            self::$data = array_replace(self::$data, $loaded);
+            $data = array_replace(self::$data[$group], $loaded);
         }
+        self::$data[$group] = $data;
     }
 
     /**
@@ -176,5 +146,22 @@ class Config {
 
         $result = array_save($config, $path, $php_var);
         return $result;
+    }
+
+    public static function autoload($path = PATH_CONF) {
+        $dir = scandir($path);
+        foreach ($dir as $filename) {
+            if($filename == '.' OR $filename == '..') {
+                continue;
+            }
+            $file = $path.'/'.$filename;
+            $info = pathinfo($filename);
+            $group = val('filename', $info);
+
+            if($group) {
+                echo $group . ' '.$file. "\n";
+                self::load($group, $file);
+            }
+        }
     }
 }

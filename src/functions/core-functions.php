@@ -149,13 +149,12 @@ function array_uquick(array $array, callable $callback) {
  * Load configuration data from a file into an array.
  *
  * @param string $path The path to load the file from.
- * @param string $php_var The name of the php variable to load from if using the php file type.
  * @return array The configuration data.
  * @throws InvalidArgumentException Throws an exception when the file type isn't supported.
  *
  * @category Array Functions
  */
-function array_load($path, $php_var = 'config') {
+function array_load($path) {
     if (!file_exists($path)) {
         return false;
     }
@@ -164,17 +163,12 @@ function array_load($path, $php_var = 'config') {
     $ext = strstr(basename($path), '.');
 
     switch ($ext) {
-//            case '.ini':
-//            case '.ini.php':
-//                $loaded = parse_ini_file($path, false, INI_SCANNER_RAW);
-//                break;
         case '.json':
         case '.json.php':
             $loaded = json_decode(file_get_contents($path), true);
             break;
         case '.php':
-            include $path;
-            $loaded = $$php_var;
+            $loaded = require $path;
             break;
         case '.ser':
         case '.ser.php':
@@ -210,11 +204,6 @@ function array_save($data, $path, $php_var = 'config') {
     $ext = strstr(basename($path), '.');
 
     switch ($ext) {
-//            case '.ini':
-//            case '.ini.php':
-//                $ini = static::iniEncode($config);
-//                $result = file_put_contents_safe($path, $ini);
-//                break;
         case '.json':
         case '.json.php':
             if (defined('JSON_PRETTY_PRINT')) {
@@ -382,8 +371,9 @@ function base64url_decode($str) {
  * @return string The config value.
  * @see config()
  */
-function c($key, $default = null) {
-    return config($key, $default);
+function c($key = false, $default = null) {
+    $data = Garden\Config::data();
+    return valr($key, $data, $default);
 }
 
 //function checkRoute($className, $methodName, &$routed) {
@@ -401,8 +391,8 @@ function c($key, $default = null) {
  * @param mixed $default The default value if the config setting isn't available.
  * @return mixed The config value.
  */
-function config($key, $default = null) {
-    return Garden\Config::get($key, $default);
+function config($group, $key = false, $default = null) {
+    return Garden\Config::get($group, $key, $default);
 }
 
 /**

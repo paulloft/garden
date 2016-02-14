@@ -1,9 +1,7 @@
 <?php
-
 // namespace Garden;
-// \php_error\reportErrors(['enable_saving' => false]);
 
-$debug = c('debug', false);
+$debug = c('main.debug', false);
 
 $errorHandler = new \Kuria\Error\ErrorHandler($debug);
 $errorHandler->register();
@@ -15,7 +13,7 @@ $errorHandler->register();
 
 if (!function_exists('p')) {
     function p() {
-        $debug = c('debug', false);
+        $debug = c('main.debug', false);
         if(!$debug) return;
         $Args = func_get_args();
         if (count($Args) > 0) {
