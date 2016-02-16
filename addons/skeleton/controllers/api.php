@@ -27,14 +27,14 @@ class ApiController extends Plugin
         // Instance::database();
         // Factory::database();
 
-        $db = Gdn::database();
+        // $db = Gdn::database();
 
         $s = DB::select('*')
             ->from('php_st')
             ->where('id', '<', 5)
             ->execute();
 
-        d($s);
+        // d($s);
         
         // $result = $db->sql()->get('php_st', array('id'=>'5'));
         // $result = $db->sql()
@@ -50,6 +50,11 @@ class ApiController extends Plugin
 
         // Factory::get('Usermodel');
         // Usermodel::instance();
+
+        $cache = Gdn::cache()->add('test', $s, 10);
+
+        $result = Gdn::cache()->get('test', false);
+        d($result);
     }
 
 

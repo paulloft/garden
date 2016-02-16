@@ -21,6 +21,22 @@ class Dirty extends \Garden\Cache\Cache
     public function set($id, $data, $lifetime = 3600)
     {
         $this->data[$id] = $data;
+        return true;
+    }
+
+    public function add($id, $data, $lifetime = 3600)
+    {
+        if(!isset($this->data[$id])) {
+            $this->data[$id] = $data;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function exists($id)
+    {
+        return isset($this->data[$id]);
     }
 
     public function delete($id)
@@ -28,7 +44,7 @@ class Dirty extends \Garden\Cache\Cache
         unset($this->data[$id]);
     }
 
-    public function delete_all()
+    public function deleteAll()
     {
         $this->data = [];
     }

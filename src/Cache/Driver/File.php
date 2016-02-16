@@ -9,18 +9,37 @@ class File extends \Garden\Cache\Cache
     public $lifetime;
     public $cacheDir;
 
+    public $packFunction = 'serialize';
+    public $unpackFunction = 'unserialize';
+
     function __construct($config)
     {
-        $this->lifetime = val('defaultLifetime', $config, parent::DEFAULT_LIFETIME);
+        $this->lifetime       = val('defaultLifetime', $config, parent::DEFAULT_LIFETIME);
+        $this->packFunction   = val('packFunction', $config, $this->packFunction);
+        $this->unpackFunction = val('unpackFunction', $config, $this->unpackFunction);
+
         $cacheDir = val('cacheDir', $config);
+
         $this->cacheDir = $cacheDir ? realpath(PATH_ROOT.'/'.$cacheDir) : PATH_CACHE;        
+    }
+
+    /**
+     * Replaces troublesome characters with underscores.
+     *
+     * @param   string  $id  id of cache to sanitize
+     * @return  string
+     */
+    protected function fixID($id)
+    {
+        // Change slashes and spaces to underscores
+        return str_replace(array('/', '\\', ' '), '_', $id);
     }
 
     protected function getFileName($id) {
         $id = $this->fixID($id);
         $salt = substr(md5($id), 0, 10);
 
-        return $id.'-'.$salt.'.ser';
+        return $id.'-'.$salt.'.cache';
     }
 
     /**
@@ -31,24 +50,31 @@ class File extends \Garden\Cache\Cache
      * @return  mixed
      * @throws  Cache_Exception
      */
-    public function get($id, $default = null)
+    public function get($id, $default = false)
     {
         $file = $this->cacheDir."/".$this->getFileName($id);
-        if(!file_exists($file)) {
+        if(!is_file($file)) {
             return $default;
         }
 
         $result = file_get_contents($file);
-        $result = unserialize($result);
+        $result = $unpackFunction($result);
         $expire = val('expire', $result, 0);
-        $data = val('data', $result, null);
+        $data = val('data', $result, false);
 
         if($expire !== false && mktime() > $expire) {
             $this->delete($id);
             return $default;
         }
 
-        return $data;
+        return $data ?: $default;
+    }
+
+    public function exists($id)
+    {
+        $file = $this->cacheDir."/".$this->getFileName($id);
+
+        return is_file($file);
     }
 
     /**
@@ -68,7 +94,7 @@ class File extends \Garden\Cache\Cache
             'data' => $data
         );
 
-        $cacheData = serialize($cacheData);
+        $cacheData = $packFunction($cacheData);
 
         if(!is_dir($this->cacheDir)) {
             mkdir($this->cacheDir, 0777, true);
@@ -76,8 +102,19 @@ class File extends \Garden\Cache\Cache
 
         $cachePath = $this->cacheDir."/".$this->getFileName($id);
 
-        file_put_contents($cachePath, $cacheData);
+        $result = file_put_contents($cachePath, $cacheData);
         chmod($cachePath, 0664);
+
+        return (bool)$result;
+    }
+
+    public function add($id, $data, $lifetime = null)
+    {
+        if(!$this->exists($id)) {
+            return $this->set($id, $data, $lifetime);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -101,7 +138,8 @@ class File extends \Garden\Cache\Cache
      *
      * @return  boolean
      */
-    public function delete_all()
+    //TODO: Дописать
+    public function deleteAll()
     {
 
     }

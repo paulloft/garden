@@ -126,7 +126,7 @@ class Addons {
     public static function bootstrap($enabled_addons = null) {
         // Load the addons from the config if they aren't passed in.
         if (!is_array($enabled_addons)) {
-            $enabled_addons = config('addons', false, array());
+            $enabled_addons = config('main', 'addons', array());
         }
         // Reformat the enabled array into the form: array('addon_key' => 'addon_key')
         $enabled_keys = array_keys(array_change_key_case(array_filter($enabled_addons)));

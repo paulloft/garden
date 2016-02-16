@@ -12,12 +12,7 @@ abstract class Cache extends \Garden\Plugin
      * @var   string     default driver to use
      */
     public static $default = 'file';
-
-    /**
-     * @var   Cache instances
-     */
     public static $instances = array();
-
     public static $enabled = true;
 
     public static function instance($driver = null)
@@ -28,7 +23,7 @@ abstract class Cache extends \Garden\Plugin
         if(!self::$enabled) {
             $driver = 'dirty';
         } elseif(!$driver) {
-            $driver = val('driver', $options, self::$default);
+            $driver = val('defaultDriver', $options, self::$default);
         }
 
         if (isset(self::$instances[$type])) {
@@ -69,6 +64,24 @@ abstract class Cache extends \Garden\Plugin
     abstract public function set($id, $data, $lifetime = 3600);
 
     /**
+     * Add a value to cache if a key doesn`t exists
+     *
+     * @param   string   $id        id of cache entry
+     * @param   string   $data      data to set to cache
+     * @param   integer  $lifetime  lifetime in seconds
+     * @return  boolean
+     */
+    abstract public function add($id, $data, $lifetime = 3600);
+
+    /**
+     * Check exists cache id
+     *
+     * @param   string   $id        id of cache entry
+     * @return  boolean
+     */
+    abstract public function exists($id);
+
+    /**
      * Delete a cache entry based on id
      *
      * @param   string  $id  id to remove from cache
@@ -86,17 +99,5 @@ abstract class Cache extends \Garden\Plugin
      *
      * @return  boolean
      */
-    abstract public function delete_all();
-
-    /**
-     * Replaces troublesome characters with underscores.
-     *
-     * @param   string  $id  id of cache to sanitize
-     * @return  string
-     */
-    protected function fixID($id)
-    {
-        // Change slashes and spaces to underscores
-        return str_replace(array('/', '\\', ' '), '_', $id);
-    }
+    abstract public function deleteAll();
 }

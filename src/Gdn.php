@@ -20,6 +20,10 @@ class Gdn {
         return Cache\Cache::instance();
     }
 
+    public static function dirtyCache() {
+        return Cache\Cache::instance('dirty');
+    }
+
     public static function factory($className) {
         $args = func_get_args();
         array_shift($args);
