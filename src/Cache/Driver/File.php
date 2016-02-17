@@ -12,6 +12,8 @@ class File extends \Garden\Cache\Cache
     public $packFunction = 'serialize';
     public $unpackFunction = 'unserialize';
 
+    protected $dirty;
+
     function __construct($config)
     {
         $this->lifetime       = val('defaultLifetime', $config, parent::DEFAULT_LIFETIME);
@@ -20,7 +22,9 @@ class File extends \Garden\Cache\Cache
 
         $cacheDir = val('cacheDir', $config);
 
-        $this->cacheDir = $cacheDir ? realpath(PATH_ROOT.'/'.$cacheDir) : PATH_CACHE;        
+        $this->cacheDir = $cacheDir ? realpath(PATH_ROOT.'/'.$cacheDir) : PATH_CACHE;
+
+        $this->dirty = \Garden\Gdn::dirtyCache();
     }
 
     /**
@@ -52,19 +56,28 @@ class File extends \Garden\Cache\Cache
      */
     public function get($id, $default = false)
     {
-        $file = $this->cacheDir."/".$this->getFileName($id);
-        if(!is_file($file)) {
-            return $default;
-        }
+        $fileName = $this->getFileName($id);
 
-        $result = file_get_contents($file);
-        $result = $unpackFunction($result);
-        $expire = val('expire', $result, 0);
-        $data = val('data', $result, false);
+        if(!$data = $this->dirty->get($fileName)) {
 
-        if($expire !== false && mktime() > $expire) {
-            $this->delete($id);
-            return $default;
+            $file = $this->cacheDir."/".$fileName;
+
+            if(!is_file($file)) {
+                return $default;
+            }
+
+            $result = file_get_contents($file);
+            $result = $unpackFunction($result);
+            $expire = val('expire', $result, 0);
+            $data   = val('data', $result, false);
+
+            if($expire !== false && mktime() > $expire) {
+                $this->delete($id);
+                return $default;
+            }
+
+            //save to temporary cache
+            $this->dirty->add($fileName, $data);
         }
 
         return $data ?: $default;
@@ -100,7 +113,8 @@ class File extends \Garden\Cache\Cache
             mkdir($this->cacheDir, 0777, true);
         }
 
-        $cachePath = $this->cacheDir."/".$this->getFileName($id);
+        $fileName = $this->getFileName($id);
+        $cachePath = $this->cacheDir."/".$fileName;
 
         $result = file_put_contents($cachePath, $cacheData);
         chmod($cachePath, 0664);

@@ -24,6 +24,7 @@ class Memcached extends Memcache
     {
         if(is_null($lifetime)) $lifetime = $this->lifetime;
         $id = $this->fixID($id);
+        $this->dirty->delete($id);
 
         return $this->cache->set($id, $data, intval($lifetime));
     }

@@ -17,7 +17,7 @@ $app = Gdn::app();
 // Instantiate the application.
 
 // Register default controller.
-$app->route('/(\?.*)?', array(ApiController::instance(), 'test'));
+$app->route('/(\?.*)?', array(Addons\Skeleton\ApiController::instance(), 'test'));
 
 // Register a route to controllers.
 $app->route('/', '%sController');

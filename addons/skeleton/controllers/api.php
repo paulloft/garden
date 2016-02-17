@@ -1,10 +1,11 @@
 <?php
-namespace Garden;
+namespace Garden\Addons\Skeleton;
 use Garden\Db\DB;
+use Garden\Gdn;
 /**
 * 
 */
-class ApiController extends Plugin
+class ApiController extends \Garden\Plugin
 {
     
     function __construct() {
@@ -33,6 +34,7 @@ class ApiController extends Plugin
             ->from('php_st')
             ->where('id', '<', 5)
             ->execute();
+        // echo 'api_controller_test';
 
         // d($s);
         
@@ -56,6 +58,8 @@ class ApiController extends Plugin
         $result = Gdn::cache()->get('test', false);
         d($result);
     }
+
+    
 
 
 }

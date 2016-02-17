@@ -49,7 +49,11 @@ class Memcache extends \Garden\Cache\Cache
     public function get($id, $default = false)
     {
         $id = $this->fixID($id);
-        $result = $this->cache->get($id);
+        if(!$result = $this->dirty->get($id)) {
+            $result = $this->cache->get($id);
+            //save to temporary cache
+            $this->dirty->add($id, $result);
+        }
         return $result ?: $default;
     }
     
@@ -57,6 +61,7 @@ class Memcache extends \Garden\Cache\Cache
     {
         if(is_null($lifetime)) $lifetime = $this->lifetime;
         $id = $this->fixID($id);
+        $this->dirty->delete($id);
 
         return $this->cache->set($id, $data, MEMCACHE_COMPRESSED, intval($lifetime));
     }
@@ -77,6 +82,7 @@ class Memcache extends \Garden\Cache\Cache
     public function delete($id)
     {
         $id = $this->fixID($id);
+        $this->dirty->delete($id);
         $this->cache->delete($id);
     }
 

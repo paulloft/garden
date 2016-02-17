@@ -129,7 +129,7 @@ class Event {
      */
     public static function bindClass($class, $priority = Event::PRIORITY_NORMAL) {
         $method_names = get_class_methods($class);
-
+        
         // Grab an instance of the class so there is something to bind to.
         if (is_string($class)) {
             if (method_exists($class, 'instance')) {
@@ -261,29 +261,6 @@ class Event {
         }
         return $value;
     }
-
-    /**
-     * Fire an event meant to override another function or method.
-     * The event handler should return true if it wants to say it is overridding the method.
-     *
-     * @param string $event The name of the event to fire.
-     * @return bool Whether or not the event has been overridden.
-     */
-//   public static function fireOverride($event) {
-//      $handlers = self::getHandlers($event);
-//      if ($handlers === false)
-//         return $value;
-//
-//      $args = array_slice(func_get_args(), 1);
-//      foreach ($handlers as $callbacks) {
-//         foreach ($callbacks as $callback) {
-//            $overridden = call_user_func_array($callback, $args);
-//            if ($overridden)
-//               return true;
-//         }
-//      }
-//      return false;
-//   }
 
     /**
      * Checks if a function exists or there is a replacement event for it.

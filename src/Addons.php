@@ -99,7 +99,7 @@ class Addons {
     public static function autoload($classname) {
         list($fullClass, $path) = static::classMap($classname);
         if ($path) {
-            require $path;
+            require_once $path;
         }
     }
 
@@ -142,8 +142,8 @@ class Addons {
             if (!isset($addon[self::K_CLASSES])) {
                 continue;
             }
-
-            foreach ($addon[self::K_CLASSES] as $class_name => $class_path) {
+            foreach ($addon[self::K_CLASSES] as $class) {
+                list($class_name, $path) = $class;
                 if (str_ends($class_name, 'plugin')) {
                     Event::bindClass($class_name);
                 } elseif (str_ends($class_name, 'hooks')) {
