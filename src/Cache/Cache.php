@@ -26,8 +26,8 @@ abstract class Cache extends \Garden\Plugin
             $driver = val('defaultDriver', $options, self::$default);
         }
 
-        if (isset(self::$instances[$type])) {
-            return self::$instances[$type];
+        if (isset(self::$instances[$driver])) {
+            return self::$instances[$driver];
         }
 
         $driverClass = 'Garden\Cache\Driver\\'.ucfirst($driver);
@@ -36,10 +36,10 @@ abstract class Cache extends \Garden\Plugin
             throw new UserException("Cache driver \"%s\" not found", array($driver));
         } else {
             $config = c("cache.$driver");
-            self::$instances[$type] = new $driverClass($config);
+            self::$instances[$driver] = new $driverClass($config);
         }
 
-        return self::$instances[$type];
+        return self::$instances[$driver];
     }
 
 

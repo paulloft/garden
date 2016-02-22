@@ -40,6 +40,7 @@ class Model extends Plugin {
     public function __construct($table = null)
     {
         $this->setTable($table);
+        //TODO: Доделать 
         // $user = Auth::instance()->get_user();
         $user = false;
         if($user) {

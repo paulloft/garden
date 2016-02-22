@@ -946,18 +946,28 @@ function setval($Key, &$Collection, $Value) {
         $Collection->$Key = $Value;
 }
 
-if (!function_exists('ErrorMessage')) {
-    /**
-     * Returns an error message formatted in a way that the custom ErrorHandler
-     * function can understand (allows a little more information to be displayed
-     * on errors).
-     *
-     * @param string The actual error message.
-     * @param string The name of the object that encountered the error.
-     * @param string The name of the method that encountered the error.
-     * @param string Any additional information that could be useful to debuggers.
-     */
-    function ErrorMessage($Message, $SenderObject, $SenderMethod, $Code = '') {
-       return $Message.' | '.$SenderObject.' | '.$SenderMethod.' | '.$Code;
-    }
+/**
+ * Returns an error message formatted in a way that the custom ErrorHandler
+ * function can understand (allows a little more information to be displayed
+ * on errors).
+ *
+ * @param string The actual error message.
+ * @param string The name of the object that encountered the error.
+ * @param string The name of the method that encountered the error.
+ * @param string Any additional information that could be useful to debuggers.
+ */
+function ErrorMessage($Message, $SenderObject, $SenderMethod, $Code = '') {
+   return $Message.' | '.$SenderObject.' | '.$SenderMethod.' | '.$Code;
+}
+
+function getInclude($path, $data = array()) {
+    ob_start();
+    extract($data);
+    
+    include $path;
+
+    $result = ob_get_contents(); 
+    ob_end_clean();
+
+    return $result;
 }

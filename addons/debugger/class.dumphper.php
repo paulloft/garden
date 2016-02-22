@@ -7,6 +7,8 @@
 
 // Fixed by S
 
+define('DPHP_USE_ACCESSIBLE', true);
+
 class Dumphper
 {
     /** config **/

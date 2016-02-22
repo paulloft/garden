@@ -8,23 +8,28 @@ namespace Garden;
 class Gdn {
     protected static $instances;
 
-    public static function database($name = null, array $config = null) {
+    public static function database($name = null, array $config = null)
+    {
         return Db\Database::instance($name, $config);
     }
 
-    public static function app() {
+    public static function app()
+    {
         return self::factory('Application');
     }
 
-    public static function cache() {
+    public static function cache()
+    {
         return Cache\Cache::instance();
     }
 
-    public static function dirtyCache() {
+    public static function dirtyCache()
+    {
         return Cache\Cache::instance('dirty');
     }
 
-    public static function factory($className) {
+    public static function factory($className)
+    {
         $args = func_get_args();
         array_shift($args);
         $hash = self::factoryHash($className, $args);
@@ -36,7 +41,8 @@ class Gdn {
         return self::$instances[$hash];
     }
 
-    protected static function factoryHash($className, $args = array()) {
+    protected static function factoryHash($className, $args = array())
+    {
         return empty($args) ? $className : md5($className.implode('',$args));
     }
 
@@ -47,7 +53,8 @@ class Gdn {
      * @param array $args The arguments to pass to the constructor.
      * Note: This function currently only supports a maximum of 8 arguments.
      */
-    protected static function _instantiateObject($className, $args = array()) {
+    protected static function _instantiateObject($className, $args = array())
+    {
         $result = NULL;
 
         //check namespace
@@ -84,7 +91,8 @@ class Gdn {
         return $result;
     }
 
-    public static function exists($className) {
+    public static function exists($className)
+    {
         $args = func_get_args();
         array_shift($args);
         $hash = self::factoryHash($className, $args);

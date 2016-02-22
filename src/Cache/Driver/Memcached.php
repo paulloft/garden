@@ -10,7 +10,7 @@ class Memcached extends Memcache
         parent::__construct($config);
     }
 
-    protected function connect($host, $port)
+    protected function connect()
     {
         if(!class_exists('Memcached')) {
             throw new UserException('Memcached extention not found');

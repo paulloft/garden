@@ -31,7 +31,7 @@ class Memcache extends \Garden\Cache\Cache
         $this->connect();
     }
 
-    protected function connect($host, $port)
+    protected function connect()
     {
         if(!class_exists('memcache')) {
             throw new UserException('memcache extention not found');
