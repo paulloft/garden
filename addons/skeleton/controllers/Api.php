@@ -16,7 +16,7 @@ class Api extends \Garden\Template
         echo 'index method_';
     }
 
-    public function test() {
+    public function test($id, $bi = false) {
         $this->title('Тестировый тайтл');
         $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
         $this->addCss('bootstrap', false);
@@ -35,7 +35,7 @@ class Api extends \Garden\Template
         $result = Gdn::cache()->get('test', false);
 
         
-        $this->render('test');
+        $this->render('index');
     }
 
     

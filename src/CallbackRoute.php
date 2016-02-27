@@ -81,32 +81,6 @@ class CallbackRoute extends Route {
     }
 
     /**
-     * Convert a path pattern into its regex.
-     *
-     * @param string $pattern The route pattern to convert into a regular expression.
-     * @return string Returns the regex pattern for the route.
-     */
-    protected function getPatternRegex($pattern) {
-        $result = preg_replace_callback('`{([^}]+)}`i', function ($match) {
-            if (preg_match('`(.*?)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)(.*?)`', $match[1], $matches)) {
-                $before = preg_quote($matches[1], '`');
-                $param = $matches[2];
-                $after = preg_quote($matches[3], '`');
-            } else {
-                throw new \Exception("Invalid route parameter: $match[1].", 500);
-            }
-
-            $param_pattern = val($param, $this->conditions, val($param, self::$globalConditions, '[^/]+?'));
-            $result = "(?<$param>$before{$param_pattern}$after)";
-
-            return $result;
-        }, $pattern);
-
-        $result = '`^'.$result.'$`i';
-        return $result;
-    }
-
-    /**
      * Get the callback for the route.
      *
      * @return callable Returns the current callback.

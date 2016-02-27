@@ -56,105 +56,31 @@ class ResourceRoute extends Route {
     public function dispatch(Request $request, array &$args) {
         $controller = new $args['controller']();
         $method = strtolower($args['method']);
-        $pathArgs = $args['pathArgs'];
+        $actionArgs = $args['args'];
+        $action = $args['action'];
+        $actions = ['get' => 'index', 'post' => 'post', 'options' => 'options'];
 
-        // See if the initialize method can take any of the parameters.
-        $initialize = false;
-        $initArgs = [];
-        $initParams = [];
-        $actionIndex = 0;
-        if (method_exists($controller, 'initialize')) {
-            $initialize = true;
-            $initMethod = new \ReflectionMethod($controller, 'initialize');
+        $initialize = method_exists($controller, 'initialize');
 
-            // Walk through the initialize() arguments and supply all of the ones that are required.
-            foreach ($initMethod->getParameters() as $initParam) {
-                $i = $initParam->getPosition();
-                $initArgs[$i] = null;
-                $initParams[$i] = $initParam->getName();
-
-                if ($initParam->isDefaultValueAvailable()) {
-                    $initArgs[$i] = $initParam->getDefaultValue();
-                } elseif (!isset($pathArgs[$i])) {
-                    throw new NotFoundException('Page', "Missing argument $i for {$args['controller']}::initialize().");
-                } elseif ($this->failsCondition($initParams[$i], $pathArgs[$i])) {
-                    // This isn't a valid value for a required parameter.
-                    throw new NotFoundException('Page', "Invalid argument '{$pathArgs[$i]}' for {$initParams[$i]}.");
-                } else {
-                    $initArgs[$i] = $pathArgs[$i];
-                    $actionIndex = $i + 1;
-                }
-            }
-        }
-
-        $action = '';
-        $initComplete = false;
-        for ($i = $actionIndex; $i < count($pathArgs); $i++) {
-            $pathArg = $pathArgs[$i];
-
-            $action = $this->actionExists($controller, $pathArg, $method, true);
-            if ($action) {
-                // We found an action and can move on to the next step.
-                $actionIndex = $i + 1;
-                break;
-            } else {
-                // This is a method argument. See whether to add it to the initialize method or not.
-                if (!$initComplete && $actionIndex < count($initArgs)) {
-                    // Make sure the argument is valid.
-                    if ($this->failsCondition($initParams[$actionIndex], $pathArg)) {
-                        // The argument doesn't validate against its condition so this can't be an init argument.
-                        $initComplete = true;
-                    } else {
-                        // The argument can be added to initialize().
-                        $initArgs[$actionIndex] = $pathArg;
-                        $actionIndex++;
-                    }
-                }
-            }
+        if (!isset($actions[$method])) {
+            // The http method isn't allowed.
+            $allowed = array_keys($actions);
+            throw new MethodNotAllowedException($method, $allowed);
         }
 
         if (!$action) {
-            // There is no specific action at this point so we have to check for a resource action.
-            if ($actionIndex === 0) {
-                $actions = ['get' => 'index', 'post' => 'post', 'options' => 'options'];
+            $action = $this->actionExists($controller, $actions[$method]);
+        } else {
+            $action = $this->actionExists($controller, $action, $method, true);
+        }
+
+        if(!$action) {
+            $allowed = $this->allowedMethods($controller, $action);
+            if (!empty($allowed)) {
+                // At least one method was allowed for this action so throw an exception.
+                throw new MethodNotAllowedException($method, $allowed);
             } else {
-                $actions = ['get' => 'get', 'patch' => 'patch', 'put' => 'put', 'delete' => 'delete'];
-            }
-
-            if (!isset($actions[$method])) {
-                if ($actionIndex < count($pathArgs)) {
-                    // There are more path args left to go then just throw a 404.
-                    throw new NotFoundException();
-                } else {
-                    // The http method isn't allowed.
-                    $allowed = array_keys($actions);
-                    throw new MethodNotAllowedException($method, $allowed);
-                }
-            }
-
-            $action = $actions[$method];
-            if (!$this->actionExists($controller, $action)) {
-                // If there are more path args left to go then just throw a 404.
-                if ($actionIndex < count($pathArgs)) {
-                    throw new NotFoundException();
-                }
-
-                // Check to see what actions are allowed.
-                unset($actions[$method]);
-                $allowed = [];
-                foreach ($actions as $otherMethod => $otherAction) {
-                    if ($this->actionExists($controller, $otherAction)) {
-                        $allowed[] = strtoupper($otherMethod);
-                    }
-                }
-
-                if (!empty($allowed)) {
-                    // Other methods are allowed. Show them.
-                    throw new MethodNotAllowedException($method, $allowed);
-                } else {
-                    // The action does not exist at all.
-                    throw new NotFoundException();
-                }
+                throw new NotFoundException();
             }
         }
 
@@ -162,46 +88,27 @@ class ResourceRoute extends Route {
         $actionMethod = new \ReflectionMethod($controller, $action);
         $action = $actionMethod->getName(); // make correct case.
         $actionParams = $actionMethod->getParameters();
-        $actionArgs = array_slice($pathArgs, $actionIndex);
 
-        if (count($actionArgs) > count($actionParams)) {
-            // Double check to see if the first argument might be a method, but one that isn't allowed.
-            $allowed = $this->allowedMethods($controller, $actionArgs[0]);
-            if (count($allowed) > 0) {
-                // At least one method was allowed for this action so throw an exception.
-                throw new MethodNotAllowedException($method, $allowed);
-            }
-
-            // Too many arguments were passed.
-            throw new NotFoundException();
-        }
         // Fill in missing default parameters.
-        foreach ($actionParams as $param) {
-            $i = $param->getPosition();
+        foreach ($actionParams as $i => $param) {
             $paramName = $param->getName();
 
             if ($this->isMapped($paramName)) {
                 // The parameter is mapped to a specific request item.
                 array_splice($actionArgs, $i, 0, [$this->mappedData($paramName, $request)]);
-            } elseif (!isset($actionArgs[$i]) || !$actionArgs[$i]) {
+            } elseif (!isset($actionArgs[$paramName])) {
                 if ($param->isDefaultValueAvailable()) {
-                    $actionArgs[$i] = $param->getDefaultValue();
+                    $actionArgs[$paramName] = $param->getDefaultValue();
                 } else {
-                    throw new NotFoundException('Page', "Missing argument $i for {$args['controller']}::$action().");
+                    throw new NotFoundException("Missing argument $i for {$args['controller']}::$action().");
                 }
-            } elseif ($this->failsCondition($paramName, $actionArgs[$i])) {
-                throw new NotFoundException('Page', "Invalid argument '{$actionArgs[$i]}' for {$paramName}.");
+            } elseif ($this->failsCondition($paramName, $actionArgs[$paramName])) {
+                throw new NotFoundException("Invalid argument '{$actionArgs[$paramName]}' for {$paramName}.");
             }
         }
 
-        $args = array_replace($args, [
-            'init' => $initialize,
-            'initArgs' => $initArgs,
-            'action' => $action,
-            'actionArgs' => $actionArgs
-        ]);
-
         if ($initialize) {
+            $initArgs = array_merge(['action' => $action], $actionArgs);
             Event::callUserFuncArray([$controller, 'initialize'], $initArgs);
         }
 
@@ -307,23 +214,23 @@ class ResourceRoute extends Route {
             $path = $request->getPath();
         }
 
-        // If this route is off of a root then check that first.
-        if ($root = $this->pattern()) {
-            if (stripos($path, $root) === 0) {
-                // Strip the root off the path that we are examining.
-                $path = substr($path, strlen($root));
-            } else {
-                return null;
+        $regex = $this->getPatternRegex($this->pattern());
+
+        $controller = $action = false;
+
+        if (preg_match($regex, $path, $matches)) {
+            $args = [];
+            foreach ($matches as $key => $value) {
+                if ($key == 'controller' OR $key == 'action') {
+                    $$key = $value;
+                } elseif (!is_numeric($key)) {
+                    $args[$key] = $value;
+                }
             }
-        }
-
-        $pathParts = explode('/', trim($path, '/'));
-
-        $controller = array_shift($pathParts);
-
-        if (!$controller) {
+        } else {
             return null;
         }
+
 
         // Check to see if a class exists with the desired controller name.
         // If a controller is found then it is responsible for the route, regardless of any other parameters.
@@ -331,7 +238,6 @@ class ResourceRoute extends Route {
         if (class_exists('\Garden\Addons', false)) {
             list($classname) = Addons::classMap($basename);
 
-            // TODO: Optimize this second check.
             if (!$classname && class_exists($basename)) {
                 $classname = $basename;
             }
@@ -347,10 +253,11 @@ class ResourceRoute extends Route {
 
         $result = array(
             'controller' => $classname,
-            'method' => $request->getMethod(),
-            'path' => $path,
-            'pathArgs' => $pathParts,
-            'query' => $request->getQuery()
+            'action'     => $action,
+            'method'     => $request->getMethod(),
+            'path'       => $path,
+            'args'       => $args,
+            'query'      => $request->getQuery()
         );
         return $result;
     }
