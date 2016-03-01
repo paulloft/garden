@@ -174,7 +174,7 @@ class Addons {
         // Salt the cache with the root path so that it will invalidate if the app is moved.
         $salt = substr(md5(static::baseDir()), 0, 10);
 
-        $cache_path = PATH_CACHE."/$key-$salt.json.php";
+        $cache_path = PATH_CACHE."/$key-$salt.json";
         if (file_exists($cache_path)) {
             $result = array_load($cache_path);
             return $result;

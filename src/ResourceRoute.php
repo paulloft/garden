@@ -20,7 +20,7 @@ use Garden\Exception\MethodNotAllowedException;
  * - METHOD /controller/action -> methodAction
  */
 class ResourceRoute extends Route {
-    protected $controllerPattern = '%sApiController';
+    protected $controllerPattern = '%sController';
 
     /**
      * @var array An array of controller method names that can't be dispatched to by name.
@@ -217,14 +217,17 @@ class ResourceRoute extends Route {
         $regex = $this->getPatternRegex($this->pattern());
 
         $controller = $action = false;
+        $printArgs = array();
 
         if (preg_match($regex, $path, $matches)) {
             $args = [];
             foreach ($matches as $key => $value) {
-                if ($key == 'controller' OR $key == 'action') {
+                if ($key === 'controller' OR $key === 'action') {
                     $$key = $value;
+                    $printArgs[] = ucfirst($value);
                 } elseif (!is_numeric($key)) {
                     $args[$key] = $value;
+                    $printArgs[] = ucfirst($value);
                 }
             }
         } else {
@@ -234,7 +237,7 @@ class ResourceRoute extends Route {
 
         // Check to see if a class exists with the desired controller name.
         // If a controller is found then it is responsible for the route, regardless of any other parameters.
-        $basename = sprintf($this->controllerPattern, ucfirst($controller));
+        $basename = vsprintf($this->controllerPattern, $printArgs);
         if (class_exists('\Garden\Addons', false)) {
             list($classname) = Addons::classMap($basename);
 

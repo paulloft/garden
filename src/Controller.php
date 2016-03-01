@@ -91,7 +91,7 @@ class Controller extends Plugin {
         $filename = val('filename', $pathinfo, 'index');
         $ext = val('extension', $pathinfo, 'tpl');
 
-        return strtolower($addonFolder).'/views/'.strtolower($controllerName).'/'.$filename.'.'.$ext;
+        return $addonFolder.'/views/'.strtolower($controllerName).'/'.$filename.'.'.$ext;
     }
 
     protected function controllerInfo($key = false, $default = false)
@@ -106,7 +106,7 @@ class Controller extends Plugin {
             } else {
                 $result = array(
                     'addon' => $space[1],
-                    'folder' => $space[0].'/'.$space[1],
+                    'folder' => strtolower($space[0]).'/'.$space[1],
                     'controller' => array_pop($space)
                 );
             }

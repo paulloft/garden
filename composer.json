@@ -37,7 +37,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Garden\\": "src"
+			"Garden\\": "src",
+			"Addons\\": "addons"
 		},
 		"files": [
 			"src/functions/autoload.php"

@@ -17,11 +17,11 @@ $app = Gdn::app();
 // Instantiate the application.
 
 // Register default controller.
-$app->route('/(\?.*)?', 'api');
+// $app->route('/(\?.*)?', 'api');
+$app->route('/(\?.*)?', array(\Addons\Skeleton\Controllers\Api::instance(), 'index'));
 
 // Register a route to controllers.
-$app->route('/{controller}/{action}/{id}(\?.*)?', 'controller\\%s')->conditions(array('id'=>'\d+'));
+$app->route('/{controller}/{action}/{id}(\?.*)?', '\\Addons\\Skeleton\\Controllers\\%s')->conditions(array('id'=>'\d+'));
 
 // Run the application.
 $app->run();
-// p($app);
