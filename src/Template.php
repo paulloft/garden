@@ -4,7 +4,7 @@ namespace Garden;
 class Template extends Controller {
 
     // template file
-    protected $template = 'template.tpl';
+    protected $template = 'template';
     protected $addonName;
 
     protected $_js  = array();
@@ -51,15 +51,17 @@ class Template extends Controller {
     public function render($view = false, $controllerName = false, $addonFolder = false)
     {
         Event::fire('beforeRender');
-        
+
+        $view = $view ?: $this->callerMethod();
         $view = $this->fetchView($view, $controllerName, $addonFolder);
 
         $this->smarty()->assign('gdn', array(
-            'content' => $view,
-            'meta'    => $this->meta,
-            'js'      => $this->_js,
-            'css'     => $this->_css,
+            'content'  => $view,
+            'meta'     => $this->meta,
+            'js'       => $this->_js,
+            'css'      => $this->_css,
         ));
+        $this->smarty()->assign('sitename', c('main.sitename'));
         $template = $this->fetchView($this->template, '/', $this->addonName);
 
         echo $template;

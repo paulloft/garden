@@ -10,6 +10,9 @@ class Controller extends Plugin {
     protected $controllerName;
     protected $addonFolder;
 
+    // default view extention
+    protected $viewExt = 'tpl';
+
     private $smarty;
 
     public function __construct()
@@ -48,35 +51,36 @@ class Controller extends Plugin {
     public function render($view = false, $controllerName = false, $addonFolder = false)
     {
         Event::fire('beforeRender');
-        
+
+        $view = $view ?: $this->callerMethod();
         $view = $this->fetchView($view, $controllerName, $addonFolder);
         echo $view;
 
         Event::fire('afterRender');
     }
 
-    public function fetchView($view = false, $controllerName = false, $addonFolder = false)
+    public function fetchView($view, $controllerName = false, $addonFolder = false)
     {
-        $viewPath = realpath(PATH_ROOT.'/'.$this->getViewPath($view, $controllerName, $addonFolder));
+        $viewPath = $this->getViewPath($view, $controllerName, $addonFolder);
+        $realPath = realpath(PATH_ROOT.'/'.$viewPath);
 
-        if(!is_file($viewPath)) {
-            throw new Exception\NotFoundException();
+        if(!is_file($realPath)) {
+            throw new Exception\NotFoundException('View "'.$view.'" not found in '.$viewPath);
         }
 
-        if(str_ends($viewPath, '.tpl')) {
+        if(str_ends($realPath, '.'.$this->viewExt)) {
             $smarty = $this->smarty();
             $smarty->assign($this->data);
-            $view = $smarty->fetch($viewPath);
+            $view = $smarty->fetch($realPath);
         } else {
-            $view = \getInclude($viewPath, $this->data);
+            $view = \getInclude($realPath, $this->data);
         }
 
         return $view;
     }
 
-    public function getViewPath($view = false, $controllerName = false, $addonFolder = false)
+    public function getViewPath($view, $controllerName = false, $addonFolder = false)
     {
-        $view = $view ?: $this->view;
         $addonFolder = $addonFolder ?: $this->addonFolder;
         $controllerName = $controllerName ?: $this->controllerName;
 
@@ -89,7 +93,7 @@ class Controller extends Plugin {
 
         $pathinfo = pathinfo($view);
         $filename = val('filename', $pathinfo, 'index');
-        $ext = val('extension', $pathinfo, 'tpl');
+        $ext = val('extension', $pathinfo, $this->viewExt);
 
         return $addonFolder.'/views/'.strtolower($controllerName).'/'.$filename.'.'.$ext;
     }
@@ -132,6 +136,13 @@ class Controller extends Plugin {
         }
 
         return $this->smarty;
+    }
+
+    protected function callerMethod($depth = 2)
+    {
+        $trace = debug_backtrace();
+        $controller = val($depth, $trace);
+        return val('function', $controller);
     }
 
 }

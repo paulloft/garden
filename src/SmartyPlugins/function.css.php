@@ -11,7 +11,7 @@ function smarty_function_css($Params, &$Smarty) {
     $i = 0;
     foreach ($css as $src) {
         $i++;
-        $html .= '   <link href="'.$src.'" rel="stylesheet" type="text/css" />'.($i == $c ? null : "\n");
+        $html .= '<link href="'.$src.'" rel="stylesheet" type="text/css" />'.($i == $c ? null : "\n    ");
     }
 
     return $html;

@@ -5,23 +5,30 @@ use Garden\Gdn;
 /**
 * 
 */
-class Api extends \Garden\Template
+class Skeleton extends \Garden\Template
 {
     
-    function __construct() {
+    function __construct()
+    {
         parent::__construct();
     }
 
-    public function index() {
-        echo 'index method_';
-    }
+    public function index()
+    {
+        $this->title('Hello World');
 
-    public function test($id, $bi = false) {
-        $this->title('Тестировый тайтл');
         $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
-        $this->addCss('bootstrap', false);
+        $this->addJs('bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js');
+        $this->addCss('bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css');
+        $this->addCss('starter-template.css');
         $this->meta('X-UA-Compatible', 'IE=edge,chrome=1', true);
         $this->meta('viewport', 'width=device-width, initial-scale=1.0');
+
+        $this->render();
+    }
+
+    public function test($id, $bi = false)
+    {
 
         $tableModel = Model\Table::instance();
 
@@ -35,7 +42,7 @@ class Api extends \Garden\Template
         $result = Gdn::cache()->get('test', false);
 
         
-        $this->render('index');
+        
     }
 
     

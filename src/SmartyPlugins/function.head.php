@@ -5,8 +5,9 @@ function smarty_function_head($Params, &$Smarty) {
     $title = val('title', $Smarty->tpl_vars);
     $meta  = val('meta', $vars);
     $sitename = c('main.sitename');
+    $separator = c('main.titleSeparator', '-');
     
-    $html = "   <title>$title - $sitename</title>\n";
+    $html = "<title>$title $separator $sitename</title>\n    ";
 
     if(!empty($meta)){
         $c = count($meta);
@@ -14,7 +15,7 @@ function smarty_function_head($Params, &$Smarty) {
         foreach ($meta as $name => $value) {
             $i++;
             list($content, $http_equiv) = $value;
-            $html .= '   <meta '.($http_equiv ? 'http-equiv' : 'name').'="'.$name.'" content="'.$content.'" />'.($i == $c ? null : "\n");
+            $html .= '<meta '.($http_equiv ? 'http-equiv' : 'name').'="'.$name.'" content="'.$content.'" />'.($i == $c ? null : "\n    ");
         }
     }
 
