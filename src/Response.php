@@ -165,15 +165,15 @@ class Response implements JsonSerializable {
     public static function create($result) {
         if ($result instanceof Response) {
             return $result;
-        } elseif ($result instanceof Exception\ResponseException) {
-            /* @var Exception\ResponseException $result */
+        } elseif ($result instanceof Exception\Response) {
+            /* @var Exception\Response $result */
             return $result->getResponse();
         }
 
         $response = new Response();
 
-        if ($result instanceof Exception\ClientException) {
-            /* @var Exception\ClientException $cex */
+        if ($result instanceof Exception\Client) {
+            /* @var Exception\Client $cex */
             $cex = $result;
             $response->status($cex->getCode());
             $response->headers($cex->getHeaders());

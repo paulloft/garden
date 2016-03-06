@@ -1,6 +1,6 @@
 <?php 
 namespace Garden\Db\Driver;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 use \Garden\Db\Database;
 use \PDO as _PDO;
 /**
@@ -135,7 +135,7 @@ class PDO extends Database {
             $result = $this->_connection->query($sql);
         } catch (Exception $e) {
             // Convert the exception in a database exception
-            throw new UserException('%s [ %s ]',array($e->getMessage(), $sql), $e->getCode());
+            throw new Exception\Custom('%s [ %s ]',array($e->getMessage(), $sql), $e->getCode());
         }
 
         // Set the last query
@@ -196,12 +196,12 @@ class PDO extends Database {
 
     public function list_tables($like = NULL)
     {
-        throw new UserException('Database method %s is not supported by %s', array(__FUNCTION__, __CLASS__));
+        throw new Exception\Custom('Database method %s is not supported by %s', array(__FUNCTION__, __CLASS__));
     }
 
     public function list_columns($table, $like = NULL, $add_prefix = TRUE)
     {
-        throw new UserException('Database method %s is not supported by %s', array( __FUNCTION__,  __CLASS__));
+        throw new Exception\Custom('Database method %s is not supported by %s', array( __FUNCTION__,  __CLASS__));
     }
 
     public function escape($value)

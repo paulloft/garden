@@ -65,7 +65,7 @@ class Controller extends Plugin {
         $realPath = realpath(PATH_ROOT.'/'.$viewPath);
 
         if(!is_file($realPath)) {
-            throw new Exception\NotFoundException('View "'.$view.'" not found in '.$viewPath);
+            throw new Exception\NotFound('View "'.$view.'" not found in '.$viewPath);
         }
 
         if(str_ends($realPath, '.'.$this->viewExt)) {
@@ -124,7 +124,7 @@ class Controller extends Plugin {
     {
         if(is_null($this->smarty)) {
             if(!class_exists('\Smarty')) {
-                throw new Exception\UserException('Smarty class does not exists');
+                throw new Exception\Client('Smarty class does not exists');
             }
             $this->smarty = new \Smarty();
             

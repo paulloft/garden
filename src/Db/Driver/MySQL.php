@@ -1,6 +1,6 @@
 <?php 
 namespace Garden\Db\Driver;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 use \Garden\Db\Database;
 /**
  * MySQL database connection.
@@ -174,7 +174,7 @@ class MySQL extends Database {
         // Execute the query
         if (($result = mysql_query($sql, $this->_connection)) === FALSE)
         {
-            throw new UserException('%s [ %s ]', array(mysql_error($this->_connection), $sql), mysql_errno($this->_connection));
+            throw new Exception\Custom('%s [ %s ]', array(mysql_error($this->_connection), $sql), mysql_errno($this->_connection));
         }
 
         // Set the last query

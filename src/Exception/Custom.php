@@ -15,11 +15,11 @@ namespace Garden\Exception;
  * b) can be considered expected behavior from the user.
  *
  * Most exceptions will generate a stack trace and other debugging information when in debug mode.
- * The {@link UserException} will always display just its message since it represents expected behavior.
+ * The {@link Custom} will always display just its message since it represents expected behavior.
  */
-class UserException extends ClientException {
+class Custom extends Client {
     /**
-     * Initialize a {@link NotFoundException}.
+     * Initialize a {@link Custom}.
      *
      * @param string $message The error message or a one word resource name.
      * @param string $description A longer description for the error.

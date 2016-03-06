@@ -7,9 +7,6 @@
 
 namespace Garden;
 
-
-use Garden\Exception\ValidationException;
-
 /**
  * An class for collecting validation errors.
  */

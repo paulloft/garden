@@ -20,7 +20,7 @@ $app = Gdn::app();
 $app->route('/(\?.*)?', '\\Addons\\Skeleton\\Controllers\\Skeleton');
 
 // Register a route to controllers.
-$app->route('/{controller}/{action}/(\?.*)?', '\\Addons\\Skeleton\\Controllers\\%s')
+$app->route('/{controller}/{action}/?(\?.*)?', '\\Addons\\Skeleton\\Controllers\\%s')
     ->conditions(array('id'=>'\d+'));
 
 // Run the application.

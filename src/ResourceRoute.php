@@ -7,9 +7,6 @@
 
 namespace Garden;
 
-use Garden\Exception\NotFoundException;
-use Garden\Exception\MethodNotAllowedException;
-
 /**
  * Maps paths to controllers that act as RESTful resources.
  *
@@ -49,8 +46,8 @@ class ResourceRoute extends Route {
      * @param array &$args The args to pass to the dispatch.
      * These are the arguments returned from {@link Route::matches()}.
      * @return mixed Returns the result from the controller method.
-     * @throws NotFoundException Throws a 404 when the path doesn't map to a controller action.
-     * @throws MethodNotAllowedException Throws a 405 when the http method does not map to a controller action,
+     * @throws Exception\NotFound Throws a 404 when the path doesn't map to a controller action.
+     * @throws Exception\MethodNotAllowed Throws a 405 when the http method does not map to a controller action,
      * but other methods do.
      */
     public function dispatch(Request $request, array &$args) {
@@ -65,7 +62,7 @@ class ResourceRoute extends Route {
         if (!isset($actions[$method])) {
             // The http method isn't allowed.
             $allowed = array_keys($actions);
-            throw new MethodNotAllowedException($method, $allowed);
+            throw new Exception\MethodNotAllowed($method, $allowed);
         }
 
         if (!$action) {
@@ -78,9 +75,9 @@ class ResourceRoute extends Route {
             $allowed = $this->allowedMethods($controller, $action);
             if (!empty($allowed)) {
                 // At least one method was allowed for this action so throw an exception.
-                throw new MethodNotAllowedException($method, $allowed);
+                throw new Exception\MethodNotAllowed($method, $allowed);
             } else {
-                throw new NotFoundException();
+                throw new Exception\NotFound();
             }
         }
 
@@ -88,6 +85,10 @@ class ResourceRoute extends Route {
         $actionMethod = new \ReflectionMethod($controller, $action);
         $action = $actionMethod->getName(); // make correct case.
         $actionParams = $actionMethod->getParameters();
+
+        if(!$actionMethod->isPublic()) {
+            throw new Exception\NotFound();
+        }
 
         // Fill in missing default parameters.
         foreach ($actionParams as $i => $param) {
@@ -100,10 +101,10 @@ class ResourceRoute extends Route {
                 if ($param->isDefaultValueAvailable()) {
                     $actionArgs[$paramName] = $param->getDefaultValue();
                 } else {
-                    throw new NotFoundException("Missing argument $i for {$args['controller']}::$action().");
+                    throw new Exception\NotFound("Missing argument $i for {$args['controller']}::$action().");
                 }
             } elseif ($this->failsCondition($paramName, $actionArgs[$paramName])) {
-                throw new NotFoundException("Invalid argument '{$actionArgs[$paramName]}' for {$paramName}.");
+                throw new Exception\NotFound("Invalid argument '{$actionArgs[$paramName]}' for {$paramName}.");
             }
         }
 

@@ -10,9 +10,9 @@ namespace Garden\Exception;
 /**
  * Represents a 404 not found error.
  */
-class NotFoundException extends ClientException {
+class NotFound extends Client {
     /**
-     * Initialize a {@link NotFoundException}.
+     * Initialize a {@link NotFound}.
      *
      * @param string $message The error message or a one word resource name.
      * @param string $description A longer description for the error.

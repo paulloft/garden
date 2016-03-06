@@ -564,7 +564,7 @@ function garden_error_handler($number, $message, $file, $line, $args) {
 
     $backtrace = debug_backtrace();
 
-    throw new Garden\Exception\ErrorException($message, $number, $file, $line, $args, $backtrace);
+    throw new Garden\Exception\Error($message, $number, $file, $line, $args, $backtrace);
 }
 
 /**

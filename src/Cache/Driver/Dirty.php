@@ -1,6 +1,5 @@
 <?php
 namespace Garden\Cache\Driver;
-use \Garden\Exception\UserException;
 /**
 * 
 */

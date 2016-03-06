@@ -10,10 +10,10 @@ namespace Garden\Exception;
 /**
  * An exception that represents a 405 method not allowed exception.
  */
-class MethodNotAllowedException extends ClientException {
+class MethodNotAllowed extends Client {
 
     /**
-     * Initialize the {@link MethodNotAllowedException}.
+     * Initialize the {@link MethodNotAllowed}.
      *
      * @param string $method The http method that's not allowed.
      * @param array|string $allow An array http methods that are allowed.

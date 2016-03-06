@@ -10,13 +10,13 @@ namespace Garden\Exception;
 /**
  * An exception for php errors that also includes the error context and a backtrace.
  */
-class ErrorException extends \ErrorException {
+class Error extends \ErrorException {
     protected $context;
 
     protected $backtrace;
 
     /**
-     * Initialize an instance of the {@link ErrorException} class.
+     * Initialize an instance of the {@link Error} class.
      *
      * @param string $message The error message.
      * @param int $number The error number.

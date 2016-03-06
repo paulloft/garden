@@ -1,6 +1,6 @@
 <?php
 namespace Garden\Cache;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 /**
 * 
 */
@@ -33,7 +33,7 @@ abstract class Cache extends \Garden\Plugin
         $driverClass = 'Garden\Cache\Driver\\'.ucfirst($driver);
 
         if(!class_exists($driverClass)) {
-            throw new UserException("Cache driver \"%s\" not found", array($driver));
+            throw new Exception\Custom("Cache driver \"%s\" not found", array($driver));
         } else {
             $config = c("cache.$driver");
             self::$instances[$driver] = new $driverClass($config);

@@ -13,18 +13,30 @@ class Skeleton extends \Garden\Template
         parent::__construct();
     }
 
-    public function index()
-    {
-        $this->title('Hello World');
-
+    protected function pageInit() {
         $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
         $this->addJs('bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js');
+
         $this->addCss('bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css');
         $this->addCss('starter-template.css');
+
         $this->meta('X-UA-Compatible', 'IE=edge,chrome=1', true);
         $this->meta('viewport', 'width=device-width, initial-scale=1.0');
+    }
+
+    public function index()
+    {
+        $this->pageInit();
+        $this->title('Hello World');
 
         $this->render();
+    }
+
+    public function about() {
+        $this->pageInit();
+        $this->title('About Garden');
+
+        $this->render('index');
     }
 
     public function test($id, $bi = false)

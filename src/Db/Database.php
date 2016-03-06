@@ -1,6 +1,6 @@
 <?php 
 namespace Garden\Db;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 /**
  * Database connection wrapper/helper.
  *
@@ -68,7 +68,7 @@ abstract class Database
             $driver = val('driver', $config);
 
             if (!$driver) {
-                throw new UserException('Database driver not defined in %s configuration', array($name));
+                throw new Exception\Custom('Database driver not defined in %s configuration', array($name));
             }
 
             // Set the driver class name

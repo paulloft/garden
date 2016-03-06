@@ -7,9 +7,6 @@
 
 namespace Garden;
 
-
-use Garden\Exception\ValidationException;
-
 /**
  * A class for defining and validating data schemas.
  */
@@ -260,7 +257,7 @@ class Schema implements \JsonSerializable {
      * @param array &$data The data to validate.
      * @param Validation &$validation This argument will be filled with the validation result.
      * @return bool Returns true if the data is valid, false otherwise.
-     * @throws ValidationException Throws an exception when the data does not validate against the schema.
+     * @throws Exception\Validation Throws an exception when the data does not validate against the schema.
      */
     public function validate(array &$data, Validation &$validation = null) {
         if (!$this->isValidInternal($data, $this->schema, $validation, '')) {
@@ -269,7 +266,7 @@ class Schema implements \JsonSerializable {
                 $validation = new Validation();
             }
 
-            throw new ValidationException($validation);
+            throw new Exception\Validation($validation);
         }
         return $this;
     }

@@ -2,8 +2,6 @@
 
 namespace Garden;
 
-use Garden\Exception\NotFoundException;
-
 class Application {
     /// Properties ///
     protected static $instances;
@@ -183,7 +181,7 @@ class Application {
             }
 
             if (!$dispatched) {
-                throw new NotFoundException();
+                throw new Exception\NotFound();
             }
         } catch (\Exception $ex) {
             $result = $ex;

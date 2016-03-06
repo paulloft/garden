@@ -1,6 +1,6 @@
 <?php
 namespace Garden\Cache\Driver;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 /**
 * 
 */
@@ -13,7 +13,7 @@ class Memcached extends Memcache
     protected function connect()
     {
         if(!class_exists('Memcached')) {
-            throw new UserException('Memcached extention not found');
+            throw new Exception\Custom('Memcached extention not found');
         }
 
         $this->cache = new \Memcached($this->persistent);

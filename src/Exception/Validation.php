@@ -13,13 +13,13 @@ use Garden\Validation;
  * An exception that was built from a {@link Validation} object.
  *
  * The validation object collects errors and is mutable. Once it's ready to be thrown as an exception it gets converted
- * to an instance of the immutable {@link ValidationException} class.
+ * to an instance of the immutable {@link Validation} class.
  */
-class ValidationException extends ClientException {
+class Validation extends Client {
     protected $validation;
 
     /**
-     * Initialize an instance of the {@link ValidationException} class.
+     * Initialize an instance of the {@link Validation} class.
      *
      * @param Validation $validation The {@link Validation} object for the exception.
      */

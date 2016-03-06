@@ -12,11 +12,11 @@ use Garden\Response;
 /**
  * Represents a 400 series exception.
  */
-class ClientException extends \Exception implements \JsonSerializable {
+class Client extends \Exception implements \JsonSerializable {
     protected $context;
 
     /**
-     * Initialize an instance of the {@link ClientException} class.
+     * Initialize an instance of the {@link Client} class.
      *
      * The 4xx class of status code is intended for cases in which the client seems to have erred.
      * When constructing a client exception you can pass additional information on the {@link $context} parameter

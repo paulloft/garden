@@ -1,6 +1,6 @@
 <?php
 namespace Garden\Cache\Driver;
-use \Garden\Exception\UserException;
+use \Garden\Exception as Exception;
 /**
 * 
 */
@@ -34,7 +34,7 @@ class Memcache extends \Garden\Cache\Cache
     protected function connect()
     {
         if(!class_exists('memcache')) {
-            throw new UserException('memcache extention not found');
+            throw new Exception\Custom('memcache extention not found');
         }
 
         $this->cache = new \Memcache();
