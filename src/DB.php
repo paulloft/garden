@@ -1,5 +1,6 @@
 <?php 
-namespace Garden\Db;
+namespace Garden;
+use Garden\Db\Database\Query;
 /**
  * Provides a shortcut to get Database related objects for [making queries](../database/query).
  *
@@ -42,7 +43,7 @@ class DB {
      */
     public static function query($type, $sql)
     {
-        return new Database\Query($type, $sql);
+        return new Query($type, $sql);
     }
 
     /**
@@ -60,7 +61,7 @@ class DB {
      */
     public static function select($columns = NULL)
     {
-        return new Database\Query\Builder\Select(func_get_args());
+        return new Query\Builder\Select(func_get_args());
     }
 
     /**
@@ -74,7 +75,7 @@ class DB {
      */
     public static function select_array(array $columns = NULL)
     {
-        return new Database\Query\Builder\Select($columns);
+        return new Query\Builder\Select($columns);
     }
 
     /**
@@ -89,7 +90,7 @@ class DB {
      */
     public static function insert($table = NULL, array $columns = NULL)
     {
-        return new Database\Query\Builder\Insert($table, $columns);
+        return new Query\Builder\Insert($table, $columns);
     }
 
     /**
@@ -103,7 +104,7 @@ class DB {
      */
     public static function update($table = NULL)
     {
-        return new Database\Query\Builder\Update($table);
+        return new Query\Builder\Update($table);
     }
 
     /**
@@ -117,7 +118,7 @@ class DB {
      */
     public static function delete($table = NULL)
     {
-        return new Database\Query\Builder\Delete($table);
+        return new Query\Builder\Delete($table);
     }
 
     /**
@@ -134,7 +135,7 @@ class DB {
      */
     public static function expr($string, $parameters = array())
     {
-        return new Database\Expression($string, $parameters);
+        return new Db\Database\Expression($string, $parameters);
     }
 
 }

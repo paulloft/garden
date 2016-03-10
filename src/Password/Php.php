@@ -8,9 +8,9 @@
 namespace Garden\Password;
 
 /**
- * An {@link IPassword} that uses the various `password_*` functions.
+ * An {@link Password} that uses the various `password_*` functions.
  */
-class PhpPassword implements IPassword {
+class Php implements Password {
     /**
      * @var int One of the `PASSWORD_*` constants supplied to {@link password_hash()}.
      */

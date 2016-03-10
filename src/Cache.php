@@ -1,10 +1,10 @@
 <?php
-namespace Garden\Cache;
+namespace Garden;
 use \Garden\Exception as Exception;
 /**
 * 
 */
-abstract class Cache extends \Garden\Plugin
+abstract class Cache extends Plugin
 {
     const DEFAULT_LIFETIME = 3600;
 
@@ -30,7 +30,7 @@ abstract class Cache extends \Garden\Plugin
             return self::$instances[$driver];
         }
 
-        $driverClass = 'Garden\Cache\Driver\\'.ucfirst($driver);
+        $driverClass = 'Garden\Cache\\'.ucfirst($driver);
 
         if(!class_exists($driverClass)) {
             throw new Exception\Custom("Cache driver \"%s\" not found", array($driver));

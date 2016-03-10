@@ -10,14 +10,14 @@ namespace Garden\Password;
 /**
  * Implements tha password hashing algorithm from the Django framework.
  */
-class DjangoPassword implements IPassword {
+class Django implements Password {
     /**
      * @var string The hash method to use when hashing passwords.
      */
     public $hashMethod;
 
     /**
-     * Initiailize an instance of the {@link DjangoPassword} class.
+     * Initiailize an instance of the {@link Django} class.
      *
      * @param string $hashMethod The hasm method used to hash the passwords.
      */

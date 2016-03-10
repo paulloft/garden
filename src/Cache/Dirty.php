@@ -1,9 +1,9 @@
 <?php
-namespace Garden\Cache\Driver;
+namespace Garden\Cache;
 /**
 * 
 */
-class Dirty extends \Garden\Cache\Cache
+class Dirty extends \Garden\Cache
 {
     protected $config;
     protected $data = [];

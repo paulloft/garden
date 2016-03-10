@@ -20,12 +20,12 @@ class Gdn {
 
     public static function cache()
     {
-        return Cache\Cache::instance();
+        return Cache::instance();
     }
 
     public static function dirtyCache()
     {
-        return Cache\Cache::instance('dirty');
+        return Cache::instance('dirty');
     }
 
     public static function factory($className)

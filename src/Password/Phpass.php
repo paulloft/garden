@@ -13,7 +13,7 @@ namespace Garden\Password;
  * The code in this class is copied from the phppass library version 0.3 located at http://www.openwall.com/phpass/.
  * Any code copied from the phppass library is copyright the original owner.
  */
-class PhpassPassword implements IPassword {
+class Phpass implements Password {
     const HASH_PHPASS = 0x00;
     const HASH_BLOWFISH = 0x01;
     const HASH_EXTDES = 0x02;
@@ -32,7 +32,7 @@ class PhpassPassword implements IPassword {
      * @param int $hashMethod The hash method to use when hashing passwords.
      * @param int $iteration_count_log2 The number of times to iterate when generating the passwords.
      */
-    public function __construct($hashMethod = PhpassPassword::HASH_PHPASS, $iteration_count_log2 = 8) {
+    public function __construct($hashMethod = Phpass::HASH_PHPASS, $iteration_count_log2 = 8) {
         $this->itoa64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
         if ($iteration_count_log2 < 4 || $iteration_count_log2 > 31) {
@@ -328,7 +328,7 @@ class PhpassPassword implements IPassword {
      * Set the current hash method.
      *
      * @param int $hashMethod The new hash mathod.
-     * @return PhpassPassword Returns $this for fluent calls.
+     * @return Phpass Returns $this for fluent calls.
      */
     public function setHashMethod($hashMethod) {
         $this->hashMethod = $hashMethod;

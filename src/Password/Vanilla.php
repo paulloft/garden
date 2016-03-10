@@ -10,12 +10,12 @@ namespace Garden\Password;
 /**
  * Implements the default Vanilla password algorithm.
  */
-class VanillaPassword extends PhpassPassword {
+class Vanilla extends Phpass {
     /**
-     * Initialize an instance of the {@link VanillaPassword} class.
+     * Initialize an instance of the {@link Vanilla} class.
      */
     public function __construct() {
-        parent::__construct(PhpassPassword::HASH_BEST);
+        parent::__construct(Phpass::HASH_BEST);
     }
 
     /**

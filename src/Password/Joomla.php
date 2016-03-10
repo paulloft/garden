@@ -8,9 +8,9 @@
 namespace Garden\Password;
 
 /**
- * Implements the password hashing algorithm of Mybb.
+ * Implements the password hashing algorithm of Joomla.
  */
-class MybbPassword implements IPassword {
+class Joomla implements Password {
 
     /**
      * {@inheritdoc}
@@ -28,7 +28,7 @@ class MybbPassword implements IPassword {
      * @return string Returns the password hash.
      */
     protected function hashRaw($password, $salt) {
-        $calc_hash = md5(md5($salt).$password);
+        $calc_hash = md5($password.$salt);
 
         return $calc_hash;
     }

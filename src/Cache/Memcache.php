@@ -1,10 +1,10 @@
 <?php
-namespace Garden\Cache\Driver;
+namespace Garden\Cache;
 use \Garden\Exception as Exception;
 /**
 * 
 */
-class Memcache extends \Garden\Cache\Cache
+class Memcache extends \Garden\Cache
 {
     protected $lifetime;
 

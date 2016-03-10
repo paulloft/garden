@@ -15,7 +15,7 @@ namespace Garden\Password;
 /**
  * Implements phpBB's password hashing algorithm.
  */
-class PhpbbPassword implements IPassword {
+class Phpbb implements Password {
     const ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
     /**
@@ -41,7 +41,7 @@ class PhpbbPassword implements IPassword {
      * @return string The encypted password.
      */
     private function cryptPrivate($password, $setting) {
-        $itoa64 = PhpbbPassword::ITOA64;
+        $itoa64 = Phpbb::ITOA64;
         $output = '*';
 
         // Check for correct hash
@@ -96,7 +96,7 @@ class PhpbbPassword implements IPassword {
      * @return string The encoded string.
      */
     protected function encode64($input, $count) {
-        $itoa64 = PhpbbPassword::ITOA64;
+        $itoa64 = Phpbb::ITOA64;
         $output = '';
         $i = 0;
 
@@ -154,7 +154,7 @@ class PhpbbPassword implements IPassword {
      * @return string Returns the password salt prefixed with `$P$`.
      */
     private function gensaltPrivate($input) {
-        $itoa64 = PhpbbPassword::ITOA64;
+        $itoa64 = Phpbb::ITOA64;
 
         $output = '$H$';
         $output .= $itoa64[min(8 + ((PHP_VERSION >= '5') ? 5 : 3), 30)];

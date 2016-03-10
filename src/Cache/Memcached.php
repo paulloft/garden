@@ -1,5 +1,5 @@
 <?php
-namespace Garden\Cache\Driver;
+namespace Garden\Cache;
 use \Garden\Exception as Exception;
 /**
 * 

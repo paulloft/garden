@@ -1,6 +1,5 @@
 <?php 
 namespace Garden;
-use Garden\Db\DB;
 use Garden\Db\Database;
 
 /**

@@ -1,9 +1,9 @@
 <?php
-namespace Garden\Cache\Driver;
+namespace Garden\Cache;
 /**
 * 
 */
-class File extends \Garden\Cache\Cache
+class File extends \Garden\Cache
 {
     public $lifetime;
     public $cacheDir;

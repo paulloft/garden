@@ -5,12 +5,14 @@
  * @license MIT
  */
 
-namespace Garden;
+namespace Garden\Route;
+use Garden\Request;
+use Garden\Application;
 
 /**
  * A route that maps urls to callbacks.
  */
-class CallbackRoute extends Route {
+class Callback extends \Garden\Route {
     /// Properties ///
 
     /**

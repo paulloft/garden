@@ -5,7 +5,12 @@
  * @license MIT
  */
 
-namespace Garden;
+namespace Garden\Route;
+use Garden\Exception as Exception;
+use Garden\Request;
+use Garden\Application;
+use Garden\Addons;
+use Garden\Event;
 
 /**
  * Maps paths to controllers that act as RESTful resources.
@@ -16,7 +21,7 @@ namespace Garden;
  * - GET /controller -> index
  * - METHOD /controller/action -> methodAction
  */
-class ResourceRoute extends Route {
+class Resource extends \Garden\Route {
     protected $controllerPattern = '%sController';
 
     /**

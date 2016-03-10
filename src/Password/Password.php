@@ -10,7 +10,7 @@ namespace Garden\Password;
 /**
  * Defines the interface for classes that implement a secure password hashing algorithm.
  */
-interface IPassword {
+interface Password {
     /**
      * Hashes a plaintext password.
      *

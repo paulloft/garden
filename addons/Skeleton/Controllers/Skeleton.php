@@ -39,7 +39,7 @@ class Skeleton extends \Garden\Template
         $this->render('index');
     }
 
-    public function test($id, $bi = false)
+    public function test()
     {
 
         $tableModel = Model\Table::instance();
