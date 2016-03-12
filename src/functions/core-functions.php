@@ -179,7 +179,7 @@ function array_load($path) {
             $loaded = yaml_parse_file($path);
             break;
         default:
-            throw new InvalidArgumentException("Invalid config extension $ext on $path.", 500);
+            throw new \InvalidArgumentException("Invalid config extension $ext on $path.", 500);
     }
     return $loaded;
 }
@@ -970,4 +970,13 @@ function getInclude($path, $data = array()) {
     ob_end_clean();
 
     return $result;
+}
+
+function redirect($url, $code = 302) {
+    $host = Garden\Request::current()->getHost();
+    $scheme = Garden\Request::current()->getScheme();
+
+    header("Location: $scheme://$host$url");
+
+    exit;
 }
