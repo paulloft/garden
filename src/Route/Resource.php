@@ -82,7 +82,8 @@ class Resource extends \Garden\Route {
                 // At least one method was allowed for this action so throw an exception.
                 throw new Exception\MethodNotAllowed($method, $allowed);
             } else {
-                throw new Exception\NotFound();
+                // not found
+                throw new Exception\Pass;
             }
         }
 
@@ -92,7 +93,7 @@ class Resource extends \Garden\Route {
         $actionParams = $actionMethod->getParameters();
 
         if(!$actionMethod->isPublic()) {
-            throw new Exception\NotFound();
+            throw new Exception\Pass;
         }
 
         // Fill in missing default parameters.
