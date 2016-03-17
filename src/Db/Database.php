@@ -411,6 +411,11 @@ abstract class Database
         return $this->_config['tablePrefix'];
     }
 
+    public function encoding()
+    {
+        return $this->_config['charset'];
+    }
+
     /**
      * Quote a value for an SQL query.
      *

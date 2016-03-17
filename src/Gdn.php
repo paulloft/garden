@@ -13,6 +13,11 @@ class Gdn {
         return Db\Database::instance($name, $config);
     }
 
+    public static function structure($name)
+    {
+        return Db\Structure::instance($name);
+    }
+
     public static function app()
     {
         return self::factory('Application');
