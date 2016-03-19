@@ -28,6 +28,11 @@ class Gdn {
         return Cache::instance();
     }
 
+    public static function request()
+    {
+        return Request::current();
+    }
+
     public static function dirtyCache()
     {
         return Cache::instance('dirty');

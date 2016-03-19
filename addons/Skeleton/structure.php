@@ -1,50 +1,50 @@
 <?php
 namespace Addons\Skeleton;
 use Garden\Gdn;
-$Construct = Gdn::Structure();
+$construct = Gdn::structure();
 
 // User Table
-$Construct->Table('User');
+$construct->table('User');
 
-$Explicit = true; 
-$Drop = false;
+$explicit = true; 
+$drop = false;
 
-$Construct
-    ->PrimaryKey('UserID')
-    ->Column('Name', 'varchar(50)', true, 'key')
-    ->Column('Password', 'varbinary(100)') // keep this longer because of some imports.
-    ->Column('HashMethod', 'varchar(10)', TRUE)
-    ->Column('Photo', 'varchar(255)', NULL)
-    ->Column('Title', 'varchar(100)', NULL)
-    ->Column('Location', 'varchar(100)', NULL)
-    ->Column('About', 'text', TRUE)
-    ->Column('Email', 'varchar(200)', FALSE, 'index')
-    ->Column('ShowEmail', 'tinyint(1)', '0')
-    ->Column('Gender', array('u', 'm', 'f'), 'u')
-    ->Column('CountVisits', 'int', '0')
-    ->Column('CountInvitations', 'int', '0')
-    ->Column('CountNotifications', 'int', NULL)
-    ->Column('InviteUserID', 'int', TRUE)
-    ->Column('DiscoveryText', 'text', TRUE)
-    ->Column('Preferences', 'text', TRUE)
-    ->Column('Permissions', 'text', TRUE)
-    ->Column('Attributes', 'text', TRUE)
-    ->Column('DateSetInvitations', 'datetime', TRUE)
-    ->Column('DateOfBirth', 'datetime', TRUE)
-    ->Column('DateFirstVisit', 'datetime', TRUE)
-    ->Column('DateLastActive', 'datetime', TRUE, 'index')
-    ->Column('LastIPAddress', 'varchar(15)', TRUE)
-    ->Column('AllIPAddresses', 'varchar(100)', TRUE)
-    ->Column('DateInserted', 'datetime', FALSE, 'index')
-    ->Column('InsertIPAddress', 'varchar(15)', TRUE)
-    ->Column('DateUpdated', 'datetime', TRUE)
-    ->Column('UpdateIPAddress', 'varchar(15)', TRUE)
-    ->Column('HourOffset', 'int', '0')
-    ->Column('Score', 'float', NULL)
-    ->Column('Admin', 'tinyint(1)', '0')
-    ->Column('Confirmed', 'tinyint(1)', '1') // 1 means email confirmed, otherwise not confirmed
-    ->Column('Verified', 'tinyint(1)', '0') // 1 means verified (non spammer), otherwise not verified
-    ->Column('Banned', 'tinyint(1)', '0') // 1 means banned, otherwise not banned
-    ->Column('Deleted', 'tinyint(1)', '0')
-    ->Column('Points', 'int', 0)
-    ->Set($Explicit, $Drop);
+$construct
+    ->primaryKey('userID')
+    ->column('name', 'varchar(50)', true, 'key')
+    ->column('password', 'varbinary(100)') // keep this longer because of some imports.
+    ->column('hashMethod', 'varchar(10)', true)
+    ->column('photo', 'varchar(255)', null)
+    ->column('title', 'varchar(100)', null)
+    ->column('location', 'varchar(100)', null)
+    ->column('about', 'text', true)
+    ->column('email', 'varchar(200)', false, 'index')
+    ->column('showEmail', 'tinyint(1)', '0')
+    ->column('gender', array('u', 'm', 'f'), 'u')
+    ->column('countVisits', 'int', '0')
+    ->column('countInvitations', 'int', '0')
+    ->column('countNotifications', 'int', null)
+    ->column('inviteUserid', 'int', true)
+    ->column('discoverytext', 'text', true)
+    ->column('preferences', 'text', true)
+    ->column('permissions', 'text', true)
+    ->column('attributes', 'text', true)
+    ->column('dateSetInvitations', 'datetime', true)
+    ->column('dateOfBirth', 'datetime', true)
+    ->column('dateFirstVisit', 'datetime', true)
+    ->column('dateLastaCtive', 'datetime', true, 'index')
+    ->column('lastIpAddress', 'varchar(15)', true)
+    ->column('allIpAddresses', 'varchar(100)', true)
+    ->column('dateInserted', 'datetime', false, 'index')
+    ->column('insertIpAddress', 'varchar(15)', true)
+    ->column('dateUpdated', 'datetime', true)
+    ->column('updateIpAddress', 'varchar(15)', true)
+    ->column('hourOffset', 'int', '0')
+    ->column('score', 'float', null)
+    ->column('admin', 'tinyint(1)', '0')
+    ->column('confirmed', 'tinyint(1)', '1') // 1 means email confirmed, otherwise not confirmed
+    ->column('verified', 'tinyint(1)', '0') // 1 means verified (non spammer), otherwise not verified
+    ->column('banned', 'tinyint(1)', '0') // 1 means banned, otherwise not banned
+    ->column('deleted', 'tinyint(1)', '0')
+    ->column('points', 'int', 0)
+    ->set($explicit, $drop);

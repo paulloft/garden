@@ -250,7 +250,7 @@ class MySQL extends \Garden\Db\Structure {
         
         $Sql .= ';';
 
-        $Result = $this->Query($Sql, Database::SELECT);
+        $Result = $this->Query($Sql);
         $this->Reset();
         
         return $Result;
@@ -432,8 +432,11 @@ class MySQL extends \Garden\Db\Structure {
 
                 // This column name is not in the existing column collection, so add the column
                 $AddColumnSql = 'add '.$this->_DefineColumn(val($ColumnName, $this->_Columns));
-                if($PrevColumnName !== FALSE)
+                if($PrevColumnName !== FALSE) {
                     $AddColumnSql .= " after `$PrevColumnName`";
+                } else {
+                    $AddColumnSql .= " first";
+                }
                 
                 $AlterSql[] = $AddColumnSql;
 
@@ -482,23 +485,25 @@ class MySQL extends \Garden\Db\Structure {
         foreach($Indexes as $Name => $Sql) {
             if(array_key_exists($Name, $IndexesDb)) {
                 if($Indexes[$Name] != $IndexesDb[$Name]) {
-                    if($Name == 'PRIMARY')
-                        $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
-                    else
+                    if($Name !== 'PRIMARY')
+                    //     $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
+                    // else
                         $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
                     $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";
                 }
                 unset($IndexesDb[$Name]);
             } else {
-                $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";    
+                if($Name !== 'PRIMARY') {
+                    $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";    
+                }
             }
         }
         // Go through the indexes to drop.
         if($Explicit) {
             foreach($IndexesDb as $Name => $Sql) {
-                if($Name == 'PRIMARY')
-                    $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
-                else
+                if($Name !== 'PRIMARY')
+                //     $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
+                // else
                     $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
             }
         }
@@ -554,7 +559,7 @@ class MySQL extends \Garden\Db\Structure {
             $Return .= " default ".self::_QuoteValue($Column->Default);
 
         if ($Column->AutoIncrement)
-            $Return .= ' auto_increment';
+            $Return .= ' auto_increment primary key';
 
         return $Return;
     }

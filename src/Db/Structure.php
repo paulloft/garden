@@ -194,7 +194,7 @@ abstract class Structure {
         foreach ($KeyTypes as $KeyType1) {
             $Parts = explode('.', $KeyType1, 2);
             
-            if (in_array($Parts[0], array('primary', 'key', 'index', 'unique', 'fulltext', FALSE)))
+            if (in_array($Parts[0], array('key', 'index', 'unique', 'fulltext', FALSE)))
                 $KeyTypes1[] = $KeyType1;
         }
         if (count($KeyTypes1) == 0)
@@ -331,8 +331,8 @@ abstract class Structure {
      * @param string $Type The data type of the column.
      * @return Gdn_DatabaseStructure $this.
      */
-    public function PrimaryKey($Name, $Type = 'int') {
-        $Column = $this->_CreateColumn($Name, $Type, FALSE, NULL, 'primary');
+    public function PrimaryKey($Name, $Type = 'int(10)') {
+        $Column = $this->_CreateColumn($Name, $Type, FALSE, NULL);
         $Column->AutoIncrement = TRUE;
         $this->_Columns[$Name] = $Column;
         
