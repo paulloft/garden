@@ -1,7 +1,7 @@
 <?php
 namespace Garden\Db\Structure;
-use \Garden\Db\Database;
 use \Garden\Exception as Exception;
+use \Garden\Db\Database;
 /**
  * MySQL structure driver
  * 
@@ -20,6 +20,10 @@ class MySQL extends \Garden\Db\Structure {
     
     public function __construct($Database = NULL) {
         parent::__construct($Database);
+    }
+
+    protected function _query($sql) {
+        return $this->Database->Query(Database::SELECT, $sql, true);
     }
 
     /**
@@ -47,7 +51,7 @@ class MySQL extends \Garden\Db\Structure {
         static $ViableEngines = NULL;
 
         if ($ViableEngines === NULL) {
-            $EngineList = $this->Database->Query(Database::SELECT, "SHOW ENGINES;");
+            $EngineList = $this->_query("SHOW ENGINES;");
             $ViableEngines = array();
             while ($StorageEngine = $EngineList->get('Engine')) {
                 $EngineName = strtolower($StorageEngine);
@@ -89,11 +93,7 @@ class MySQL extends \Garden\Db\Structure {
             $this->_TableName = $TableName;
 
         // Get the schema for this table
-        $OldPrefix = $this->Database->DatabasePrefix;
-        $this->Database->DatabasePrefix = $this->_DatabasePrefix;
-        $Schema = $this->Database->SQL()->FetchTableSchema($this->_TableName);
-        $this->Database->DatabasePrefix = $OldPrefix;
-
+        $Schema = $this->getColumns($this->_TableName);
         // Get the definition for this column
         $OldColumn = val($OldName, $Schema);
         $NewColumn = val($NewName, $Schema);
@@ -138,19 +138,13 @@ class MySQL extends \Garden\Db\Structure {
      * @param string $Query The actual query to create as the view. Typically
      * this can be generated with the $Database object.
      */
-    public function View($Name, $SQL) {
-        if(is_string($SQL)) {
-            $SQLString = $SQL;
-            $SQL = NULL;
-        } else {
-            $SQLString = $SQL->GetSelect();
-        }
-        
-        $Result = $this->Query('create or replace view '.$this->_DatabasePrefix.$Name." as \n".$SQLString);
-        if(!is_null($SQL)) {
-            $SQL->Reset();
-        }
+    public function View($Name, $sql) {
+        $this->Query('create or replace view '.$this->_DatabasePrefix.$Name." as \n".$sql);
     }
+
+    public static function alphaNumeric($string) {
+        return preg_replace('/([^\w\d_-])/', '', $string);
+    } 
 
     /**
      * Creates the table defined with $this->Table() and $this->Column().
@@ -164,7 +158,7 @@ class MySQL extends \Garden\Db\Structure {
         $Keys = '';
         $Sql = '';
         
-        $ForceDatabaseEngine = C('Database.ForceStorageEngine');
+        $ForceDatabaseEngine = c('database.forceStorageEngine');
         if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
             $this->_TableStorageEngine = $ForceDatabaseEngine;
             $AllowFullText = $this->_SupportsFulltext();
@@ -200,10 +194,10 @@ class MySQL extends \Garden\Db\Structure {
             $Keys .= ",\nprimary key (`".implode('`, `', $PrimaryKey)."`)";
         // Build unique keys.
         if (count($UniqueKey) > 0)
-            $Keys .= ",\nunique index `".Gdn_Format::AlphaNumeric('UX_'.$this->_TableName).'` (`'.implode('`, `', $UniqueKey)."`)";
+            $Keys .= ",\nunique index `".$this->AlphaNumeric('UX_'.$this->_TableName).'` (`'.implode('`, `', $UniqueKey)."`)";
         // Build full text index.
         if (count($FullTextKey) > 0)
-            $Keys .= ",\nfulltext index `".Gdn_Format::AlphaNumeric('TX_'.$this->_TableName).'` (`'.implode('`, `', $FullTextKey)."`)";
+            $Keys .= ",\nfulltext index `".$this->AlphaNumeric('TX_'.$this->_TableName).'` (`'.implode('`, `', $FullTextKey)."`)";
         // Build the rest of the keys.
         foreach ($Indexes as $IndexType => $IndexGroups) {
             $CreateString = val($IndexType, array('FK' => 'key', 'IX' => 'index'));
@@ -237,7 +231,7 @@ class MySQL extends \Garden\Db\Structure {
             if ($HasFulltext)
                 $this->_TableStorageEngine = 'myisam';
             else
-                $this->_TableStorageEngine = C('Database.DefaultStorageEngine', 'innodb');
+                $this->_TableStorageEngine = c('database.storageEngine', 'innodb');
             
             if (!$this->HasEngine($this->_TableStorageEngine)) {
                 $this->_TableStorageEngine = 'myisam';
@@ -250,13 +244,13 @@ class MySQL extends \Garden\Db\Structure {
         if ($this->_CharacterEncoding !== FALSE && $this->_CharacterEncoding != '')
             $Sql .= ' default character set '.$this->_CharacterEncoding;
             
-        if (array_key_exists('Collate', $this->Database->ExtendedProperties)) {
-            $Sql .= ' collate ' . $this->Database->ExtendedProperties['Collate'];
-        }
+        // if (array_key_exists('Collate', $this->Database->ExtendedProperties)) {
+        //     $Sql .= ' collate ' . $this->Database->ExtendedProperties['Collate'];
+        // }
         
         $Sql .= ';';
 
-        $Result = $this->Query($Sql);
+        $Result = $this->Query($Sql, Database::SELECT);
         $this->Reset();
         
         return $Result;
@@ -322,7 +316,7 @@ class MySQL extends \Garden\Db\Structure {
 
     protected function _IndexSqlDb() {
         // We don't want this to be captured so send it directly.
-        $Data = $this->Database->Query(Database::SELECT, 'show indexes from '.$this->_DatabasePrefix.$this->_TableName);
+        $Data = $this->_query('show indexes from '.$this->_DatabasePrefix.$this->_TableName);
         
         $Result = array();    
         foreach($Data as $Row) {
@@ -399,7 +393,7 @@ class MySQL extends \Garden\Db\Structure {
         $AlterSqlPrefix = 'alter table `'.$this->_DatabasePrefix.$this->_TableName."`\n";
         
         // 2. Alter the table storage engine.
-        $ForceDatabaseEngine = C('Database.ForceStorageEngine');
+        $ForceDatabaseEngine = c('database.forceStorageEngine', false);
         if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
             $this->_TableStorageEngine = $ForceDatabaseEngine;
         }
@@ -407,9 +401,9 @@ class MySQL extends \Garden\Db\Structure {
         $IndexesDb = $this->_IndexSqlDb();
 
         if($this->_TableStorageEngine) {
-			$CurrentEngine = $this->Database->Query(Database::SELECT, "show table status where name = '".$this->_DatabasePrefix.$this->_TableName."'")->Value('Engine');
+            $CurrentEngine = $this->_query("show table status where name = '".$this->_DatabasePrefix.$this->_TableName."'")->Value('Engine');
 
-			if(strcasecmp($CurrentEngine, $this->_TableStorageEngine)) {
+            if(strcasecmp($CurrentEngine, $this->_TableStorageEngine)) {
                 // Check to drop a fulltext index if we don't support it.
                 if (!$this->_SupportsFulltext()) {
                     foreach ($IndexesDb as $IndexName => $IndexSql) {
@@ -421,10 +415,10 @@ class MySQL extends \Garden\Db\Structure {
                     }
                 }
 
-				$EngineQuery = $AlterSqlPrefix.' engine = '.$this->_TableStorageEngine;
-				if (!$this->Query($EngineQuery))
-					throw new Exception\Custom(t('Failed to alter the storage engine of table `%1$s` to `%2$s`.'), array($this->_DatabasePrefix.$this->_TableName, $this->_TableStorageEngine));
-			}
+                $EngineQuery = $AlterSqlPrefix.' engine = '.$this->_TableStorageEngine;
+                if (!$this->Query($EngineQuery))
+                    throw new Exception\Custom(t('Failed to alter the storage engine of table `%1$s` to `%2$s`.'), array($this->_DatabasePrefix.$this->_TableName, $this->_TableStorageEngine));
+            }
         }
         
         // 3. Add new columns & modify existing ones
@@ -444,13 +438,13 @@ class MySQL extends \Garden\Db\Structure {
                 $AlterSql[] = $AddColumnSql;
 
             } else {
-				$ExistingColumn = $ExistingColumns[$ColumnName];
+                $ExistingColumn = $ExistingColumns[$ColumnName];
 
                 $ExistingColumnDef = $this->_DefineColumn($ExistingColumn);
                 $ColumnDef = $this->_DefineColumn($Column);
                 $Comment = "/* Existing: $ExistingColumnDef, New: $ColumnDef */\n";
                 
-				if ($ExistingColumnDef != $ColumnDef) {  
+                if ($ExistingColumnDef != $ColumnDef) {  
                     // The existing & new column types do not match, so modify the column.
                     $ChangeSql = $Comment.'change `'.$ColumnName.'` '.$this->_DefineColumn(val($ColumnName, $this->_Columns));
                     $AlterSql[] = $ChangeSql;
@@ -471,7 +465,7 @@ class MySQL extends \Garden\Db\Structure {
                         $AdditionalSql[$Description] = $Sql;
 
                     }
-				}
+                }
             }
             $PrevColumnName = $ColumnName;
         }

@@ -1,6 +1,7 @@
 <?php
 namespace Garden\Db;
 use \Garden\Exception as Exception;
+use \Garden\Db\Database;
 use \Garden\Gdn;
 /**
  * Database Structure tools
@@ -16,7 +17,7 @@ use \Garden\Gdn;
 
 abstract class Structure {
 
-	 protected $_DatabasePrefix = '';
+     protected $_DatabasePrefix = '';
 
     /**
      * Whether or not to only capture the sql, rather than execute it.
@@ -226,10 +227,10 @@ abstract class Structure {
     }
     
     /**
-	 * And associative array of $ColumnName => $ColumnProperties columns for the table.
-	 * @return array
-	 */
-	public function Columns($Name = '') {
+     * And associative array of $ColumnName => $ColumnProperties columns for the table.
+     * @return array
+     */
+    public function Columns($Name = '') {
         if (strlen($Name) > 0) {
             if (array_key_exists($Name, $this->_Columns))
                 return $this->_Columns[$Name];
@@ -241,39 +242,39 @@ abstract class Structure {
                 return NULL;
             }
         }
-		return $this->_Columns;
-	}
+        return $this->_Columns;
+    }
 
-	/** Return the definition string for a column.
-	 * @param mixed $Column The column to get the type string from.
-	 *  - <b>object</b>: The column as returned by the database schema. The properties looked at are Type, Length, and Precision.
-	 *  - <b>string</b<: The name of the column currently in this structure.
-	 * * @return string The type definition string.
-	 */
-	public function ColumnTypeString($Column) {
-		if(is_string($Column))
-			$Column = $this->_Columns[$Column];
-		
-		$Type = val('Type', $Column);
-		$Length = val('Length', $Column);
-		$Precision = val('Precision', $Column);
+    /** Return the definition string for a column.
+     * @param mixed $Column The column to get the type string from.
+     *  - <b>object</b>: The column as returned by the database schema. The properties looked at are Type, Length, and Precision.
+     *  - <b>string</b<: The name of the column currently in this structure.
+     * * @return string The type definition string.
+     */
+    public function ColumnTypeString($Column) {
+        if(is_string($Column))
+            $Column = $this->_Columns[$Column];
+        
+        $Type = val('Type', $Column);
+        $Length = val('Length', $Column);
+        $Precision = val('Precision', $Column);
 
-		if(in_array(strtolower($Type), array('tinyint', 'smallint', 'mediumint', 'int', 'float', 'double')))
-			$Length = NULL;
+        if(in_array(strtolower($Type), array('tinyint', 'smallint', 'mediumint', 'int', 'float', 'double')))
+            $Length = NULL;
 
-		if($Type && $Length && $Precision)
-			$Result = "$Type($Length, $Precision)";
-		elseif($Type && $Length)
-			$Result = "$Type($Length)";
+        if($Type && $Length && $Precision)
+            $Result = "$Type($Length, $Precision)";
+        elseif($Type && $Length)
+            $Result = "$Type($Length)";
         elseif(strtolower($Type) == 'enum') {
             $Result = val('Enum', $Column, array());
-		} elseif($Type)
-			$Result = $Type;
-		else
-			$Result = 'int';
+        } elseif($Type)
+            $Result = $Type;
+        else
+            $Result = 'int';
 
-		return $Result;
-	}
+        return $Result;
+    }
 
     /**
      * Gets and/or sets the database prefix.
@@ -309,19 +310,19 @@ abstract class Structure {
     }
 
 
-	/** Load the schema for this table from the database.
-	 * @param string $TableName The name of the table to get or blank to get the schema for the current table.
-	 * @return Gdn_DatabaseStructure $this
-	 */
-	public function Get($TableName = '') {
-		if($TableName)
-			$this->Table($TableName);
+    /** Load the schema for this table from the database.
+     * @param string $TableName The name of the table to get or blank to get the schema for the current table.
+     * @return Gdn_DatabaseStructure $this
+     */
+    public function Get($TableName = '') {
+        if($TableName)
+            $this->Table($TableName);
 
-		$Columns = $this->Database->list_columns($this->_TableName);
-		$this->_Columns = $Columns;
+        $Columns = $this->getColumns($this->_TableName);
+        $this->_Columns = $Columns;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Defines a primary key column on a table.
@@ -337,24 +338,23 @@ abstract class Structure {
         
         return $this;
     }
-	
-	/**
-	 * Send a query to the database and return the result.
-	 * @param string $Sql The sql to execute.
-	 * @return bool Whethor or not the query succeeded.
-	 */
-	public function Query($Sql) {
-		if($this->CaptureOnly) {
-			if(!property_exists($this->Database, 'CapturedSql')) {
-				$this->Database->CapturedSql = array();
+    
+    /**
+     * Send a query to the database and return the result.
+     * @param string $Sql The sql to execute.
+     * @return bool Whethor or not the query succeeded.
+     */
+    public function Query($Sql, $type = Database::INSERT) {
+        if($this->CaptureOnly) {
+            if(!property_exists($this->Database, 'CapturedSql')) {
+                $this->Database->CapturedSql = array();
             }
-			$this->Database->CapturedSql[] = $Sql;
-			return TRUE;
-		} else {
-			$Result = $this->Database->Query(Database::SELECT, $Sql);
-			return $Result;
-		}
-	}
+            $this->Database->CapturedSql[] = $Sql;
+            return TRUE;
+        } else {
+            return $this->Database->Query($type, $Sql);
+        }
+    }
     
     /**
      * Renames a column in $this->Table().
@@ -429,9 +429,9 @@ abstract class Structure {
      * @param string $CharacterEncoding The default character encoding to specify for this table.
      */
     public function Table($Name = '', $CharacterEncoding = '') {
-		if(!$Name)
-			return $this->_TableName;
-		
+        if(!$Name)
+            return $this->_TableName;
+        
         $this->_TableName = $Name;
         if ($CharacterEncoding == '')
             $CharacterEncoding = $this->Database->encoding();
@@ -525,13 +525,62 @@ abstract class Structure {
         trigger_error(ErrorMessage('The selected database engine does not perform the requested task.', $this->ClassName, '_Create'), E_USER_ERROR);
     }
 
+    protected function getKeyType($key) {
+        switch ($key) {
+            case 'PRI':
+                return 'primary';
+                break;
+            case 'UNI':
+                return 'uniqid';
+                break;
+            case 'MUL':
+                return 'index';
+                break;
+            
+            default:
+                return false;
+                break;
+        }
+    }
+
+    protected function getColumns($table)
+    {
+        $columns = $this->Database->list_columns($this->_TableName);
+
+        $result = array();
+        foreach ($columns as $name => $column) {
+            if(is_string($column->type) && strncasecmp($column->type, 'u', 1) == 0) {
+                $Unsigned = TRUE;
+            } else {
+                $Unsigned = FALSE;
+            }
+
+            $obj = new \stdClass();
+            $obj->Name = $column->name;
+            $obj->Type = $column->dataType;
+            $obj->Length = $column->length;
+            $obj->Precision = '';
+            $obj->Enum = val('options', $column);
+            $obj->AllowNull = $column->allowNull;
+            $obj->Default = $column->default;
+            $obj->KeyType = $this->getKeyType($column->key);
+            $obj->Unsigned = $Unsigned;
+            $obj->AutoIncrement = $column->autoIncrement;
+
+            $result[$name] = $obj;
+        }
+
+        return $result;
+    }
+
+
     /** Gets the column definitions for the columns in the database.
      * @return array
      */
     public function ExistingColumns() {
         if($this->_ExistingColumns === NULL) {
             if($this->TableExists())
-                $this->_ExistingColumns = $this->Database->list_columns($this->_TableName);
+                $this->_ExistingColumns = $this->getColumns($this->_TableName);
             else
                 $this->_ExistingColumns = array();
         }
@@ -559,6 +608,6 @@ abstract class Structure {
         $this->_TableName = '';
         $this->_TableStorageEngine = NULL;
 
-		return $this;
+        return $this;
     }
 }

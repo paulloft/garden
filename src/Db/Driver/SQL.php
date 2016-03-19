@@ -10,7 +10,7 @@ abstract class SQL extends Database {
     {
         static $types = array
         (
-            'blob'                      => array('type' => 'string', 'binary' => TRUE, 'character_maximum_length' => '65535'),
+            'blob'                      => array('type' => 'string', 'binary' => TRUE, 'maxLength' => '65535'),
             'bool'                      => array('type' => 'bool'),
             'bigint unsigned'           => array('type' => 'int', 'min' => '0', 'max' => '18446744073709551615'),
             'datetime'                  => array('type' => 'string'),
@@ -25,12 +25,12 @@ abstract class SQL extends Database {
             'geometry'                  => array('type' => 'string', 'binary' => TRUE),
             'int unsigned'              => array('type' => 'int', 'min' => '0', 'max' => '4294967295'),
             'integer unsigned'          => array('type' => 'int', 'min' => '0', 'max' => '4294967295'),
-            'longblob'                  => array('type' => 'string', 'binary' => TRUE, 'character_maximum_length' => '4294967295'),
-            'longtext'                  => array('type' => 'string', 'character_maximum_length' => '4294967295'),
-            'mediumblob'                => array('type' => 'string', 'binary' => TRUE, 'character_maximum_length' => '16777215'),
+            'longblob'                  => array('type' => 'string', 'binary' => TRUE, 'maxLength' => '4294967295'),
+            'longtext'                  => array('type' => 'string', 'maxLength' => '4294967295'),
+            'mediumblob'                => array('type' => 'string', 'binary' => TRUE, 'maxLength' => '16777215'),
             'mediumint'                 => array('type' => 'int', 'min' => '-8388608', 'max' => '8388607'),
             'mediumint unsigned'        => array('type' => 'int', 'min' => '0', 'max' => '16777215'),
-            'mediumtext'                => array('type' => 'string', 'character_maximum_length' => '16777215'),
+            'mediumtext'                => array('type' => 'string', 'maxLength' => '16777215'),
             'national varchar'          => array('type' => 'string'),
             'numeric unsigned'          => array('type' => 'float', 'exact' => TRUE, 'min' => '0'),
             'nvarchar'                  => array('type' => 'string'),
@@ -38,11 +38,11 @@ abstract class SQL extends Database {
             'real unsigned'             => array('type' => 'float', 'min' => '0'),
             'set'                       => array('type' => 'string'),
             'smallint unsigned'         => array('type' => 'int', 'min' => '0', 'max' => '65535'),
-            'text'                      => array('type' => 'string', 'character_maximum_length' => '65535'),
-            'tinyblob'                  => array('type' => 'string', 'binary' => TRUE, 'character_maximum_length' => '255'),
+            'text'                      => array('type' => 'string', 'maxLength' => '65535'),
+            'tinyblob'                  => array('type' => 'string', 'binary' => TRUE, 'maxLength' => '255'),
             'tinyint'                   => array('type' => 'int', 'min' => '-128', 'max' => '127'),
             'tinyint unsigned'          => array('type' => 'int', 'min' => '0', 'max' => '255'),
-            'tinytext'                  => array('type' => 'string', 'character_maximum_length' => '255'),
+            'tinytext'                  => array('type' => 'string', 'maxLength' => '255'),
             'year'                      => array('type' => 'string'),
         );
 
@@ -98,59 +98,60 @@ abstract class SQL extends Database {
         {
             list($type, $length) = $this->_parse_type($row['Type']);
 
-            $column = $this->datatype($type);
+            $column = (object)$this->datatype($type);
 
-            $column['column_name']      = $row['Field'];
-            $column['column_default']   = $row['Default'];
-            $column['data_type']        = $type;
-            $column['is_nullable']      = ($row['Null'] == 'YES');
-            $column['ordinal_position'] = ++$count;
+            $column->name      = $row['Field'];
+            $column->default   = $row['Default'];
+            $column->dataType  = $type;
+            $column->allowNull = ($row['Null'] == 'YES');
+            $column->position  = ++$count;
+            $column->length    = $length;
 
-            switch ($column['type'])
+            switch ($column->type)
             {
                 case 'float':
                     if (isset($length))
                     {
-                        list($column['numeric_precision'], $column['numeric_scale']) = explode(',', $length);
+                        list($column->numPrecision, $column->numScale) = explode(',', $length);
                     }
                 break;
                 case 'int':
                     if (isset($length))
                     {
                         // MySQL attribute
-                        $column['display'] = $length;
+                        $column->length = $length;
                     }
                 break;
                 case 'string':
-                    switch ($column['data_type'])
+                    switch ($column->dataType)
                     {
                         case 'binary':
                         case 'varbinary':
-                            $column['character_maximum_length'] = $length;
+                            $column->maxLength = $length;
                         break;
                         case 'char':
                         case 'varchar':
-                            $column['character_maximum_length'] = $length;
+                            $column->maxLength = $length;
                         case 'text':
                         case 'tinytext':
                         case 'mediumtext':
                         case 'longtext':
-                            $column['collation_name'] = $row['Collation'];
+                            $column->collation = $row['Collation'];
                         break;
                         case 'enum':
                         case 'set':
-                            $column['collation_name'] = $row['Collation'];
-                            $column['options'] = explode('\',\'', substr($length, 1, -1));
+                            $column->collation = $row['Collation'];
+                            $column->options = explode('\',\'', substr($length, 1, -1));
                         break;
                     }
                 break;
             }
 
             // MySQL attributes
-            $column['comment']      = $row['Comment'];
-            $column['extra']        = $row['Extra'];
-            $column['key']          = $row['Key'];
-            $column['privileges']   = $row['Privileges'];
+            $column->comment       = $row['Comment'];
+            $column->autoIncrement = strpos($row['Extra'], 'auto_increment') === FALSE ? FALSE : TRUE;;
+            $column->key           = $row['Key'];
+            $column->privileges    = $row['Privileges'];
 
             $columns[$row['Field']] = $column;
         }

@@ -41,12 +41,19 @@ class Skeleton extends \Garden\Template
 
     public function structure()
     {
-        // $structure = Gdn::database()->list_columns('map_tooth');
-        // d($structure);
-        $s = Gdn::structure();
-        $s->CaptureOnly = 1;
+        $this->pageInit();
+        $this->title('Structure update');
+
+        $structure = Gdn::structure();
+        $structure->CaptureOnly = 1;
         include PATH_ADDONS.'/Skeleton/structure.php';
-        d($s->Database->CapturedSql);
+
+        $capture = $structure->Database->CapturedSql;
+        // d($capture);
+
+        $this->setData('capturedSql', $capture);
+
+        $this->render();
     }
 
     public function test()
