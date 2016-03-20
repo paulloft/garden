@@ -13,7 +13,7 @@ class Gdn {
         return Db\Database::instance($name, $config);
     }
 
-    public static function structure($name)
+    public static function structure($name = false)
     {
         return Db\Structure::instance($name);
     }

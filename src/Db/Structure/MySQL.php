@@ -16,565 +16,511 @@ use \Garden\Db\Database;
  */
 
 class MySQL extends \Garden\Db\Structure {
-    /// Constructor ///
-    
-    public function __construct($Database = NULL) {
-        parent::__construct($Database);
+
+    public function __construct($database = null) {
+        parent::__construct($database);
     }
 
-    protected function _query($sql) {
-        return $this->Database->Query(Database::SELECT, $sql, true);
+    public function dropTable() {
+        if($this->tableExists()) {
+            return $this->query('drop table `'.$this->_prefix.$this->_table.'`');
+        }
     }
 
-    /**
-     * Drops $this->Table() from the database.
-     */
-    public function Drop() {
-        if($this->TableExists())
-            return $this->Query('drop table `'.$this->_DatabasePrefix.$this->_TableName.'`');
-    }
-
-    /**
-     * Drops $Name column from $this->Table().
-     *
-     * @param string $Name The name of the column to drop from $this->Table().
-     * @return boolean
-     */
-    public function DropColumn($Name) {
-        if (!$this->Query('alter table `'.$this->_DatabasePrefix.$this->_TableName.'` drop column `'.$Name.'`'))
-            throw new Exception\Custom(t('Failed to remove the `%1$s` column from the `%2$s` table.'), array($Name, $this->_DatabasePrefix.$this->_TableName));
-
-        return TRUE;
-    }
-
-    public function HasEngine($Engine) {
-        static $ViableEngines = NULL;
-
-        if ($ViableEngines === NULL) {
-            $EngineList = $this->_query("SHOW ENGINES;");
-            $ViableEngines = array();
-            while ($StorageEngine = $EngineList->get('Engine')) {
-                $EngineName = strtolower($StorageEngine);
-                $ViableEngines[$EngineName] = TRUE;
-                $EngineList->next();
-            }
+    public function dropColumn($name) {
+        if (!$this->query('alter table `'.$this->_prefix.$this->_table.'` drop column `'.$name.'`')) {
+            throw new Exception\Custom(t('Failed to remove the `%1$s` column from the `%2$s` table.'), array($name, $this->_prefix.$this->_table));
         }
 
-        if (array_key_exists($Engine, $ViableEngines))
-            return TRUE;
-        else
-            return FALSE;
+        return true;
     }
-    
-    public function Engine($Engine, $CheckAvailability=TRUE) {
-        $Engine = strtolower($Engine);
-        
-        
-        if ($CheckAvailability) {
-            if (!$this->HasEngine($Engine))
-                return $this;
-        }
-        
-        $this->_TableStorageEngine = $Engine;
-        return $this;
-    }
-    
-    /**
-     * Renames a column in $this->Table().
-     *
-     * @param string $OldName The name of the column to be renamed.
-     * @param string $NewName The new name for the column being renamed.
-     * @param string $TableName
-     * @return boolean
-     * @todo $TableName needs a description.
-     */
-    public function RenameColumn($OldName, $NewName, $TableName = '') {
-        if ($TableName != '')
-            $this->_TableName = $TableName;
+
+    public function renameColumn($oldname, $newname, $tablename = '') {
+        if ($tablename != '') $this->_table = $tablename;
 
         // Get the schema for this table
-        $Schema = $this->getColumns($this->_TableName);
-        // Get the definition for this column
-        $OldColumn = val($OldName, $Schema);
-        $NewColumn = val($NewName, $Schema);
+        $schema = $this->getColumns($this->_table);
+        $oldColumn = val($oldname, $schema);
+        $newColumn = val($newname, $schema);
 
         // Make sure that one column, or the other exists
-        if (!$OldColumn && !$NewColumn)
-            throw new Exception\Custom(t('The `%1$s` column does not exist.'), $OldName);
+        if (!$oldColumn && !$newColumn) {
+            throw new Exception\Custom(t('The `%1$s` column does not exist.'), $oldname);
+        }
 
         // Make sure the new column name isn't already taken
-        if ($OldColumn && $NewColumn)
-            throw new Exception\Custom(t('You cannot rename the `%1$s` column to `%2$s` because that column already exists.'), array($OldName, $NewName));
+        if ($oldColumn && $newColumn) {
+            throw new Exception\Custom(t('You cannot rename the `%1$s` column to `%2$s` because that column already exists.'), array($oldname, $newname));
+        }
 
         // Rename the column
-        // The syntax for renaming a column is:
-        // ALTER TABLE tablename CHANGE COLUMN oldname newname originaldefinition;
-        if (!$this->Query('alter table `'.$this->_TableName.'` change column `'.$OldName.'` `'.$NewName.'` '.$this->_DefineColumn($OldColumn)))
-            throw new Exception\Custom(t('Failed to rename table `%1$s` to `%2$s`.'), array($OldName, $NewName));
+        if (!$this->query('alter table `'.$this->_table.'` change column `'.$oldname.'` `'.$newname.'` '.$this->defineColumn($oldColumn))) {
+            throw new Exception\Custom(t('Failed to rename table `%1$s` to `%2$s`.'), array($oldname, $newname));
+        }
 
-        return TRUE;
+        return true;
+    }
+
+    public function renameTable($oldname, $newname) {
+        if (!$this->query('rename table `'.$this->_prefix.$oldname.'` to `'.$this->_prefix.$newname.'`')) {
+            throw new Exception\Custom(t('Failed to rename table `%1$s` to `%2$s`.'), array($oldname, $newname));
+        }
+
+        return true;
+    }
+
+    public function view($name, $sql) {
+        $this->query('create or replace view '.$this->_prefix.$name." as \n".$sql);
+    }
+
+    public function engine($engine, $checkAvailability = true) {
+        $engine = strtolower($engine);
+        
+        if ($checkAvailability) {
+            if (!$this->hasEngine($engine)) return $this;
+        }
+
+        
+        $this->_engine = $engine;
+        return $this;
+    }
+
+    public function hasEngine($engine) {
+        $engine = strtolower($engine);
+        static $viableEngines = null;
+
+        if ($viableEngines === null) {
+            $list = $this->_query("SHOW ENGINES;");
+            $viableEngines = array();
+            while ($storage = $list->get('Engine')) {
+                $name = strtolower($storage);
+                $viableEngines[$name] = true;
+                $list->next();
+            }
+        }
+
+        return isset($viableEngines[$engine]);
     }
 
     /**
-     * Renames a table in the database.
+     * Modifies $this->table() with the columns specified with $this->column().
      *
-     * @param string $OldName The name of the table to be renamed.
-     * @param string $NewName The new name for the table being renamed.
-     * @param boolean $UsePrefix A boolean value indicating if $this->_DatabasePrefix should be prefixed
-     * before $OldName and $NewName.
-     * @return boolean
+     * @param boolean $explicit If true, this method will remove any columns from the table that were not
+     * defined with $this->column().
      */
-    public function RenameTable($OldName, $NewName, $UsePrefix = FALSE) {
-        if (!$this->Query('rename table `'.$OldName.'` to `'.$NewName.'`'))
-            throw new Exception\Custom(t('Failed to rename table `%1$s` to `%2$s`.'), array($OldName, $NewName));
+    protected function modify($explicit = false) {
+        $px = $this->_prefix;
+        $addSql = array(); // statements executed at the end
 
-        return TRUE;
-    }
-
-    /**
-     * Specifies the name of the view to create or modify.
-     *
-     * @param string $Name The name of the view.
-     * @param string $Query The actual query to create as the view. Typically
-     * this can be generated with the $Database object.
-     */
-    public function View($Name, $sql) {
-        $this->Query('create or replace view '.$this->_DatabasePrefix.$Name." as \n".$sql);
-    }
-
-    public static function alphaNumeric($string) {
-        return preg_replace('/([^\w\d_-])/', '', $string);
-    } 
-
-    /**
-     * Creates the table defined with $this->Table() and $this->Column().
-     */
-    protected function _Create() {
-        $PrimaryKey = array();
-        $UniqueKey = array();
-        $FullTextKey = array();
-        $AllowFullText = TRUE;
-        $Indexes = array();
-        $Keys = '';
-        $Sql = '';
-        
-        $ForceDatabaseEngine = c('database.forceStorageEngine');
-        if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
-            $this->_TableStorageEngine = $ForceDatabaseEngine;
-            $AllowFullText = $this->_SupportsFulltext();
-        }
-
-        foreach ($this->_Columns as $ColumnName => $Column) {
-            if ($Sql != '')
-                $Sql .= ',';
-
-            $Sql .= "\n".$this->_DefineColumn($Column);
-
-            $ColumnKeyTypes = (array)$Column->KeyType;
-
-            foreach ($ColumnKeyTypes as $ColumnKeyType) {
-                $KeyTypeParts = explode('.', $ColumnKeyType, 2);
-                $ColumnKeyType = $KeyTypeParts[0];
-                $IndexGroup = val(1, $KeyTypeParts, '');
-                
-                if ($ColumnKeyType == 'primary')
-                    $PrimaryKey[] = $ColumnName;
-                elseif ($ColumnKeyType == 'key')
-                    $Indexes['FK'][$IndexGroup][] = $ColumnName;
-                elseif ($ColumnKeyType == 'index')
-                    $Indexes['IX'][$IndexGroup][] = $ColumnName;
-                elseif ($ColumnKeyType == 'unique')
-                    $UniqueKey[] = $ColumnName;
-                elseif ($ColumnKeyType == 'fulltext' && $AllowFullText)
-                    $FullTextKey[] = $ColumnName;
-            }
-        }
-        // Build primary keys
-        if (count($PrimaryKey) > 0)
-            $Keys .= ",\nprimary key (`".implode('`, `', $PrimaryKey)."`)";
-        // Build unique keys.
-        if (count($UniqueKey) > 0)
-            $Keys .= ",\nunique index `".$this->AlphaNumeric('UX_'.$this->_TableName).'` (`'.implode('`, `', $UniqueKey)."`)";
-        // Build full text index.
-        if (count($FullTextKey) > 0)
-            $Keys .= ",\nfulltext index `".$this->AlphaNumeric('TX_'.$this->_TableName).'` (`'.implode('`, `', $FullTextKey)."`)";
-        // Build the rest of the keys.
-        foreach ($Indexes as $IndexType => $IndexGroups) {
-            $CreateString = val($IndexType, array('FK' => 'key', 'IX' => 'index'));
-            foreach ($IndexGroups as $IndexGroup => $ColumnNames) {
-                if (!$IndexGroup) {
-                    foreach ($ColumnNames as $ColumnName) {
-                        $Keys .= ",\n{$CreateString} `{$IndexType}_{$this->_TableName}_{$ColumnName}` (`{$ColumnName}`)";
-                    }
-                } else {
-                    $Keys .= ",\n{$CreateString} `{$IndexType}_{$this->_TableName}_{$IndexGroup}` (`".implode('`, `', $ColumnNames).'`)';
-                }
-            }
-        }
-
-        $Sql = 'create table `'.$this->_DatabasePrefix.$this->_TableName.'` ('
-            .$Sql
-            .$Keys
-        ."\n)";
-
-        // Check to see if there are any fulltext columns, otherwise use innodb.
-        if (!$this->_TableStorageEngine) {
-            $HasFulltext = FALSE;
-            foreach ($this->_Columns as $Column) {
-                $ColumnKeyTypes = (array)$Column->KeyType;
-                array_map('strtolower', $ColumnKeyTypes);
-                if (in_array('fulltext', $ColumnKeyTypes)) {
-                    $HasFulltext = TRUE;
-                    break;
-                }
-            }
-            if ($HasFulltext)
-                $this->_TableStorageEngine = 'myisam';
-            else
-                $this->_TableStorageEngine = c('database.storageEngine', 'innodb');
-            
-            if (!$this->HasEngine($this->_TableStorageEngine)) {
-                $this->_TableStorageEngine = 'myisam';
-            }
-        }
-        
-        if ($this->_TableStorageEngine)
-            $Sql .= ' engine='.$this->_TableStorageEngine;
-
-        if ($this->_CharacterEncoding !== FALSE && $this->_CharacterEncoding != '')
-            $Sql .= ' default character set '.$this->_CharacterEncoding;
-            
-        // if (array_key_exists('Collate', $this->Database->ExtendedProperties)) {
-        //     $Sql .= ' collate ' . $this->Database->ExtendedProperties['Collate'];
-        // }
-        
-        $Sql .= ';';
-
-        $Result = $this->Query($Sql);
-        $this->Reset();
-        
-        return $Result;
-    }
-    
-    protected function _IndexSql($Columns, $KeyType = FALSE) {        
-        $Result = array();
-        $Keys = array();
-        $Prefixes = array('key' => 'FK_', 'index' => 'IX_', 'unique' => 'UX_', 'fulltext' => 'TX_');
-        $Indexes = array();
-        
-        // Gather the names of the columns.
-        foreach ($Columns as $ColumnName => $Column) {
-            $ColumnKeyTypes = (array)$Column->KeyType;
-
-            foreach ($ColumnKeyTypes as $ColumnKeyType) {
-                $Parts = explode('.', $ColumnKeyType, 2);
-                $ColumnKeyType = $Parts[0];
-                $IndexGroup = val(1, $Parts, '');
-                
-                if(!$ColumnKeyType || ($KeyType && $KeyType != $ColumnKeyType))
-                    continue;
-
-                // Don't add a fulltext if we don't support.
-                if ($ColumnKeyType == 'fulltext' && !$this->_SupportsFulltext())
-                    continue;
-
-                $Indexes[$ColumnKeyType][$IndexGroup][] = $ColumnName;
-            }
-        }
-        
-        // Make the multi-column keys into sql statements.
-        foreach($Indexes as $ColumnKeyType => $IndexGroups) {
-            $CreateType = val($ColumnKeyType, array('index' => 'index', 'key' => 'key', 'unique' => 'unique index', 'fulltext' => 'fulltext index', 'primary' => 'primary key'));
-            
-            if($ColumnKeyType == 'primary') {
-                $Result['PRIMARY'] = 'primary key (`'.implode('`, `', $IndexGroups['']).'`)';
-            } else {
-                foreach ($IndexGroups as $IndexGroup => $ColumnNames) {
-                    $Multi = (strlen($IndexGroup) > 0 || in_array($ColumnKeyType, array('unique', 'fulltext')));
-
-                    if ($Multi) {
-                        $IndexName = "{$Prefixes[$ColumnKeyType]}{$this->_TableName}".($IndexGroup ? '_'.$IndexGroup : '');
-
-                        $Result[$IndexName] = "$CreateType $IndexName (`".implode('`, `', $ColumnNames).'`)';
-                    } else {
-                        foreach ($ColumnNames as $ColumnName) {
-                            $IndexName = "{$Prefixes[$ColumnKeyType]}{$this->_TableName}_$ColumnName";
-
-                            $Result[$IndexName] = "$CreateType $IndexName (`$ColumnName`)";
-                        }
-                    }
-                }
-            }
-        }
-        
-        return $Result;
-    }
-    
-    public function IndexSqlDb() {
-        return $this->_IndexSqlDb();
-    }
-
-    protected function _IndexSqlDb() {
-        // We don't want this to be captured so send it directly.
-        $Data = $this->_query('show indexes from '.$this->_DatabasePrefix.$this->_TableName);
-        
-        $Result = array();    
-        foreach($Data as $Row) {
-            if(array_key_exists($Row->Key_name, $Result)) {
-                $Result[$Row->Key_name] .= ', `'.$Row->Column_name.'`';
-            } else {
-                switch(strtoupper(substr($Row->Key_name, 0, 2))) {
-                    case 'PR':
-                        $Type = 'primary key';
-                        break;
-                    case 'FK':
-                        $Type = 'key '.$Row->Key_name;
-                        break;
-                    case 'IX':
-                        $Type = 'index '.$Row->Key_name;
-                        break;
-                    case 'UX':
-                        $Type = 'unique index '.$Row->Key_name;
-                        break;
-                    case 'TX':
-                        $Type = 'fulltext index '.$Row->Key_name;
-                        break;
-                    default:
-                        // Try and guess the index type.
-                        if(strcasecmp($Row->Index_type, 'fulltext') == 0)
-                            $Type = 'fulltext index '.$Row->Key_name;
-                        elseif($Row->Non_unique)
-                            $Type = 'index '.$Row->Key_name;
-                        else
-                            $Type = 'unique index '.$Row->Key_name;
-
-                        break;
-                }
-                $Result[$Row->Key_name] = $Type.' (`'.$Row->Column_name.'`';
-            }
-        }
-        
-        // Cap off the sql.
-        foreach($Result as $Name => $Sql) {
-            $Result[$Name] .= ')';
-        }
-        
-        return $Result;
-    }
-
-    /**
-     * Modifies $this->Table() with the columns specified with $this->Column().
-     *
-     * @param boolean $Explicit If TRUE, this method will remove any columns from the table that were not
-     * defined with $this->Column().
-     */
-    protected function _Modify($Explicit = FALSE) {
-        $Px = $this->_DatabasePrefix;
-        $AdditionalSql = array(); // statements executed at the end
-
-        // Returns an array of schema data objects for each field in the specified
-        // table. The returned array of objects contains the following properties:
-        // Name, PrimaryKey, Type, AllowNull, Default, Length, Enum.
-        $ExistingColumns = $this->ExistingColumns();
-        $AlterSql = array();
+        $existingColumns = $this->existingColumns();
+        $alterSql = array();
 
         // 1. Remove any unnecessary columns if this is an explicit modification
-        if ($Explicit) {
+        if ($explicit) {
             // array_diff returns values from the first array that aren't present
             // in the second array. In this example, all columns currently in the
-            // table that are NOT in $this->_Columns.
-            $RemoveColumns = array_diff(array_keys($ExistingColumns), array_keys($this->_Columns));
-            foreach ($RemoveColumns as $Column) {
-                $AlterSql[] = "drop column `$Column`";
+            // table that are NOT in $this->_columns.
+            $removeColumns = array_diff(array_keys($existingColumns), array_keys($this->_columns));
+            foreach ($removeColumns as $column) {
+                $alterSql[] = "drop column `$column`";
             }
         }
 
         // Prepare the alter query
-        $AlterSqlPrefix = 'alter table `'.$this->_DatabasePrefix.$this->_TableName."`\n";
+        $alterSqlPrefix = 'alter table `'.$this->_prefix.$this->_table."`\n";
         
         // 2. Alter the table storage engine.
-        $ForceDatabaseEngine = c('database.forceStorageEngine', false);
-        if ($ForceDatabaseEngine && !$this->_TableStorageEngine) {
-            $this->_TableStorageEngine = $ForceDatabaseEngine;
+        $forceEngine = c('database.forceStorageEngine', false);
+        if ($forceEngine && !$this->_engine) {
+            $this->_engine = $forceEngine;
         }
-        $Indexes = $this->_IndexSql($this->_Columns);
-        $IndexesDb = $this->_IndexSqlDb();
+        $indexes = $this->indexSql($this->_columns);
+        $indexesDb = $this->indexSqlDb();
 
-        if($this->_TableStorageEngine) {
-            $CurrentEngine = $this->_query("show table status where name = '".$this->_DatabasePrefix.$this->_TableName."'")->Value('Engine');
+        if($this->_engine) {
+            $currentEngine = $this->_query("show table status where name = '".$this->_prefix.$this->_table."'")->get('Engine');
 
-            if(strcasecmp($CurrentEngine, $this->_TableStorageEngine)) {
+            if(strcasecmp($currentEngine, $this->_engine)) {
                 // Check to drop a fulltext index if we don't support it.
-                if (!$this->_SupportsFulltext()) {
-                    foreach ($IndexesDb as $IndexName => $IndexSql) {
-                        if (StringBeginsWith($IndexSql, 'fulltext', TRUE)) {
-                            $DropIndexQuery = "$AlterSqlPrefix drop index $IndexName;\n";
-                            if (!$this->Query($DropIndexQuery))
-                                throw new Exception\Custom(t('Failed to drop the index `%1$s` on table `%2$s`.'), array($IndexName, $this->_TableName));
+                if (!$this->supportsFulltext()) {
+                    foreach ($indexesDb as $indexName => $indexSql) {
+                        if (substr($indexSql, 0, 8) === 'fulltext') {
+                            //Drop index query
+                            if (!$this->query("$alterSqlPrefix drop index $indexName;\n")) {
+                                throw new Exception\Custom(t('Failed to drop the index `%1$s` on table `%2$s`.'), array($indexName, $this->_table));
+                            }
                         }
                     }
                 }
 
-                $EngineQuery = $AlterSqlPrefix.' engine = '.$this->_TableStorageEngine;
-                if (!$this->Query($EngineQuery))
-                    throw new Exception\Custom(t('Failed to alter the storage engine of table `%1$s` to `%2$s`.'), array($this->_DatabasePrefix.$this->_TableName, $this->_TableStorageEngine));
+                // Engine query
+                if (!$this->query($alterSqlPrefix.' engine = '.$this->_engine)) {
+                    throw new Exception\Custom(t('Failed to alter the storage engine of table `%1$s` to `%2$s`.'), array($this->_prefix.$this->_table, $this->_engine));
+                }
             }
         }
         
         // 3. Add new columns & modify existing ones
 
         // array_diff returns values from the first array that aren't present in
-        // the second array. In this example, all columns in $this->_Columns that
+        // the second array. In this example, all columns in $this->_columns that
         // are NOT in the table.
-        $PrevColumnName = FALSE;
-        foreach ($this->_Columns as $ColumnName => $Column) {
-            if (!array_key_exists($ColumnName, $ExistingColumns)) {
+        $prevColumnName = false;
+        foreach ($this->_columns as $columnName => $column) {
+            if (!isset($existingColumns[$columnName])) {
 
                 // This column name is not in the existing column collection, so add the column
-                $AddColumnSql = 'add '.$this->_DefineColumn(val($ColumnName, $this->_Columns));
-                if($PrevColumnName !== FALSE) {
-                    $AddColumnSql .= " after `$PrevColumnName`";
+                $addColumnSql = 'add '.$this->defineColumn(val($columnName, $this->_columns));
+                if($prevColumnName !== false) {
+                    $addColumnSql .= " after `$prevColumnName`";
                 } else {
-                    $AddColumnSql .= " first";
+                    $addColumnSql .= " first";
                 }
                 
-                $AlterSql[] = $AddColumnSql;
+                $alterSql[] = $addColumnSql;
 
             } else {
-                $ExistingColumn = $ExistingColumns[$ColumnName];
+                $existingColumn = $existingColumns[$columnName];
 
-                $ExistingColumnDef = $this->_DefineColumn($ExistingColumn);
-                $ColumnDef = $this->_DefineColumn($Column);
-                $Comment = "/* Existing: $ExistingColumnDef, New: $ColumnDef */\n";
+                $existingColumnDef = $this->defineColumn($existingColumn);
+                $columnDef = $this->defineColumn($column);
+                $comment = "/* Existing: $existingColumnDef, New: $columnDef */\n";
                 
-                if ($ExistingColumnDef != $ColumnDef) {  
+                if ($existingColumnDef != $columnDef) {  
                     // The existing & new column types do not match, so modify the column.
-                    $ChangeSql = $Comment.'change `'.$ColumnName.'` '.$this->_DefineColumn(val($ColumnName, $this->_Columns));
-                    $AlterSql[] = $ChangeSql;
+                    $alterSql[] = $comment.'change `'.$columnName.'` '.$this->defineColumn(val($columnName, $this->_columns));
                     // Check for a modification from an enum to an int.
-                    if(strcasecmp($ExistingColumn->Type, 'enum') == 0 && in_array(strtolower($Column->Type), $this->Types('int'))) {
-                        $Sql = "update `$Px{$this->_TableName}` set `$ColumnName` = case `$ColumnName`";
-                        foreach($ExistingColumn->Enum as $Index => $NewValue) {
-                            $OldValue = $Index + 1;
+                    if(strcasecmp($existingColumn->type, 'enum') == 0 && in_array(strtolower($column->type), $this->types('int'))) {
+                        $sql = "update `$px{$this->_table}` set `$columnName` = case `$columnName`";
+                        foreach($existingColumn->enum as $index => $newValue) {
+                            $oldValue = $index + 1;
                             
-                            if(!is_numeric($NewValue))
+                            if(!is_numeric($newValue))
                                 continue;
-                            $NewValue = (int)$NewValue;
+                            $newValue = (int)$newValue;
 
-                            $Sql .= " when $OldValue then $NewValue";
+                            $sql .= " when $oldValue then $newValue";
                         }
-                        $Sql .= " else `$ColumnName` end";
-                        $Description = "Update {$this->_TableName}.$ColumnName enum values to {$Column->Type}";
-                        $AdditionalSql[$Description] = $Sql;
+                        $sql .= " else `$columnName` end";
+                        $description = "Update {$this->_table}.$columnName enum values to {$column->type}";
+                        $addSql[$description] = $sql;
 
                     }
                 }
             }
-            $PrevColumnName = $ColumnName;
+            $prevColumnName = $columnName;
         }
         
-        if (count($AlterSql) > 0) {
-            if (!$this->Query($AlterSqlPrefix.implode(",\n", $AlterSql))) {
-                throw new Exception\Custom(t('Failed to alter the `%s` table.'), $this->_DatabasePrefix.$this->_TableName);
+        if (count($alterSql) > 0) {
+            if (!$this->query($alterSqlPrefix.implode(",\n", $alterSql))) {
+                throw new Exception\Custom(t('Failed to alter the `%s` table.'), $this->_prefix.$this->_table);
             }
         }
         
-        // 4. Update Indexes.
-        $IndexSql = array();
+        // 4. Update indexes.
+        $indexSql = array();
         // Go through the indexes to add or modify.
-        foreach($Indexes as $Name => $Sql) {
-            if(array_key_exists($Name, $IndexesDb)) {
-                if($Indexes[$Name] != $IndexesDb[$Name]) {
-                    if($Name !== 'PRIMARY')
-                    //     $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
+        foreach($indexes as $name => $sql) {
+            if(isset($indexesDb[$name])) {
+                if($indexes[$name] != $indexesDb[$name]) {
+                    if($name !== 'PRIMARY')
+                    //     $indexSql[$name][] = $alterSqlPrefix."drop primary key;\n";
                     // else
-                        $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
-                    $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";
+                        $indexSql[$name][] = $alterSqlPrefix.'drop index '.$name.";\n";
+                    $indexSql[$name][] = $alterSqlPrefix."add $sql;\n";
                 }
-                unset($IndexesDb[$Name]);
+                unset($indexesDb[$name]);
             } else {
-                if($Name !== 'PRIMARY') {
-                    $IndexSql[$Name][] = $AlterSqlPrefix."add $Sql;\n";    
+                if($name !== 'PRIMARY') {
+                    $indexSql[$name][] = $alterSqlPrefix."add $sql;\n";    
                 }
             }
         }
         // Go through the indexes to drop.
-        if($Explicit) {
-            foreach($IndexesDb as $Name => $Sql) {
-                if($Name !== 'PRIMARY')
-                //     $IndexSql[$Name][] = $AlterSqlPrefix."drop primary key;\n";
+        if($explicit) {
+            foreach($indexesDb as $name => $sql) {
+                if($name !== 'PRIMARY')
+                //     $indexSql[$name][] = $alterSqlPrefix."drop primary key;\n";
                 // else
-                    $IndexSql[$Name][] = $AlterSqlPrefix.'drop index '.$Name.";\n";
+                    $indexSql[$name][] = $alterSqlPrefix.'drop index '.$name.";\n";
             }
         }
         
         // Modify all of the indexes.
-        foreach($IndexSql as $Name => $Sqls) {
-            foreach ($Sqls as $Sql) {
-                if(!$this->Query($Sql))
-                    throw new Exception\Custom(t('Error.ModifyIndex', 'Failed to add or modify the `%1$s` index in the `%2$s` table.'), array($Name, $this->_TableName));
+        foreach($indexSql as $name => $sqls) {
+            foreach ($sqls as $sql) {
+                if(!$this->query($sql))
+                    throw new Exception\Custom(t('Error.ModifyIndex', 'Failed to add or modify the `%1$s` index in the `%2$s` table.'), array($name, $this->_table));
             }
         }
 
         // Run any additional Sql.
-        foreach($AdditionalSql as $Description => $Sql) {
-            if(!$this->Query($Sql))
-                throw new Exception\Custom("Error modifying table: {$Description}.");
+        foreach($addSql as $description => $sql) {
+            if(!$this->query($sql))
+                throw new Exception\Custom("Error modifying table: {$description}.");
         }
 
-        $this->Reset();
-        return TRUE;
+        $this->reset();
+        return true;
     }
 
     /**
-     * Undocumented method.
-     *
-     * @param string $Column
-     * @todo This method and $Column need descriptions.
+     * Creates the table defined with $this->table() and $this->column().
      */
-    protected function _DefineColumn($Column) {
-        if (!is_array($Column->Type) && !in_array($Column->Type, array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'char', 'varchar', 'varbinary', 'date', 'datetime', 'mediumtext', 'longtext', 'text', 'decimal', 'numeric', 'float', 'double', 'enum', 'timestamp', 'tinyblob', 'blob', 'mediumblob', 'longblob')))
-            throw new Exception\Custom(t('The specified data type (%1$s) is not accepted for the MySQL database.'), $Column->Type);
+    protected function create() {
+        $primaryKey = array();
+        $uniqueKey = array();
+        $fullTextKey = array();
+        $allowFullText = true;
+        $indexes = array();
+        $keys = '';
+        $sql = '';
         
-        $Return = '`'.$Column->Name.'` '.$Column->Type;
-        
-        $LengthTypes = $this->Types('length');
-        if ($Column->Length != '' && in_array(strtolower($Column->Type), $LengthTypes)) {
-            if($Column->Precision != '')
-                $Return .= '('.$Column->Length.', '.$Column->Precision.')';
+        $forceEngine = c('database.forceStorageEngine');
+        if ($forceEngine && !$this->_engine) {
+            $this->_engine = $forceEngine;
+            $allowFullText = $this->supportsFulltext();
+        }
+
+        foreach ($this->_columns as $columnName => $column) {
+            if ($sql != '')
+                $sql .= ',';
+
+            $sql .= "\n".$this->defineColumn($column);
+
+            $columnKeyTypes = (array)$column->keyType;
+
+            foreach ($columnKeyTypes as $columnKeyType) {
+                $keyTypeParts = explode('.', $columnKeyType, 2);
+                $columnKeyType = $keyTypeParts[0];
+                $indexGroup = val(1, $keyTypeParts, '');
+                
+                if ($columnKeyType == 'primary')
+                    $primaryKey[] = $columnName;
+                elseif ($columnKeyType == 'key')
+                    $indexes['FK'][$indexGroup][] = $columnName;
+                elseif ($columnKeyType == 'index')
+                    $indexes['IX'][$indexGroup][] = $columnName;
+                elseif ($columnKeyType == 'unique')
+                    $uniqueKey[] = $columnName;
+                elseif ($columnKeyType == 'fulltext' && $allowFullText)
+                    $fullTextKey[] = $columnName;
+            }
+        }
+        // Build primary keys
+        if (count($primaryKey) > 0)
+            $keys .= ",\nprimary key (`".implode('`, `', $primaryKey)."`)";
+        // Build unique keys.
+        if (count($uniqueKey) > 0)
+            $keys .= ",\nunique index `".$this->alphaNumeric('UX_'.$this->_table).'` (`'.implode('`, `', $uniqueKey)."`)";
+        // Build full text index.
+        if (count($fullTextKey) > 0)
+            $keys .= ",\nfulltext index `".$this->alphaNumeric('TX_'.$this->_table).'` (`'.implode('`, `', $fullTextKey)."`)";
+        // Build the rest of the keys.
+        foreach ($indexes as $indexType => $indexGroups) {
+            $createString = val($indexType, array('FK' => 'key', 'IX' => 'index'));
+            foreach ($indexGroups as $indexGroup => $columnNames) {
+                if (!$indexGroup) {
+                    foreach ($columnNames as $columnName) {
+                        $keys .= ",\n{$createString} `{$indexType}_{$this->_table}_{$columnName}` (`{$columnName}`)";
+                    }
+                } else {
+                    $keys .= ",\n{$createString} `{$indexType}_{$this->_table}_{$indexGroup}` (`".implode('`, `', $columnNames).'`)';
+                }
+            }
+        }
+
+        $sql = 'create table `'.$this->_prefix.$this->_table.'` ('.$sql.$keys."\n)";
+
+        // Check to see if there are any fulltext columns, otherwise use innodb.
+        if (!$this->_engine) {
+            $hasFulltext = false;
+            foreach ($this->_columns as $column) {
+                $columnKeyTypes = (array)$column->keyType;
+                array_map('strtolower', $columnKeyTypes);
+                if (in_array('fulltext', $columnKeyTypes)) {
+                    $hasFulltext = true;
+                    break;
+                }
+            }
+            if ($hasFulltext)
+                $this->_engine = 'myisam';
             else
-                $Return .= '('.$Column->Length.')';
+                $this->_engine = c('database.storageEngine', 'innodb');
+            
+            if (!$this->hasEngine($this->_engine)) {
+                $this->_engine = 'myisam';
+            }
         }
-        if (property_exists($Column, 'Unsigned') && $Column->Unsigned) {
-            $Return .= ' unsigned';
+        
+        if ($this->_engine)
+            $sql .= ' engine='.$this->_engine;
+
+        if ($this->_encoding !== false && $this->_encoding != '')
+            $sql .= ' default character set '.$this->_encoding;
+            
+        // if (array_key_exists('Collate', $this->database->extendedProperties)) {
+        //     $sql .= ' collate ' . $this->database->extendedProperties['Collate'];
+        // }
+        
+        $sql .= ';';
+
+        $result = $this->query($sql);
+        $this->reset();
+        
+        return $result;
+    }
+
+    protected function alphaNumeric($string) {
+        return preg_replace('/([^\w\d_-])/', '', $string);
+    } 
+
+    protected function indexSql($columns, $keyType = false) {        
+        $result = array();
+        $keys = array();
+        $prefixes = array('key' => 'FK_', 'index' => 'IX_', 'unique' => 'UX_', 'fulltext' => 'TX_');
+        $indexes = array();
+        
+        // Gather the names of the columns.
+        foreach ($columns as $columnName => $column) {
+            $columnKeyTypes = (array)$column->keyType;
+
+            foreach ($columnKeyTypes as $columnKeyType) {
+                $parts = explode('.', $columnKeyType, 2);
+                $columnKeyType = $parts[0];
+                $indexGroup = val(1, $parts, '');
+                
+                if(!$columnKeyType || ($keyType && $keyType != $columnKeyType))
+                    continue;
+
+                // Don't add a fulltext if we don't support.
+                if ($columnKeyType == 'fulltext' && !$this->supportsFulltext())
+                    continue;
+
+                $indexes[$columnKeyType][$indexGroup][] = $columnName;
+            }
+        }
+        
+        // Make the multi-column keys into sql statements.
+        foreach($indexes as $columnKeyType => $indexGroups) {
+            $createType = val($columnKeyType, array('index' => 'index', 'key' => 'key', 'unique' => 'unique index', 'fulltext' => 'fulltext index', 'primary' => 'primary key'));
+            
+            if($columnKeyType == 'primary') {
+                $result['PRIMARY'] = 'primary key (`'.implode('`, `', $indexGroups['']).'`)';
+            } else {
+                foreach ($indexGroups as $indexGroup => $columnNames) {
+                    $multi = (strlen($indexGroup) > 0 || in_array($columnKeyType, array('unique', 'fulltext')));
+
+                    if ($multi) {
+                        $indexName = "{$prefixes[$columnKeyType]}{$this->_table}".($indexGroup ? '_'.$indexGroup : '');
+
+                        $result[$indexName] = "$createType $indexName (`".implode('`, `', $columnNames).'`)';
+                    } else {
+                        foreach ($columnNames as $columnName) {
+                            $indexName = "{$prefixes[$columnKeyType]}{$this->_table}_$columnName";
+
+                            $result[$indexName] = "$createType $indexName (`$columnName`)";
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $result;
+    }
+
+    protected function indexSqlDb() {
+        // We don't want this to be captured so send it directly.
+        $data = $this->_query('show indexes from '.$this->_prefix.$this->_table);
+
+        
+        $result = array();    
+        foreach($data as $row) {
+            if(isset($result[$row->Key_name])) {
+                $result[$row->Key_name] .= ', `'.$row->Column_name.'`';
+            } else {
+                switch(strtoupper(substr($row->Key_name, 0, 2))) {
+                    case 'PR':
+                        $type = 'primary key';
+                        break;
+                    case 'FK':
+                        $type = 'key '.$row->Key_name;
+                        break;
+                    case 'IX':
+                        $type = 'index '.$row->Key_name;
+                        break;
+                    case 'UX':
+                        $type = 'unique index '.$row->Key_name;
+                        break;
+                    case 'TX':
+                        $type = 'fulltext index '.$row->Key_name;
+                        break;
+                    default:
+                        // Try and guess the index type.
+                        if(strcasecmp($row->Index_type, 'fulltext') == 0)
+                            $type = 'fulltext index '.$row->Key_name;
+                        elseif($row->Non_unique)
+                            $type = 'index '.$row->Key_name;
+                        else
+                            $type = 'unique index '.$row->Key_name;
+
+                        break;
+                }
+                $result[$row->Key_name] = $type.' (`'.$row->Column_name.'`';
+            }
+        }
+        
+        // Cap off the sql.
+        foreach($result as $name => $sql) {
+            $result[$name] .= ')';
+        }
+        
+        return $result;
+    }
+
+    protected function defineColumn($column) {
+        if (!is_array($column->type) && !in_array($column->type, array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'char', 'varchar', 'varbinary', 'date', 'datetime', 'mediumtext', 'longtext', 'text', 'decimal', 'numeric', 'float', 'double', 'enum', 'timestamp', 'tinyblob', 'blob', 'mediumblob', 'longblob')))
+            throw new Exception\Custom(t('The specified data type (%1$s) is not accepted for the MySQL database.'), $column->type);
+        
+        $return = '`'.$column->name.'` '.$column->type;
+        
+        $lengthTypes = $this->types('length');
+        if ($column->length != '' && in_array(strtolower($column->type), $lengthTypes)) {
+            if($column->precision != '')
+                $return .= '('.$column->length.', '.$column->precision.')';
+            else
+                $return .= '('.$column->length.')';
+        }
+        if (property_exists($column, 'unsigned') && $column->unsigned) {
+            $return .= ' unsigned';
         }
 
-        if (is_array($Column->Enum))
-            $Return .= "('".implode("','", $Column->Enum)."')";
+        if (is_array($column->enum))
+            $return .= "('".implode("','", $column->enum)."')";
 
-        if (!$Column->AllowNull)
-            $Return .= ' not null';
+        if (!$column->allownull)
+            $return .= ' not null';
 
-        if (!(is_null($Column->Default) || $Column->Default === '') && strcasecmp($Column->Type, 'timestamp') != 0)
-            $Return .= " default ".self::_QuoteValue($Column->Default);
+        if (!(is_null($column->default) || $column->default === '') && strcasecmp($column->type, 'timestamp') != 0)
+            $return .= " default ".self::quotevalue($column->default);
 
-        if ($Column->AutoIncrement)
-            $Return .= ' auto_increment primary key';
+        if ($column->autoIncrement)
+            $return .= ' auto_increment primary key';
 
-        return $Return;
+        return $return;
     }
     
-    protected static function _QuoteValue($Value) {
-        if(is_numeric($Value)) {
-            return $Value;
-        } else if(is_bool($Value)) {
-            return $Value ? '1' : '0';
+    protected static function quoteValue($value) {
+        if(is_numeric($value)) {
+            return $value;
+        } else if(is_bool($value)) {
+            return $value ? '1' : '0';
         } else {
-            return "'".str_replace("'", "''", $Value)."'";
+            return "'".str_replace("'", "''", $value)."'";
         }
     }
 
-    protected function _SupportsFulltext() {
-        return strcasecmp($this->_TableStorageEngine, 'myisam') == 0;
+    protected function supportsFulltext() {
+        return strcasecmp($this->_engine, 'myisam') == 0;
     }
 }

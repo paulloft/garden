@@ -10,7 +10,8 @@ $explicit = true;
 $drop = false;
 
 $construct
-    ->primaryKey('userID')
+    ->engine('InnoDB')
+    ->primary('userID')
     ->column('name', 'varchar(50)', true, 'key')
     ->column('password', 'varbinary(100)') // keep this longer because of some imports.
     ->column('hashMethod', 'varchar(10)', true)

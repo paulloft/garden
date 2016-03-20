@@ -47,10 +47,10 @@ class Skeleton extends \Garden\Template
         $captureOnly = Gdn::request()->getQuery('update', false) === false;
 
         $structure = Gdn::structure();
-        $structure->CaptureOnly = $captureOnly;
+        $structure->capture = $captureOnly;
         include PATH_ADDONS.'/Skeleton/structure.php';
 
-        $capture = $structure->Database->CapturedSql;
+        $capture = $structure->capture();
         if(!$captureOnly) {
             redirect('/structure');
         }
