@@ -113,7 +113,7 @@ class Addons {
         if ($value !== null) {
             self::$baseDir = rtrim($value, '/');
         } elseif (self::$baseDir === null) {
-            self::$baseDir = PATH_ROOT.'/addons';
+            self::$baseDir = PATH_ADDONS;
         }
     }
 

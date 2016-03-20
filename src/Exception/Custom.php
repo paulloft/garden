@@ -26,6 +26,8 @@ class Custom extends Client {
      */
     public function __construct($message, $params = array(), $code = 500, $context = []) {
 
+        if(!is_array($params)) $params = array($params);
+
         $message = vsprintf($message, $params);
 
         parent::__construct($message, $code, $context);

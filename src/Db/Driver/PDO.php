@@ -12,7 +12,7 @@ use \PDO as _PDO;
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
  */
-class PDO extends Database {
+class PDO extends SQL {
 
     // PDO uses no quoting for identifiers
     protected $_identifier = '';
@@ -192,16 +192,6 @@ class PDO extends Database {
         $this->_connection or $this->connect();
 
         return $this->_connection->rollBack();
-    }
-
-    public function list_tables($like = NULL)
-    {
-        throw new Exception\Custom('Database method %s is not supported by %s', array(__FUNCTION__, __CLASS__));
-    }
-
-    public function list_columns($table, $like = NULL, $add_prefix = TRUE)
-    {
-        throw new Exception\Custom('Database method %s is not supported by %s', array( __FUNCTION__,  __CLASS__));
     }
 
     public function escape($value)
