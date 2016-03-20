@@ -28,6 +28,11 @@ class Gdn {
         return Cache::instance('dirty');
     }
 
+    public static function response()
+    {
+        return Response::current();
+    }
+
     public static function factory($className)
     {
         $args = func_get_args();
