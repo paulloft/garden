@@ -144,7 +144,7 @@ class MySQL extends \Garden\Db\Structure {
                 // Check to drop a fulltext index if we don't support it.
                 if (!$this->supportsFulltext()) {
                     foreach ($indexesDb as $indexName => $indexSql) {
-                        if (substr($indexSql, 0, 8) === 'fulltext') {
+                        if (str_begins($indexSql, 'fulltext')) {
                             //Drop index query
                             if (!$this->query("$alterSqlPrefix drop index $indexName;\n")) {
                                 throw new Exception\Custom(t('Failed to drop the index `%1$s` on table `%2$s`.'), array($indexName, $this->_table));
