@@ -313,31 +313,6 @@ function array_translate($array, $mappings) {
 }
 
 /**
- * Returns the average rating based in the Wilson score interval.
- *
- *
- * @param int $positive The number of positive ratings.
- * @param int $total The total number of ratings.
- * @param float $confidence Your confidence level.
- * @return int
- *
- * @see http://stackoverflow.com/questions/9478741/mysql-php-for-wilson-score-interval-with-time-gravity
- * @see http://evanmiller.org/how-not-to-sort-by-average-rating.html
- */
-//function averageRating($positive, $total, $confidence = 0.95) {
-//   if ($total == 0)
-//      return 0;
-//
-//   if ($confidence == 0.95)
-//      $z = 1.96;
-//   else
-//      $z = pnormaldist(1 - (1 - $confidence) / 2, 0, 1);
-//   $p = 1.0 * $positive / $total;
-//   $s = ($p + $z * $z / (2 * $total) - $z * sqrt(($p * (1 - $p) + $z * $z / (4 * $total)) / $total)) / (1 + $z * $z / $total);
-//   return $s;
-//}
-
-/**
  * Base64 Encode a string, but make it suitable to be passed in a url.
  *
  * @param string $str The string to encode.
@@ -375,14 +350,6 @@ function c($key = false, $default = null) {
     $data = Garden\Config::data();
     return valr($key, $data, $default);
 }
-
-//function checkRoute($className, $methodName, &$routed) {
-//   if ($routed)
-//      return false;
-//   if (class_exists($className) && method_exists($className, $methodName))
-//      return $routed = true;
-//   return $routed = false;
-//}
 
 /**
  * Get a value from the config.
@@ -944,20 +911,6 @@ function setval($Key, &$Collection, $Value) {
         $Collection[$Key] = $Value;
     elseif(is_object($Collection))
         $Collection->$Key = $Value;
-}
-
-/**
- * Returns an error message formatted in a way that the custom ErrorHandler
- * function can understand (allows a little more information to be displayed
- * on errors).
- *
- * @param string The actual error message.
- * @param string The name of the object that encountered the error.
- * @param string The name of the method that encountered the error.
- * @param string Any additional information that could be useful to debuggers.
- */
-function ErrorMessage($Message, $SenderObject, $SenderMethod, $Code = '') {
-   return $Message.' | '.$SenderObject.' | '.$SenderMethod.' | '.$Code;
 }
 
 function getInclude($path, $data = array()) {
