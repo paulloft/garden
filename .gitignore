@@ -5,4 +5,4 @@ vendor/
 Thumbs.db
 composer.lock
 *.log
-conf/
+/conf
