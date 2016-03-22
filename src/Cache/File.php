@@ -65,6 +65,8 @@ class File extends \Garden\Cache
                 return $default;
             }
 
+            $unpackFunction = $this->unpackFunction;
+
             $result = file_get_contents($file);
             $result = $unpackFunction($result);
             $expire = val('expire', $result, 0);
@@ -105,7 +107,7 @@ class File extends \Garden\Cache
             'expire' => $lifetime === false ? false : (mktime() + intval($lifetime)),
             'data' => $data
         );
-
+        $packFunction = $this->packFunction;
         $cacheData = $packFunction($cacheData);
 
         if(!is_dir($this->cacheDir)) {

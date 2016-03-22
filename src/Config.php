@@ -35,6 +35,8 @@ class Config {
      */
     protected static $defaultPath;
 
+    protected static $coreConfigDir = PATH_ROOT.'/src/conf';
+
     /// Methods ///
 
     /**
@@ -90,14 +92,13 @@ class Config {
      *
      * @param string $path An optional path to load the file from.
      * @param string $path If true the config will be put under the current config, not over it.
-     * @param string $php_var The name of the php variable to load from if using the php file type.
      */
     public static function load($group, $path = '', $underlay = false) {
         if (!$path) {
             $path = self::defaultPath();
         }
 
-        $loaded = array_load($path, $php_var);
+        $loaded = array_load($path);
 
         if (empty($loaded)) {
             return;
@@ -149,6 +150,17 @@ class Config {
     }
 
     public static function autoload($path = PATH_CONF) {
+        self::$data = self::cacheGet('config-autoload', function ($path) {
+            return static::_autoload($path);
+        });
+    }
+
+    protected static function _autoload($path)
+    {
+        if($path !== self::$coreConfigDir) {
+            Config::_autoload(self::$coreConfigDir);
+        }
+
         $dir = scandir($path);
         foreach ($dir as $filename) {
             if($filename == '.' OR $filename == '..') {
@@ -162,5 +174,21 @@ class Config {
                 self::load($group, $file);
             }
         }
+        return self::$data;
+    }
+
+    protected static function cacheGet($key, callable $cache_cb) {
+        // Salt the cache with the root path so that it will invalidate if the app is moved.
+        $salt = substr(md5(self::defaultPath()), 0, 10);
+
+        $cache_path = PATH_CACHE."/$key-$salt.json";
+        if (file_exists($cache_path)) {
+            $result = array_load($cache_path);
+            return $result;
+        } else {
+            $result = $cache_cb();
+            array_save($result, $cache_path);
+        }
+        return $result;
     }
 }

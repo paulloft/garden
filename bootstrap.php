@@ -12,9 +12,6 @@ define('PATH_ADDONS', PATH_ROOT.'/addons');
 // Make sure a default time zone is set
 date_default_timezone_set('UTC');
 
-// Load the default config from src/conf/
-Config::autoload(PATH_ROOT.'/src/conf');
-// Load the users config from conf/
 Config::autoload();
 
 // Enable addon functionality.

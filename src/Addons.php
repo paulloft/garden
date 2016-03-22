@@ -21,9 +21,10 @@ namespace Garden;
 class Addons {
     /// Constants ///
     const K_BOOTSTRAP = 'bootstrap'; // bootstrap path key
-    const K_CLASSES = 'classes';
-    const K_DIR = 'dir';
-    const K_INFO = 'info'; // addon info key
+    const K_CONFIG    = 'config'; // config path key
+    const K_CLASSES   = 'classes';
+    const K_DIR       = 'dir';
+    const K_INFO      = 'info'; // addon info key
 
     /// Properties ///
 
@@ -338,9 +339,10 @@ class Addons {
     protected static function scanAddon($dir) {
         $dir = rtrim($dir, '/');
         $addon_key = strtolower(basename($dir));
+        $settings = $dir.'/settings';
 
         // Look for the addon info array.
-        $info_path = $dir.'/addon.json';
+        $info_path = $settings.'/about.json';
         $info = false;
         if (file_exists($info_path)) {
             $info = json_decode(file_get_contents($info_path), true);
@@ -353,12 +355,18 @@ class Addons {
 
         // Look for the bootstrap.
         $bootstrap = $dir.'/bootstrap.php';
-        if (!file_exists($dir.'/bootstrap.php')) {
+        if (!file_exists($bootstrap)) {
             $bootstrap = null;
         }
 
+        $config = $dir.'/settings/config.php';
+        if (!file_exists($config)) {
+            $config = null;
+        }
+
+
         // Scan the appropriate subdirectories  for classes.
-        $subdirs = array('', '/library', '/controllers', '/models', '/modules', '/settings');
+        $subdirs = array('', '/library', '/modules');
         $classes = array();
         foreach ($subdirs as $subdir) {
             // Get all of the php files in the subdirectory.
@@ -383,6 +391,7 @@ class Addons {
 
         $addon = array(
             self::K_BOOTSTRAP => $bootstrap,
+            self::K_CONFIG => $config,
             self::K_CLASSES => $classes,
             self::K_DIR => $dir,
             self::K_INFO => $info
@@ -500,6 +509,21 @@ class Addons {
         if ($bootstrap_path = val(self::K_BOOTSTRAP, $addon)) {
             include_once $bootstrap_path;
         }
+
+        // load config.
+        if ($config_path = val(self::K_CONFIG, $addon)) {
+            Config::load($addon, $config_path);
+        }
+
+        // load locales
+        $locale = c('main.locale', 'en_US');
+        $locale_path = val('dir', $addon)."/locale/$locale.php";
+
+        if (file_exists($locale_path)) {
+            global $translations;
+            require_once $locale_path;
+        }
+
         return true;
     }
 }
