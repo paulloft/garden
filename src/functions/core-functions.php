@@ -773,8 +773,6 @@ function str_ends($haystack, $needle) {
     return strcasecmp(substr($haystack, -strlen($needle)), $needle) === 0;
 }
 
-$translations = [];
-
 /**
  * Translate a string.
  *

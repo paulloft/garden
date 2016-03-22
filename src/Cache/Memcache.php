@@ -11,8 +11,9 @@ class Memcache extends \Garden\Cache
     protected $host = 'localhost';
     protected $port = 11211;
     protected $persistent = false;
+    protected $prefix = 'gdn_';
 
-    protected $salt = 'gdn';
+    protected $salt;
     protected $dirty;
 
     public $cache;
@@ -23,8 +24,9 @@ class Memcache extends \Garden\Cache
 
         $this->host = val('host', $config, $this->host);
         $this->port = val('port', $config, $this->port);
+        $this->prefix = val('port', $config, $this->prefix);
 
-        $this->salt = c('main.hashsalt') ?: $this->salt;
+        $this->salt = c('main.hashsalt', 'gdn');
 
         $this->dirty = \Garden\Gdn::dirtyCache();
 
@@ -43,7 +45,7 @@ class Memcache extends \Garden\Cache
 
     protected function fixID($id)
     {
-        return md5($id.$this->salt);
+        return $this->prefix.md5($id.$this->salt);
     }
 
     public function get($id, $default = false)

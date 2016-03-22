@@ -74,7 +74,13 @@ class Addons {
      */
     public static function all($addon_key = null, $key = null) {
         if (self::$all === null) {
-            self::$all = static::cacheGet('addons-all', array(get_class(), 'scanAddons'));
+
+            // self::$all = Gdn::dirtyCache()->cacheGet('addons-all', array(get_class(), 'scanAddons'));
+
+            if(!self::$all = Gdn::cache('rough')->get('addons-all')) {
+                self::$all = self::scanAddons();
+                Gdn::cache('rough')->set('addons-all', self::$all);
+            }
         }
 
         // The array should be built now return the addon.
@@ -98,6 +104,7 @@ class Addons {
      * @param string $classname The name of the class to load.
      */
     public static function autoload($classname) {
+        var_dump($classname);
         list($fullClass, $path) = static::classMap($classname);
         if ($path) {
             require_once $path;
@@ -116,6 +123,8 @@ class Addons {
         } elseif (self::$baseDir === null) {
             self::$baseDir = PATH_ADDONS;
         }
+
+        return self::$baseDir;
     }
 
 
@@ -145,45 +154,27 @@ class Addons {
             }
             foreach ($addon[self::K_CLASSES] as $class) {
                 list($class_name, $path) = $class;
-                if (str_ends($class_name, 'plugin')) {
-                    Event::bindClass($class_name);
-                } elseif (str_ends($class_name, 'hooks')) {
-                    // Vanilla 2 used hooks files for themes and applications.
-                    $basename = ucfirst(rtrim_substr($class_name, 'hooks'));
-                    deprecated($basename.'Hooks', $basename.'Plugin');
+                if (str_ends($class_name, 'hooks')) {
                     Event::bindClass($class_name);
                 }
             }
         }
+
+        self::baseDir();
 
         Event::bind('bootstrap', function () {
             // Start each of the enabled addons.
             foreach (self::enabled() as $key => $value) {
                 static::startAddon($key);
             }
+
+            global $translations;
+            $translations = Gdn::dirtyCache()->cacheGet('translations', function(){
+                global $translations;
+                return $translations;
+            });
+
         });
-    }
-
-    /**
-     * Get the cached file or hydrate the cache with a callback.
-     *
-     * @param string $key The cache key to get.
-     * @param callable $cache_cb The function to run when hydrating the cache.
-     * @return array Returns the cached array.
-     */
-    protected static function cacheGet($key, callable $cache_cb) {
-        // Salt the cache with the root path so that it will invalidate if the app is moved.
-        $salt = substr(md5(static::baseDir()), 0, 10);
-
-        $cache_path = PATH_CACHE."/$key-$salt.json";
-        if (file_exists($cache_path)) {
-            $result = array_load($cache_path);
-            return $result;
-        } else {
-            $result = $cache_cb();
-            array_save($result, $cache_path);
-        }
-        return $result;
     }
 
     /**
@@ -256,9 +247,10 @@ class Addons {
                 }
             } else {
                 // Build the enabled array by walking the addons.
-                self::$enabled = static::cacheGet('addons-enabled', function () {
-                    return static::scanAddons(null, self::$enabledKeys);
-                });
+                if(!self::$enabled = Gdn::cache('rough')->get('addons-enabled')) {
+                    self::$enabled = self::scanAddons(null, self::$enabledKeys);
+                    Gdn::cache('Rough')->set('addons-enabled', self::$enabled);
+                }
             }
         }
 
@@ -366,7 +358,7 @@ class Addons {
 
 
         // Scan the appropriate subdirectories  for classes.
-        $subdirs = array('', '/library', '/modules');
+        $subdirs = array('', '/library', '/modules', '/hooks');
         $classes = array();
         foreach ($subdirs as $subdir) {
             // Get all of the php files in the subdirectory.
@@ -410,7 +402,7 @@ class Addons {
      */
     protected static function scanAddons($dir = null, $enabled = null, &$addons = null) {
         if (!$dir) {
-            $dir = static::$baseDir;
+            $dir = self::baseDir();
         }
         if ($addons === null) {
             $addons = array();
@@ -419,7 +411,6 @@ class Addons {
         /* @var \DirectoryIterator */
         foreach (new \DirectoryIterator($dir) as $subdir) {
             if ($subdir->isDir() && !$subdir->isDot()) {
-//                echo $subdir->getPathname().$subdir->isDir().$subdir->isDot().'<br />';
                 static::scanAddonRecursive($subdir->getPathname(), $addons, $enabled);
             }
         }
@@ -510,18 +501,24 @@ class Addons {
             include_once $bootstrap_path;
         }
 
+        $dirtyCache = Gdn::dirtyCache();
+
         // load config.
-        if ($config_path = val(self::K_CONFIG, $addon)) {
-            Config::load($addon, $config_path);
+        if (!$dirtyCache->get('config-autoload')) {
+            if($config_path = val(self::K_CONFIG, $addon)) {
+                Config::load($addon, $config_path);
+            }
         }
 
-        // load locales
-        $locale = c('main.locale', 'en_US');
-        $locale_path = val('dir', $addon)."/locale/$locale.php";
+        // load translations
+        if (!$dirtyCache->get('translations')) {
+            $locale = c('main.locale', 'en_US');
+            $locale_path = val('dir', $addon)."/locale/$locale.php";
 
-        if (file_exists($locale_path)) {
-            global $translations;
-            require_once $locale_path;
+            if (file_exists($locale_path)) {
+                global $translations;
+                require_once $locale_path;
+            }
         }
 
         return true;

@@ -8,12 +8,14 @@ return [
         "defaultLifetime" => 3600,
         "host" => "localhost",
         "port" => "11211",
-        "persistent" => false
+        "persistent" => false,
+        "keyPrefix" => "gdn_"
     ],
     "memcached" => [
         "defaultLifetime" => 3600,
         "host" => "localhost",
         "port" => "11211",
-        "persistent" => false
+        "persistent" => false,
+        "keyPrefix" => "gdn_"
     ]
 ];
