@@ -13,6 +13,11 @@ class Gdn {
         return Db\Database::instance($name, $config);
     }
 
+    public static function structure($name = false)
+    {
+        return Db\Structure::instance($name);
+    }
+
     public static function app()
     {
         return self::factory('Application');
@@ -23,9 +28,19 @@ class Gdn {
         return Cache::instance();
     }
 
+    public static function request()
+    {
+        return Request::current();
+    }
+
     public static function dirtyCache()
     {
         return Cache::instance('dirty');
+    }
+
+    public static function response()
+    {
+        return Response::current();
     }
 
     public static function factory($className)

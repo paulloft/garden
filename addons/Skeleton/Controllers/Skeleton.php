@@ -39,6 +39,28 @@ class Skeleton extends \Garden\Template
         $this->render('index');
     }
 
+    public function structure()
+    {
+        $this->pageInit();
+        $this->title('Structure update');
+
+        $captureOnly = Gdn::request()->getQuery('update', false) === false;
+
+        $structure = Gdn::structure();
+        $structure->capture = $captureOnly;
+        include PATH_ADDONS.'/Skeleton/structure.php';
+
+        $capture = $structure->capture();
+        if(!$captureOnly) {
+            redirect('/structure');
+        }
+        // d($capture);
+
+        $this->setData('capturedSql', $capture);
+
+        $this->render();
+    }
+
     public function test()
     {
 
