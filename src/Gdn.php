@@ -23,14 +23,14 @@ class Gdn {
         return self::factory('Application');
     }
 
-    public static function cache()
-    {
-        return Cache::instance();
-    }
-
     public static function request()
     {
         return Request::current();
+    }
+
+    public static function cache($driver = null)
+    {
+        return Cache::instance($driver);
     }
 
     public static function dirtyCache()

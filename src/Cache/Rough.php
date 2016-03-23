@@ -1,7 +1,7 @@
 <?php
 namespace Garden\Cache;
 
-class Rough extends \Garden\Cache
+class Rough
 {
     protected $dirty;
 
@@ -35,7 +35,7 @@ class Rough extends \Garden\Cache
             }
 
             $result = file_get_contents($filePath);
-            $data = json_encode($result);
+            $data = json_decode($result, true);
 
             //save to temporary cache
             $this->dirty->add($file, $data);
@@ -51,9 +51,9 @@ class Rough extends \Garden\Cache
      * @param   string   $data      data to set to cache
      * @return  boolean
      */
-    public function set($id, $data)
+    public function set($id, $data, $lifetime = 0)
     {
-        $cacheData = json_decode($data);
+        $cacheData = json_encode($data, JSON_PRETTY_PRINT);
 
         if(!is_dir(PATH_CACHE)) {
             mkdir(PATH_CACHE, 0777, true);

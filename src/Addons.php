@@ -75,8 +75,6 @@ class Addons {
     public static function all($addon_key = null, $key = null) {
         if (self::$all === null) {
 
-            // self::$all = Gdn::dirtyCache()->cacheGet('addons-all', array(get_class(), 'scanAddons'));
-
             if(!self::$all = Gdn::cache('rough')->get('addons-all')) {
                 self::$all = self::scanAddons();
                 Gdn::cache('rough')->set('addons-all', self::$all);
@@ -104,7 +102,6 @@ class Addons {
      * @param string $classname The name of the class to load.
      */
     public static function autoload($classname) {
-        var_dump($classname);
         list($fullClass, $path) = static::classMap($classname);
         if ($path) {
             require_once $path;
@@ -145,7 +142,7 @@ class Addons {
         self::$classMap = null; // invalidate so it will rebuild
 
         // Enable the addon autoloader.
-        spl_autoload_register(array(get_class(), 'autoload'), true, true);
+        spl_autoload_register(array(get_class(), 'autoload'), true, false);
 
         // Bind all of the addon plugin events now.
         foreach (self::enabled() as $addon) {
@@ -169,10 +166,9 @@ class Addons {
             }
 
             global $translations;
-            $translations = Gdn::dirtyCache()->cacheGet('translations', function(){
-                global $translations;
-                return $translations;
-            });
+            if(!$translations = Gdn::cache('rough')->get('translations')) {
+                Gdn::cache('rough')->set('translations', $translations);
+            }
 
         });
     }
@@ -501,17 +497,17 @@ class Addons {
             include_once $bootstrap_path;
         }
 
-        $dirtyCache = Gdn::dirtyCache();
+        $rough = Gdn::cache('rough');
 
         // load config.
-        if (!$dirtyCache->get('config-autoload')) {
+        if (!$rough->get('config-autoload')) {
             if($config_path = val(self::K_CONFIG, $addon)) {
                 Config::load($addon, $config_path);
             }
         }
 
         // load translations
-        if (!$dirtyCache->get('translations')) {
+        if (!$rough->get('translations')) {
             $locale = c('main.locale', 'en_US');
             $locale_path = val('dir', $addon)."/locale/$locale.php";
 

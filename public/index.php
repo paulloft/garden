@@ -2,8 +2,6 @@
 // Put your index.php in the Garden namespace or import the various classes you need.
 namespace Garden;
 
-$start = microtime();
-
 // Report and track all errors.
 error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR);
 ini_set('display_errors', 1);
@@ -23,5 +21,3 @@ $app->route('/(\?.*)?', '\\Addons\\Skeleton\\Controllers\\Skeleton');
 
 // Run the application.
 $app->run();
-
-echo microtime() - $start;

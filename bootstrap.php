@@ -22,4 +22,4 @@ Addons::bootstrap(); // enables config('addons')
 // Fire the bootstrap event so that overridable function files can be included.
 Event::fire('bootstrap');
 
-// Config::cache();
+Config::cache();

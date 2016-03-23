@@ -152,8 +152,8 @@ class Config {
     }
 
     public static function autoload($path = PATH_CONF) {
-        // $cached = Gdn::dirtyCache()->get('config-autoload');
-        // if(!$cached) {
+        $cached = Gdn::cache('rough')->get('config-autoload');
+        if(!$cached) {
             // load default configs from $coreConfig
             if($path !== self::$coreConfig) {
                 Config::autoload(self::$coreConfig);
@@ -172,14 +172,14 @@ class Config {
                     self::load($group, $file);
                 }
             }
-        // } else {
-        //     self::$data = $cached; 
-        // }
+        } else {
+            self::$data = $cached; 
+        }
     }
 
     public static function cache() {
-        // Gdn::dirtyCache()->cacheGet('config-autoload', function() {
-            return self::$data;
-        // });
+        if(!Gdn::cache('rough')->get('config-autoload')) {
+            Gdn::cache('rough')->set('config-autoload', self::$data);
+        }
     }
 }
