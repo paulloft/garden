@@ -166,8 +166,10 @@ class Addons {
             }
 
             global $translations;
-            if(!$translations = Gdn::cache('rough')->get('translations')) {
+            if(!$cached = Gdn::cache('rough')->get('translations')) {
                 Gdn::cache('rough')->set('translations', $translations);
+            } else {
+                $translations = $cached;
             }
 
         });
