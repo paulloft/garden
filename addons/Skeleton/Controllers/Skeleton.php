@@ -14,10 +14,10 @@ class Skeleton extends \Garden\Template
     }
 
     protected function pageInit() {
-        $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
-        $this->addJs('bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js');
+        $this->addJs('//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js', false, true);
+        $this->addJs('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js', false, true);
 
-        $this->addCss('bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css');
+        $this->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', false, true);
         $this->addCss('starter-template.css');
 
         $this->meta('X-UA-Compatible', 'IE=edge,chrome=1', true);

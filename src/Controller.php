@@ -8,7 +8,8 @@ class Controller extends Plugin {
     protected $data;
     protected $view;
     protected $controllerName;
-    protected $addonFolder;
+    protected $addonFolder = 'addons';
+    protected $addonName;
 
     // default view extention
     protected $viewExt = 'tpl';
@@ -17,7 +18,7 @@ class Controller extends Plugin {
 
     public function __construct()
     {
-        
+        $this->addonName = $this->controllerInfo('addon');
     }
 
     public function setData($key, $value = null)
@@ -41,27 +42,27 @@ class Controller extends Plugin {
         $this->setData('title', $title);
     }
 
-    public function setView($view = false, $controllerName = false, $addonFolder = false)
+    public function setView($view = false, $controllerName = false, $addonName = false)
     {
         $this->view = $view;
         $this->controllerName = $controllerName;
-        $this->addonFolder = $addonFolder;
+        $this->addonName = $addonName;
     }
 
-    public function render($view = false, $controllerName = false, $addonFolder = false)
+    public function render($view = false, $controllerName = false, $addonName = false)
     {
         Event::fire('beforeRender');
 
         $view = $view ?: $this->callerMethod();
-        $view = $this->fetchView($view, $controllerName, $addonFolder);
+        $view = $this->fetchView($view, $controllerName, $addonName);
         echo $view;
 
         Event::fire('afterRender');
     }
 
-    public function fetchView($view, $controllerName = false, $addonFolder = false)
+    public function fetchView($view, $controllerName = false, $addonName = false)
     {
-        $viewPath = $this->getViewPath($view, $controllerName, $addonFolder);
+        $viewPath = $this->getViewPath($view, $controllerName, $addonName);
         $realPath = realpath(PATH_ROOT.'/'.$viewPath);
 
         if(!is_file($realPath)) {
@@ -79,12 +80,12 @@ class Controller extends Plugin {
         return $view;
     }
 
-    public function getViewPath($view, $controllerName = false, $addonFolder = false)
+    public function getViewPath($view, $controllerName = false, $addonName = false)
     {
-        $addonFolder = $addonFolder ?: $this->addonFolder;
+        $addonName = $addonName ?: $this->addonName;
         $controllerName = $controllerName ?: $this->controllerName;
 
-        $addonFolder = $addonFolder ?: $this->controllerInfo('folder');
+        $addonFolder = $addonName ? $this->addonFolder.'/'.$addonName : $this->controllerInfo('folder');
         $controllerName = $controllerName ?: $this->controllerInfo('controller');
 
         if(str_ends($controllerName, 'controller')) {
