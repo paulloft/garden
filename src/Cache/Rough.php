@@ -1,7 +1,7 @@
 <?php
 namespace Garden\Cache;
 
-class Rough
+class Rough extends \Garden\Cache
 {
     protected $dirty;
 
@@ -12,23 +12,17 @@ class Rough
 
     protected function getFile($id)
     {
-        return "/$id.json";
+        return "$id.json";
     }
 
-    /**
-     * Retrieve a cached value entry by id.
-     *
-     * @param   string  $id       id of cache to entry
-     * @param   string  $default  default value to return if cache miss
-     * @return  mixed
-     */
     public function get($id, $default = false)
     {
         $file = $this->getFile($id);
+        $data = false;
+        
+        if(!self::$clear && !$data = $this->dirty->get($file)) {
 
-        if(!$data = $this->dirty->get($file)) {
-
-            $filePath = PATH_CACHE.$file;
+            $filePath = PATH_CACHE.'/'.$file;
 
             if(!is_file($filePath)) {
                 return $default;
@@ -44,13 +38,6 @@ class Rough
         return $data ?: $default;
     }
 
-        /**
-     * Set a value to cache with id and lifetime
-     *
-     * @param   string   $id        id of cache entry
-     * @param   string   $data      data to set to cache
-     * @return  boolean
-     */
     public function set($id, $data, $lifetime = 0)
     {
         $cacheData = json_encode($data, JSON_PRETTY_PRINT);
@@ -61,13 +48,35 @@ class Rough
 
         $file = $this->getFile($id);
 
-        $filePath = PATH_CACHE.$file;
+        $filePath = PATH_CACHE.'/'.$file;
 
         $result = file_put_contents($filePath, $cacheData);
         chmod($filePath, 0664);
 
-        $this->dirty->add($file, $data);
+        $this->dirty->set($file, $data);
 
         return (bool)$result;
     }
+
+    public function deleteAll()
+    {
+        $dir = scandir(PATH_CACHE);
+        $regexp = '/'.$this->getFile('([\w-_]+)').'/';
+        foreach ($dir as $filename) {
+            // echo $filename.'|';
+            if(preg_match($regexp, $filename)) {
+                $file = PATH_CACHE.'/'.$filename;
+                if(!is_dir($file)) {
+                    unlink($file);
+                }
+            }
+
+        }
+    }
+
+    public function add($id, $data, $lifetime = null){}
+
+    public function exists($id){}
+
+    public function delete($id){}
 }

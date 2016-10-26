@@ -1,13 +1,13 @@
 <?php
 
-function smarty_function_head($Params, &$Smarty) {
-    $vars  = valr('gdn.value', $Smarty->tpl_vars);
-    $title = val('title', $Smarty->tpl_vars);
+function smarty_function_head($params, &$smarty) {
+    $vars  = valr('gdn.value', $smarty->tpl_vars);
+    $title = val('title', $smarty->tpl_vars);
     $meta  = val('meta', $vars);
     $sitename = c('main.sitename');
     $separator = c('main.titleSeparator', '-');
     
-    $html = "<title>$title $separator $sitename</title>\n    ";
+    $html = "<title>".strip_tags($title.' '.$separator.' '.$sitename)."</title>\n    ";
 
     if(!empty($meta)){
         $c = count($meta);

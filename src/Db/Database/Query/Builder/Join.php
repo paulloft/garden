@@ -29,13 +29,14 @@ class Join extends Database\Query\Builder {
      * can be specified as the second parameter.
      *
      * @param   mixed   $table  column name or array($column, $alias) or object
+     * @param   string  $alias  table alias
      * @param   string  $type   type of JOIN: INNER, RIGHT, LEFT, etc
      * @return  void
      */
-    public function __construct($table, $type = NULL)
+    public function __construct($table, $alias = NULL, $type = NULL)
     {
         // Set the table to JOIN on
-        $this->_table = $table;
+        $this->_table = $alias ? array($table, $alias) : $table;
 
         if ($type !== NULL) {
             // Set the JOIN type

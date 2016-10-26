@@ -19,7 +19,7 @@ class NotFound extends Client {
      */
     public function __construct($message = 'Page', $description = null) {
         if (strpos($message, ' ') === false) {
-            $message = sprintf('%s not found.', $message);
+            $message = sprintf('%s not found', $message);
         }
 
         parent::__construct($message, 404, ['description' => $description]);

@@ -55,8 +55,9 @@ class File extends \Garden\Cache
     public function get($id, $default = false)
     {
         $fileName = $this->getFileName($id);
+        $data = false;
 
-        if(!$data = $this->dirty->get($fileName)) {
+        if(!self::$clear && !$data = $this->dirty->get($fileName)) {
 
             $file = $this->cacheDir."/".$fileName;
 
@@ -87,7 +88,7 @@ class File extends \Garden\Cache
     {
         $file = $this->cacheDir."/".$this->getFileName($id);
 
-        return is_file($file);
+        return (!self::$clear && is_file($file));
     }
 
     /**
@@ -118,6 +119,8 @@ class File extends \Garden\Cache
 
         $result = file_put_contents($cachePath, $cacheData);
         chmod($cachePath, 0664);
+
+        $this->dirty->set($fileName, $data);
 
         return (bool)$result;
     }
@@ -152,9 +155,18 @@ class File extends \Garden\Cache
      *
      * @return  boolean
      */
-    //TODO: Дописать
     public function deleteAll()
     {
+        $dir = scandir($this->cacheDir);
+        $regexp = '/([\w-_]+).cache/';
+        foreach ($dir as $filename) {
+            if(preg_match($regexp, $filename)) {
+                $file = $this->cacheDir.'/'.$filename;
+                if(!is_dir($file)) {
+                    unlink($file);
+                }
+            }
 
+        }
     }
 }

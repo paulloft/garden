@@ -30,6 +30,10 @@ class Application {
         self::$instances[$name] = $this;
     }
 
+    /**
+     * @param string $name
+     * @return self
+     */
     public static function instance($name = 'default') {
         if (!isset(self::$instances[$name])) {
             self::$instances[$name] = new Application($name);
@@ -158,6 +162,7 @@ class Application {
                 try {
                     // Dispatch the first matched route.
                     ob_start();
+                    Event::fire('dispatch');
                     $response = $route->dispatch($request, $args);
                     $body = ob_get_clean();
 
@@ -215,7 +220,12 @@ class Application {
 
         if ($result instanceof \Exception) {
             $response->flushHeaders();
-            throw $result;
+            $handler = Event::fire('exception', $result);
+            if($handler) {
+                $response->data($handler);
+            } else {
+                throw $result;
+            }
         }
 
         // Check for known response types.

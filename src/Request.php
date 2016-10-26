@@ -23,6 +23,10 @@ class Request implements JsonSerializable {
     const METHOD_DELETE = 'DELETE';
     const METHOD_OPTIONS = 'OPTIONS';
 
+    const RENDER_VIEW = 'view';
+    const RENDER_ALL  = 'all';
+    const RENDER_JSON = 'json';
+
     /// Properties ///
 
     /**
@@ -214,6 +218,10 @@ class Request implements JsonSerializable {
 
         // PATH_INFO.
         $path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+
+        if ($qpos = strpos($path, '?')) {
+            $path = substr($path, 0, $qpos);
+        }
 
         // Strip the extension from the path.
         list($path, $ext) = static::splitPathExt($path);
@@ -1033,5 +1041,24 @@ class Request implements JsonSerializable {
      */
     public function jsonSerialize() {
         return $this->env;
+    }
+
+    /**
+     * Get current render type
+     *
+     * @return string
+     */
+    public function renderType()
+    {
+        $type = val('renderType', $_REQUEST, 'all');
+
+        switch ($type) {
+            case self::RENDER_VIEW:
+                return self::RENDER_VIEW;
+            case self::RENDER_JSON:
+                return self::RENDER_JSON;
+            default:
+                return self::RENDER_ALL;
+        }
     }
 }

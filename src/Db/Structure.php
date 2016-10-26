@@ -1,21 +1,23 @@
 <?php
 namespace Garden\Db;
+
 use \Garden\Exception as Exception;
 use \Garden\Db\Database;
 use \Garden\Gdn;
+
 /**
  * Database Structure tools
- * 
+ *
  * Used by any given database driver to build, modify, and create tables and views.
  *
- * @author Todd Burry <todd@vanillaforums.com> 
+ * @author Todd Burry <todd@vanillaforums.com>
  * @copyright 2003 Vanilla Forums, Inc
  * @license http://www.opensource.org/licenses/gpl-2.0.php GPL
  * @package Garden
  * @since 2.0
  */
-
-abstract class Structure {
+abstract class Structure
+{
 
     public $database;
     public $capture = false;
@@ -31,7 +33,11 @@ abstract class Structure {
 
     public static $instances = array();
 
-    public static function instance($name = null) 
+    /**
+     * @param null $name
+     * @return $this
+     */
+    public static function instance($name = null)
     {
         if ($name === null) {
             // Use the default Database instance name
@@ -53,15 +59,16 @@ abstract class Structure {
      * @param string $database
      * @todo $database needs a description.
      */
-    public function __construct($database = null) {
-        if(is_null($database)) {
+    public function __construct($database = null)
+    {
+        if (is_null($database)) {
             $this->database = Gdn::database();
         } else {
             $this->database = $database;
         }
-        
+
         $this->prefix($this->database->tablePrefix());
-        
+
         $this->reset();
     }
 
@@ -70,13 +77,14 @@ abstract class Structure {
      *
      * @param string $name The name of the table.
      * @param string $encoding The default character encoding to specify for this table.
-     * @return Gdn_DatabaseStructure $this.
+     * @return $this $this.
      */
-    public function table($name = '', $encoding = '') {
-        if(!$name) {
+    public function table($name = '', $encoding = '')
+    {
+        if (!$name) {
             return $this->_table;
         }
-        
+
         $this->_table = $name;
         if ($encoding == '') {
             $encoding = $this->database->encoding();
@@ -86,18 +94,23 @@ abstract class Structure {
         return $this;
     }
 
-   /**
+    /**
      * Defines a primary key column on a table.
      *
      * @param string $name The name of the column.
      * @param string $type The data type of the column.
-     * @return Gdn_DatabaseStructure $this.
+     * @return $this.
      */
-    public function primary($name, $type = 'int(10)') {
-        $column = $this->createColumn($name, $type, false, null);
-        $column->autoIncrement = true;
+    public function primary($name, $type = 'int(10)')
+    {
+        $column = $this->createColumn($name, $type, false, null, 'primary');
+        $dataType = val('type', $this->dataType($column));
+
+        if ($dataType === 'int') {
+            $column->autoIncrement = true;
+        }
         $this->_columns[$name] = $column;
-        
+
         return $this;
     }
 
@@ -114,16 +127,17 @@ abstract class Structure {
      * * Any other value: Nulls are not allowed, and the specified value will be used as the default.
      * @param string $keyType What type of key is this column on the table? Options
      * are primary, key, and false (not a key).
-     * @return Gdn_DatabaseStructure $this.
+     * @return $this.
      */
-    public function column($name, $type, $nullDefault = false, $keyType = false) {
-        if(is_null($nullDefault) || $nullDefault === true) {
+    public function column($name, $type, $nullDefault = false, $keyType = false)
+    {
+        if (is_null($nullDefault) || $nullDefault === true) {
             $null = true;
             $default = null;
-        } elseif($nullDefault === false) {
+        } elseif ($nullDefault === false) {
             $null = false;
             $default = null;
-        } elseif(is_array($nullDefault)) {
+        } elseif (is_array($nullDefault)) {
             $null = val('null', $nullDefault);
             $default = val('default', $nullDefault, null);
         } else {
@@ -136,8 +150,8 @@ abstract class Structure {
         $keyTypes1 = array();
         foreach ($keyTypes as $keyType1) {
             $parts = explode('.', $keyType1, 2);
-            
-            if (in_array($parts[0], array('key', 'index', 'unique', 'fulltext', false)))
+
+            if (in_array($parts[0], array('primary', 'key', 'index', 'unique', 'fulltext', false)))
                 $keyTypes1[] = $keyType1;
         }
         if (count($keyTypes1) == 0) {
@@ -164,7 +178,8 @@ abstract class Structure {
      * @param boolean $drop If TRUE, and the table specified with $this->table() already exists, this
      * method will drop the table before attempting to re-create it.
      */
-    public function set($explicit = false, $drop = false) {
+    public function set($explicit = false, $drop = false)
+    {
         /// Throw an event so that the structure can be overridden.
         \Garden\Event::fire('beforeSet', $explicit, $drop);
 
@@ -204,8 +219,9 @@ abstract class Structure {
      * @param string $sql The sql to execute.
      * @return bool Whethor or not the query succeeded.
      */
-    public function query($sql, $type = Database::INSERT) {
-        if($this->capture) {
+    public function query($sql, $type = Database::INSERT)
+    {
+        if ($this->capture) {
             $this->_sql[] = $sql;
             return true;
         } else {
@@ -219,7 +235,8 @@ abstract class Structure {
      * @param string $prefix
      * @todo $prefix needs a description.
      */
-    public function prefix($prefix = '') {
+    public function prefix($prefix = '')
+    {
         if ($prefix != '') $this->_prefix = $prefix;
 
         return $this->_prefix;
@@ -228,14 +245,15 @@ abstract class Structure {
     /** Whether or not the table exists in the database.
      * @return bool
      */
-    public function tableExists($tablename = null) {
-        if($this->_tableExists === null || $tablename !== null) {
+    public function tableExists($tablename = null)
+    {
+        if ($this->_tableExists === null || $tablename !== null) {
             if ($tablename === null) {
                 $tablename = $this->tableName();
             }
 
-            if(strlen($tablename) > 0) {
-                $tables = $this->database->list_tables($this->_prefix.$tablename);
+            if (strlen($tablename) > 0) {
+                $tables = $this->database->list_tables($this->_prefix . $tablename);
                 $result = count($tables) > 0;
             } else {
                 $result = false;
@@ -251,7 +269,8 @@ abstract class Structure {
      *
      * @return string
      */
-    public function tableName() {
+    public function tableName()
+    {
         return $this->_table;
     }
 
@@ -260,7 +279,8 @@ abstract class Structure {
      * @param string $columnName The name of the column to check.
      * @return bool
      */
-    public function columnExists($columnName) {
+    public function columnExists($columnName)
+    {
         $columns = $this->existingColumns();
         $result = isset($columns[$columnName]);
         if (!$result) {
@@ -275,9 +295,10 @@ abstract class Structure {
     /** Gets the column definitions for the columns in the database.
      * @return array
      */
-    public function existingColumns() {
-        if($this->_existingColumns === null) {
-            if($this->tableExists()) {
+    public function existingColumns()
+    {
+        if ($this->_existingColumns === null) {
+            if ($this->tableExists()) {
                 $this->_existingColumns = $this->getColumns($this->_table);
             } else {
                 $this->_existingColumns = array();
@@ -290,12 +311,13 @@ abstract class Structure {
      * And associative array of $columnName => $columnProperties columns for the table.
      * @return array
      */
-    public function columns($name = '') {
+    public function columns($name = '')
+    {
         if (strlen($name) > 0) {
             if (isset($this->_columns[$name])) {
                 return $this->_columns[$name];
             } else {
-                foreach($this->_columns as $colname => $def) {
+                foreach ($this->_columns as $colname => $def) {
                     if (strcasecmp($name, $colname) == 0)
                         return $def;
                 }
@@ -307,10 +329,11 @@ abstract class Structure {
 
     /** Load the schema for this table from the database.
      * @param string $tablename The name of the table to get or blank to get the schema for the current table.
-     * @return Gdn_DatabaseStructure $this
+     * @return $this
      */
-    public function get($tablename = '') {
-        if($tablename) {
+    public function get($tablename = '')
+    {
+        if ($tablename) {
             $this->table($tablename);
         }
 
@@ -326,25 +349,26 @@ abstract class Structure {
      *  - <b>string</b<: The name of the column currently in this structure.
      * * @return string The type definition string.
      */
-    public function columnType($column) {
-        if(is_string($column))
+    public function columnType($column)
+    {
+        if (is_string($column))
             $column = $this->_columns[$column];
-        
+
         $type = val('type', $column);
         $length = val('length', $column);
         $precision = val('precision', $column);
 
-        if(in_array(strtolower($type), array('tinyint', 'smallint', 'mediumint', 'int', 'float', 'double'))) {
+        if (in_array(strtolower($type), array('tinyint', 'smallint', 'mediumint', 'int', 'float', 'double'))) {
             $length = null;
         }
 
-        if($type && $length && $precision) {
+        if ($type && $length && $precision) {
             $result = "$type($length, $precision)";
-        } elseif($type && $length) {
+        } elseif ($type && $length) {
             $result = "$type($length)";
-        } elseif(strtolower($type) == 'enum') {
+        } elseif (strtolower($type) == 'enum') {
             $result = val('enum', $column, array());
-        } elseif($type) {
+        } elseif ($type) {
             $result = $type;
         } else {
             $result = 'int';
@@ -366,7 +390,8 @@ abstract class Structure {
      *  - <b>other</b>: Types that don't fit into any other category on their own.
      *  - <b>all</b>: All recognized types.
      */
-    public function types($class = 'all') {
+    public function types($class = 'all')
+    {
         $date = array('datetime', 'date');
         $decimal = array('decimal', 'numeric');
         $float = array('float', 'double');
@@ -375,34 +400,46 @@ abstract class Structure {
         $length = array('varbinary');
         $other = array('enum', 'tinyblob', 'blob', 'mediumblob', 'longblob');
 
-        switch(strtolower($class)) {
-            case 'date':      return $date;
-            case 'decimal':   return $decimal;
-            case 'float':     return $float;
-            case 'int':       return $int;
-            case 'string':    return $string;
-            case 'other':     return array_merge($length, $other);
+        switch (strtolower($class)) {
+            case 'date':
+                return $date;
+            case 'decimal':
+                return $decimal;
+            case 'float':
+                return $float;
+            case 'int':
+                return $int;
+            case 'string':
+                return $string;
+            case 'other':
+                return array_merge($length, $other);
 
-            case 'numeric':   return array_merge($float, $int, $decimal);
-            case 'length':    return array_merge($string, $length, $decimal);
-            case 'precision': return $decimal;
+            case 'numeric':
+                return array_merge($float, $int, $decimal);
+            case 'length':
+                return array_merge($string, $length, $decimal);
+            case 'precision':
+                return $decimal;
 
-            default:    return array();
+            default:
+                return array();
         }
     }
 
     /**
      * Return captured sql query.
      */
-    public function capture() {
+    public function capture()
+    {
         return $this->_sql;
     }
 
 
     /** Reset the internal state of this object so that it can be reused.
-     * @return Gdn_DatabaseStructure $this
+     * @return $this
      */
-    public function reset() {
+    public function reset()
+    {
         $this->_encoding = '';
         $this->_columns = array();
         $this->_existingColumns = null;
@@ -412,27 +449,28 @@ abstract class Structure {
 
         return $this;
     }
-    
-    protected function createColumn($name, $type, $null, $default, $keyType) {
+
+    protected function createColumn($name, $type, $null, $default, $keyType)
+    {
         $length = '';
         $precision = '';
-        
+
         // Check to see if the type starts with a 'u' for unsigned.
-        if(is_string($type) && strncasecmp($type, 'u', 1) == 0) {
+        if (is_string($type) && strncasecmp($type, 'u', 1) == 0) {
             $type = substr($type, 1);
             $unsigned = true;
         } else {
             $unsigned = false;
         }
-        
+
         // Check for a length in the type.
-        if(is_string($type) && preg_match('/(\w+)\s*\(\s*(\d+)\s*(?:,\s*(\d+)\s*)?\)/', $type, $matches)) {
+        if (is_string($type) && preg_match('/(\w+)\s*\(\s*(\d+)\s*(?:,\s*(\d+)\s*)?\)/', $type, $matches)) {
             $type = $matches[1];
             $length = $matches[2];
-            if(count($matches) >= 4)
+            if (count($matches) >= 4)
                 $precision = $matches[3];
         }
-        
+
         $column = new \stdClass();
         $column->name = $name;
         $column->type = is_array($type) ? 'enum' : $type;
@@ -444,10 +482,10 @@ abstract class Structure {
         $column->keyType = $keyType;
         $column->unsigned = $unsigned;
         $column->autoIncrement = false;
-        
+
         // Handle enums and sets as types.
-        if(is_array($type)) {
-            if(count($type) === 2 && is_array(val(1, $type))) {
+        if (is_array($type)) {
+            if (count($type) === 2 && is_array(val(1, $type))) {
                 // The type is specified as the first element in the array.
                 $column->type = $type[0];
                 $column->enum = $type[1];
@@ -460,11 +498,12 @@ abstract class Structure {
             $column->type = $type;
             $column->enum = false;
         }
-        
+
         return $column;
     }
 
-    protected function getKeyType($key) {
+    protected function getKeyType($key)
+    {
         switch ($key) {
             case 'PRI':
                 return 'primary';
@@ -475,7 +514,7 @@ abstract class Structure {
             case 'MUL':
                 return 'index';
                 break;
-            
+
             default:
                 return false;
                 break;
@@ -484,11 +523,11 @@ abstract class Structure {
 
     protected function getColumns($table)
     {
-        $columns = $this->database->list_columns($this->_table);
+        $columns = $this->database->list_columns($table);
 
         $result = array();
         foreach ($columns as $name => $column) {
-            if(is_string($column->type) && strncasecmp($column->type, 'u', 1) == 0) {
+            if (is_string($column->type) && strncasecmp($column->type, 'u', 1) == 0) {
                 $unsigned = true;
             } else {
                 $unsigned = false;
@@ -512,8 +551,14 @@ abstract class Structure {
         return $result;
     }
 
-    protected function _query($sql) {
+    protected function _query($sql)
+    {
         return $this->database->query(Database::SELECT, $sql, true);
+    }
+
+    protected function dataType($column)
+    {
+        return $this->database->datatype($column->type);
     }
 
     /**
@@ -561,7 +606,7 @@ abstract class Structure {
      *
      * @param string $engine The name of engine.
      * @param boolean $checkAvailability If TRUE check engine availability
-     * @return Gdn_DatabaseStructure $this.
+     * @return $this.
      */
     abstract public function engine($engine, $checkAvailability = true);
 

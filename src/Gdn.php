@@ -5,37 +5,58 @@ namespace Garden;
  * Framework superobject
  *
  */
-class Gdn {
-    protected static $instances;
+class Gdn extends Plugin {
 
+    /**
+     * @param string $name
+     * @param array|null $config
+     * @return Db\Database
+     */
     public static function database($name = null, array $config = null)
     {
         return Db\Database::instance($name, $config);
     }
 
+    /**
+     * @param string $name
+     * @return DB\Structure
+     */
     public static function structure($name = false)
     {
         return Db\Structure::instance($name);
     }
 
+    /**
+     * @return Application
+     */
     public static function app()
     {
-        return self::factory('Application');
+        return self::factory('Garden\\Application');
     }
 
-    public static function request()
-    {
-        return Request::current();
-    }
-
+    /**
+     * @param string $driver
+     * @return Cache
+     */
     public static function cache($driver = null)
     {
         return Cache::instance($driver);
     }
 
+    /**
+     * @return Cache\Dirty
+     */
     public static function dirtyCache()
     {
         return Cache::instance('dirty');
+    }
+
+    /**
+     * @return Session
+     */
+    public static function session()
+    {
+        return Session::instance();
     }
 
     public static function response()
@@ -43,74 +64,28 @@ class Gdn {
         return Response::current();
     }
 
-    public static function factory($className)
+    public static function request()
     {
-        $args = func_get_args();
-        array_shift($args);
-        $hash = self::factoryHash($className, $args);
-        
-        if (!isset(self::$instances[$hash])) {
-            self::$instances[$hash] = self::_instantiateObject($className, $args);
-        }
-
-        return self::$instances[$hash];
+        return Request::current();
     }
 
-    protected static function factoryHash($className, $args = array())
-    {
-        return empty($args) ? $className : md5($className.implode('',$args));
-    }
-
-    /** 
-     * Instantiate a new object.
-     *
-     * @param string $className The name of the class to instantiate.
-     * @param array $args The arguments to pass to the constructor.
-     * Note: This function currently only supports a maximum of 8 arguments.
+    public static $translations = [];
+    /**
+     * @param string $code
+     * @param string $default
+     * @return string
      */
-    protected static function _instantiateObject($className, $args = array())
+    public static function translate($code, $default = null)
     {
-        $result = NULL;
-
-        //check namespace
-        $path = explode('\\', $className);
-        if(count($path) <= 1) {
-            $className = 'Garden\\'.$className; 
+        if (substr($code, 0, 1) === '@') {
+            return substr($code, 1);
+        } elseif (isset(self::$translations[$code])) {
+            return self::$translations[$code];
+        } elseif ($default !== null) {
+            return $default;
+        } else {
+            return $code;
         }
-
-        // Instantiate the object with the correct arguments.
-        // This odd looking case statement is purely for speed optimization.
-        switch(count($args)) {
-            case 0:
-                $result = new $className; break;
-            case 1:
-                $result = new $className($args[0]); break;
-            case 2:
-                $result = new $className($args[0], $args[1]); break;
-            case 3:
-                $result = new $className($args[0], $args[1], $args[2]); break;
-            case 4:
-                $result = new $className($args[0], $args[1], $args[2], $args[3]); break;
-            case 5:
-                $result = new $className($args[0], $args[1], $args[2], $args[3], $args[4]); break;
-            case 6:
-                $result = new $className($args[0], $args[1], $args[2], $args[3], $args[4], $args[5]); break;
-            case 7:
-                $result = new $className($args[0], $args[1], $args[2], $args[3], $args[4], $args[5], $args[6]); break;
-            case 8:
-                $result = new $className($args[0], $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7]); break;
-            default:
-                throw new Exception();
-        }
-
-        return $result;
     }
 
-    public static function exists($className)
-    {
-        $args = func_get_args();
-        array_shift($args);
-        $hash = self::factoryHash($className, $args);
-        return isset(self::$instances[$hash]);
-    }
 }

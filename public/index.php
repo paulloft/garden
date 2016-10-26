@@ -10,15 +10,11 @@ ini_set('track_errors', 1);
 // Define the root path of the application.
 define('PATH_PUBLIC', __DIR__);
 define('PATH_ROOT', realpath(PATH_PUBLIC.'/../'));
+// Debugging mode
+define('DEBUG', TRUE);
 
 // Require bootstrap.
 require_once PATH_ROOT.'/bootstrap.php';
 
-$app = Gdn::app();
-// Instantiate the application.
-
-// Register default controller.
-$app->route('/(\?.*)?', '\\Addons\\Skeleton\\Controllers\\Skeleton');
-
-// Run the application.
-$app->run();
+// Instantiate and run the application.
+Gdn::app()->run();

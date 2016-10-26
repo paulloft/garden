@@ -14,5 +14,6 @@ return [
         "1000" => true,
         "1002" => "set names 'utf8'" 
     ],
+    "identifier" => '`',
     "storageEngine" => "innodb"
 ];

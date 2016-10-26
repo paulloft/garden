@@ -63,8 +63,6 @@ class Addons {
      */
     public static $sharedEnvironment;
 
-    /// Methods ///
-
     /**
      * Get all of the available addons or a single addon from the available list.
      *
@@ -135,6 +133,7 @@ class Addons {
         if (!is_array($enabled_addons)) {
             $enabled_addons = config('main', 'addons', array());
         }
+
         // Reformat the enabled array into the form: array('addon_key' => 'addon_key')
         $enabled_keys = array_keys(array_change_key_case(array_filter($enabled_addons)));
         $enabled_keys = array_combine($enabled_keys, $enabled_keys);
@@ -149,10 +148,9 @@ class Addons {
             if (!isset($addon[self::K_CLASSES])) {
                 continue;
             }
-            foreach ($addon[self::K_CLASSES] as $class) {
-                list($class_name, $path) = $class;
-                if (str_ends($class_name, 'hooks')) {
-                    Event::bindClass($class_name);
+            foreach ($addon[self::K_CLASSES] as $className=>$path) {
+                if (str_ends($className, 'hooks')) {
+                    Event::bindClass($className);
                 }
             }
         }
@@ -160,16 +158,17 @@ class Addons {
         self::baseDir();
 
         Event::bind('bootstrap', function () {
+            $translations = Gdn::cache('rough')->get('translations');
+            if ($translations) {
+                Gdn::$translations = $translations;
+            }
             // Start each of the enabled addons.
             foreach (self::enabled() as $key => $value) {
                 static::startAddon($key);
             }
 
-            global $translations;
-            if(!$cached = Gdn::cache('rough')->get('translations')) {
-                Gdn::cache('rough')->set('translations', $translations);
-            } else {
-                $translations = $cached;
+            if(!$translations) {
+                Gdn::cache('rough')->set('translations', Gdn::$translations);
             }
 
         });
@@ -197,11 +196,7 @@ class Addons {
 
         // Now that the class map has been built return the result.
         if ($classname !== null) {
-            if (strpos($classname, '\\') === false) {
-                $basename = strtolower($classname);
-            } else {
-                $basename = strtolower(trim(strrchr($classname, '\\'), '\\'));
-            }
+            $basename = trim($classname, '\\');
 
             $row = val($basename, self::$classMap);
 
@@ -343,20 +338,14 @@ class Addons {
         array_touch('name', $info, $addon_key);
         array_touch('version', $info, '0.0');
 
-        // Look for the bootstrap.
-        $bootstrap = $dir.'/bootstrap.php';
-        if (!file_exists($bootstrap)) {
-            $bootstrap = null;
-        }
+        $settingsFiles = array(self::K_BOOTSTRAP, self::K_CONFIG);
 
-        $config = $dir.'/settings/config.php';
-        if (!file_exists($config)) {
-            $config = null;
+        foreach ($settingsFiles as $file) {
+            $$file = self::checkFile($dir.'/settings', $file);
         }
-
 
         // Scan the appropriate subdirectories  for classes.
-        $subdirs = array('', '/library', '/modules', '/hooks');
+        $subdirs = array('', '/library', '/modules', '/settings');
         $classes = array();
         foreach ($subdirs as $subdir) {
             // Get all of the php files in the subdirectory.
@@ -367,13 +356,12 @@ class Addons {
                     if (isset($namespace_row['namespace']) && $namespace_row) {
                         $namespace = rtrim($namespace_row['namespace'], '\\').'\\';
                         $namespace_classes = $namespace_row['classes'];
-                    } else {
-                        $namespace = '';
-                        $namespace_classes = $namespace_row;
-                    }
 
-                    foreach ($namespace_classes as $class_row) {
-                        $classes[strtolower($class_row['name'])] = [$namespace.$class_row['name'], $path];
+                        foreach ($namespace_classes as $class_row) {
+                            $classes[$namespace.$class_row['name']] = $path;
+                        }
+                    } else {
+                        $classes[$namespace_row[0]['name']] = $path;
                     }
                 }
             }
@@ -381,13 +369,19 @@ class Addons {
 
         $addon = array(
             self::K_BOOTSTRAP => $bootstrap,
-            self::K_CONFIG => $config,
-            self::K_CLASSES => $classes,
-            self::K_DIR => $dir,
-            self::K_INFO => $info
+            self::K_CONFIG    => $config,
+            self::K_CLASSES   => $classes,
+            self::K_DIR       => $dir,
+            self::K_INFO      => $info
         );
 
         return array($addon_key, $addon);
+    }
+
+    protected static function checkFile($dir, $filename)
+    {
+        $file = $dir.'/'.$filename.'.php';
+        return (!file_exists($file) ? null : $file);
     }
 
     /**
@@ -494,17 +488,12 @@ class Addons {
             return false;
         }
 
-        // Run the class' bootstrap.
-        if ($bootstrap_path = val(self::K_BOOTSTRAP, $addon)) {
-            include_once $bootstrap_path;
-        }
-
         $rough = Gdn::cache('rough');
 
         // load config.
         if (!$rough->get('config-autoload')) {
             if($config_path = val(self::K_CONFIG, $addon)) {
-                Config::load($addon, $config_path);
+                Config::load($addon_key, $config_path);
             }
         }
 
@@ -514,9 +503,14 @@ class Addons {
             $locale_path = val('dir', $addon)."/locale/$locale.php";
 
             if (file_exists($locale_path)) {
-                global $translations;
-                require_once $locale_path;
+                $translations = include $locale_path;
+                Gdn::$translations = array_merge(Gdn::$translations, $translations);
             }
+        }
+
+        // Run the class' bootstrap.
+        if ($bootstrap_path = val(self::K_BOOTSTRAP, $addon)) {
+            include_once $bootstrap_path;
         }
 
         return true;

@@ -9,9 +9,9 @@ function smarty_function_javascript($Params, &$Smarty) {
     $html = '';
     $c = count($js);
     $i = 0;
-    foreach ($js as $src) {
+    foreach ($js as $id=>$src) {
         $i++;
-        $html .= '<script src="'.$src.'?v='.$version.'" type="text/javascript"></script>'.($i == $c ? null : "\n    ");
+        $html .= '<script src="'.$src.'?v='.$version.'" type="text/javascript" id="'.$id.'"></script>'.($i == $c ? null : "\n    ");
     }
 
     return $html;

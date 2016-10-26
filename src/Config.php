@@ -37,7 +37,7 @@ class Config {
      */
     protected static $defaultPath;
 
-    protected static $coreConfig = PATH_ROOT.'/src/conf';
+    protected static $coreConfig = PATH_SRC.'/conf';
 
     /// Methods ///
 
@@ -106,7 +106,7 @@ class Config {
             return;
         }
 
-        if (!is_array(self::$data[$group])) {
+        if (!isset(self::$data[$group])) {
             self::$data[$group] = [];
         }
 
@@ -151,6 +151,10 @@ class Config {
         return $result;
     }
 
+    /**
+     * Autoad config
+     * @param string $path
+     */
     public static function autoload($path = PATH_CONF) {
         $cached = Gdn::cache('rough')->get('config-autoload');
         if(!$cached) {
@@ -177,6 +181,9 @@ class Config {
         }
     }
 
+    /**
+     * caching all configs
+     */
     public static function cache() {
         if(!Gdn::cache('rough')->get('config-autoload')) {
             Gdn::cache('rough')->set('config-autoload', self::$data);

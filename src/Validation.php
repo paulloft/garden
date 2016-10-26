@@ -1,217 +1,237 @@
 <?php
-/**
- * @author Todd Burry <todd@vanillaforums.com>
- * @copyright 2009-2014 Vanilla Forums Inc.
- * @license MIT
- */
-
 namespace Garden;
 
-/**
- * An class for collecting validation errors.
- */
-class Validation {
-    /// Properties ///
+class Validation
+{
+    protected $model;
+    protected $data;
 
+    protected $rule = [];
     protected $errors = [];
 
-    protected $mainMessage;
+    public $validated = false;
 
-    protected $status;
-
-    /// Methods ///
-
-    /**
-     * Initialize an instance of the {@link Validation} class.
-     *
-     * @param array $errors An array of errors.
-     * @param string $mainMessage The main message of the error.
-     * @param int $status The http status code of the error or 0 to build the status code from the indivdual errors.
-     */
-    public function __construct(array $errors = [], $mainMessage = '', $status = 0) {
-        $this->errors = $errors;
-        $this->mainMessage = $mainMessage;
-        $this->status = $status;
+    function __construct($model = false)
+    {
+        $this->model = $model;
     }
 
     /**
-     * Gets the error message from an error.
-     *
-     * Errors are stored with either a message or a translation code.
-     * This method will look at both to determine the full message.
-     *
-     * @param array $error The error array.
-     * @return string Returns the message from the error.
+     * Return table columns
+     * @return array
      */
-    public static function errorMessage(array $error) {
-        if (isset($error['message'])) {
-            return $error['message'];
-        } else {
-            $field = val('field', $error, '*');
-            if (is_array($field)) {
-                $field = implode(', ', $field);
+    public function getStructure()
+    {
+        return $this->model ? $this->model->getStructure() : false;
+    }
+
+    /**
+     * Return validation errors in an array
+     * @return array
+     */
+    public function errors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * set data from validation
+     * @param array $data
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * set user error for $field
+     * @param string $field
+     * @param string $error
+     */
+    public function addError($field, $error)
+    {
+        $this->errors[$field][] = $error;
+    }
+
+    /**
+     * clear all errors
+     */
+    public function clearErrors()
+    {
+        $this->errors = [];
+    }
+
+    /**
+     * set custom validation errors of array
+     * @param array $errors
+     */
+    public function addValidationResult($errors)
+    {
+        foreach ($errors as $field => $errors) {
+            foreach ($errors as  $error) {
+                $this->addError($field, $error);
             }
-            return sprintft($error['code'].': %s.', $field);
         }
     }
 
     /**
-     * Add an error.
-     *
-     * @param string $messageCode The message translation code.
-     * If you add a message that starts with "@" then no translation will take place.
-     * @param string|array $field The name of the field to add or an array of fields if the error applies to
-     * more than one field.
-     * @param int|array $options An array of additional information to add to the error entry or a numeric error code.
-     * @return Validation Returns $this for fluent calls.
+     * Add validation rule for field
+     * @param string $field
+     * @param string $rule
+     * @param mixed $params
+     * @param string $message
+     * @return $this
      */
-    public function addError($messageCode, $field = '*', $options = []) {
-        $error = [];
-        if (substr($messageCode, 0, 1) === '@') {
-            $error['message'] = substr($messageCode, 1);
-        } else {
-            $error['code'] = $messageCode;
-        }
-        if (is_array($field)) {
-            $fieldname = array_select(['path', 'name'], $field);
-
-            if ($fieldname) {
-                // This is a full field object.
-                $fieldKey = $fieldname;
-                $error['field'] = $fieldKey;
-            } else {
-                $fieldKey = '*';
-                $error['field'] = $field;
-            }
-        } else {
-            $fieldKey = $field;
-            if ($field !== '*') {
-                $error['field'] = $field;
-            }
-        }
-
-        if (is_array($options)) {
-            $error += $options;
-        } else if (is_int($options)) {
-            $error['status'] = $options;
-        }
-
-        $this->errors[$fieldKey][] = $error;
+    public function rule($field, $rule, $params = null, $message = false)
+    {
+        $this->rule[$field][] = array(
+            'type' => $rule,
+            'params' => $params,
+            'message' => $message
+        );
 
         return $this;
     }
 
     /**
-     * Gets the main error message for the validation.
-     *
-     * @param string|null $value Pass a new main message or null to get the current main message.
-     * @return Validation|string Returns the main message or $this for fluent sets.
+     * validate data
+     * @param array $data
+     * @return bool|void
      */
-    public function mainMessage($value = null) {
-        if ($value !== null) {
-            $this->mainMessage = $value;
-            return $this;
-        }
+    public function validate($data = false)
+    {
+        if (!$this->validated) {
+            if ($data) {
+                $this->setData($data);
+            }
 
-        return $this->mainMessage;
+            if (!is_array($this->data)) {
+                return;
+            }
+
+            if ($this->model) {
+                $this->checkStructure();
+            }
+
+            $this->checkRules();
+            $this->validated = true;
+        }
+        
+        return empty($this->errors);
     }
 
     /**
-     * Get or set the error status code.
-     *
-     * The status code is an http resonse code and should be of the 4xx variety.
-     *
-     * @param int|null $value Pass a new status code or null to get the current code.
-     * @return Validation|int Returns the current status code or $this for fluent sets.
+     * check on an empty value
+     * @param $value
+     * @return bool
      */
-    public function status($value = null) {
-        if ($value !== null) {
-            $this->status = $value;
-            return $this;
-        }
-        if ($this->status) {
-            return $this->status;
-        }
+    protected function isEmpty($value)
+    {
+        return is_null($value) OR $value === '';
+    }
 
-        // There was no status so loop through the errors and look for the highest one.
-        $maxStatus = 400;
-        foreach ($this->errors as $field => $errors) {
-            foreach ($errors as $error) {
-                if (isset($error['status']) && $error['status'] > $maxStatus) {
-                    $maxStatus = $error['status'];
+    protected function checkStructure()
+    {
+        $structure = $this->getStructure();
+
+        foreach ($structure as $field => $opt) {
+            if(!array_key_exists($field, $this->data)) continue;
+
+            $value = val($field, $this->data);
+            if (is_array($value)) {
+                $this->errors[$field][] = t('validate_wrong_type_data');
+                continue;
+            }
+            $value = trim($value);
+
+
+            $length = intval($opt->length);
+            if (!empty($length)) {
+                $len = mb_strlen($value);
+                if ($len > $length) {
+                    $this->errors[$field][] = t_sprintf('validate_max_length', $length);
+                    continue;
                 }
             }
+
+            if (!$opt->autoIncrement && is_null($opt->default) && !$opt->allowNull && $this->isEmpty($value)) {
+                $this->errors[$field][] = t('validate_not_empty');
+                continue;
+            }
+
+            switch ($opt->dataType) {
+                case "int":
+                case "bigint":
+                    if (!$this->isEmpty($value) && !ctype_digit($value)) {
+                        $this->errors[$field][] = t('validate_int');
+                        continue;
+                    }
+                    break;
+
+                case"double":
+                    if (!$this->isEmpty($value) && !is_double($value)) {
+                        $this->errors[$field][] = t('validate_double');
+                        continue;
+                    }
+                    break;
+
+                case"float":
+                    if (!$this->isEmpty($value) && !is_numeric($value)) {
+                        $this->errors[$field][] = t('validate_float');
+                        continue;
+                    }
+                    break;
+
+                case"date":
+                case"datetime":
+                case"timestamp":
+                    if (!$this->isEmpty($value) && !validate_sql_date($value)) {
+                        $this->errors[$field][] = t('validate_sql_date');
+                        continue;
+                    }
+                    break;
+
+                default:
+                    continue;
+                    break;
+
+            }
         }
-        return $maxStatus;
     }
 
-    /**
-     * Get the message for this exception.
-     *
-     * @return string Returns the exception message.
-     */
-    public function getMessage() {
-        if ($this->mainMessage) {
-            return $this->mainMessage;
-        }
+    protected function checkRules()
+    {
+        if (empty($this->rule)) return true;
 
-        // Generate the message by concatenating all of the errors together.
-        $messages = [];
-        foreach ($this->errors as $errors) {
-            foreach ($errors as $error) {
-                $field = val('field', $error, '*');
-                if (is_array($field)) {
-                    $field = implode(', ', $field);
-                }
+        foreach ($this->rule as $field => $rules) {
+            foreach ($rules as $opt) {
+                $type    = val('type', $opt);
+                $message = val('message', $opt);
+                $params  = val('params', $opt);
 
-                if (isset($error['message'])) {
-                    $message = $error['message'];
-                } elseif (strpos($error['code'], '%s') === false) {
-                    $message = sprintft($error['code'].': %s.', $field);
+                $value = val($field, $this->data);
+                $value = trim($value);
+
+                if(is_array($type)) {
+                    $ruleFunc = array($type[0], $type[1]);
+                    $type = $type[1];
                 } else {
-                    $message = sprintft($error['code'], $field);
+                    $ruleFunc =  'validate_' . $type;
                 }
 
-                $messages[] = $message;
+                if(!$this->isEmpty($value) OR $type === 'not_empty') {
+                    if (!call_user_func($ruleFunc, $value, $params)) {
+                        if (is_array($message)) {
+                            $field = val(0, $message);
+                            $message = val(1, $message);
+                            $error = array(t($field), vsprintf(t($message ?: 'validate_'.$type), $params));
+                        } else {
+                            $error = vsprintf(t($message ?: 'validate_'.$type), $params);
+                        }
+                        $this->errors[$field][] = $error;
+                    }
+                }
             }
         }
-        return implode(' ', $messages);
-    }
-
-    /**
-     * Gets all of the errors as a flat array.
-     *
-     * The errors are internally stored indexed by field. This method flattens them for final error returns.
-     *
-     * @return array Returns all of the errors.
-     */
-    public function getErrorsFlat() {
-        $result = [];
-        foreach ($this->errors as $errors) {
-            foreach ($errors as $error) {
-                $result[] = $error;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * Check whether or not the validation is free of errors.
-     *
-     * @return bool Returns true if there are no errors, false otherwise.
-     */
-    public function isValid() {
-        return count($this->errors) === 0;
-    }
-
-    /**
-     * Check whether or not a particular field is has errors.
-     *
-     * @param string $field The name of the field to check for validity.
-     * @return bool Returns true if the field has no errors, false otherwise.
-     */
-    public function fieldValid($field) {
-        $result = !isset($this->errors[$field]) || count($this->errors[$field]) === 0;
-        return $result;
     }
 }

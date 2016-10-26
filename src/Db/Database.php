@@ -441,10 +441,10 @@ abstract class Database
         } elseif ($value === FALSE) {
             return "'0'";
         } elseif (is_object($value)) {
-            if ($value instanceof Database_Query) {
+            if ($value instanceof Database\Query) {
                 // Create a sub-query
                 return '('.$value->compile($this).')';
-            } elseif ($value instanceof Database_Expression) {
+            } elseif ($value instanceof Database\Expression) {
                 // Compile the expression
                 return $value->compile($this);
             } else {
@@ -492,15 +492,22 @@ abstract class Database
             $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
         }
 
-        if ($column instanceof Database_Query) {
+        if ($column instanceof Database\Query) {
             // Create a sub-query
             $column = '('.$column->compile($this).')';
-        } elseif ($column instanceof Database_Expression) {
+        } elseif ($column instanceof Database\Expression) {
             // Compile the expression
             $column = $column->compile($this);
         } else {
             // Convert to a string
             $column = (string) $column;
+
+            // $apos = stripos($column, ' AS ');
+            // if ($apos !== FALSE) {
+            //     $alias = trim(substr($column, ($apos+4)));
+            //     $column = trim(substr($column, 0, $apos));
+            //     $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            // }
 
             $column = str_replace($this->_identifier, $escaped_identifier, $column);
 
@@ -563,15 +570,22 @@ abstract class Database
             $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
         }
 
-        if ($table instanceof Database_Query) {
+        if ($table instanceof Database\Query) {
             // Create a sub-query
             $table = '('.$table->compile($this).')';
-        } elseif ($table instanceof Database_Expression) {
+        } elseif ($table instanceof Database\Expression) {
             // Compile the expression
             $table = $table->compile($this);
         } else  {
             // Convert to a string
             $table = (string) $table;
+
+            // $apos = stripos($table, ' as ');
+            // if ($apos !== FALSE) {
+            //     $alias = substr($table, ($apos+4));
+            //     $table = substr($table, 0, $apos);
+            //     $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            // }
 
             $table = str_replace($this->_identifier, $escaped_identifier, $table);
 
@@ -627,10 +641,10 @@ abstract class Database
             $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
         }
 
-        if ($value instanceof Database_Query) {
+        if ($value instanceof Database\Query) {
             // Create a sub-query
             $value = '('.$value->compile($this).')';
-        } elseif ($value instanceof Database_Expression) {
+        } elseif ($value instanceof Database\Expression) {
             // Compile the expression
             $value = $value->compile($this);
         }  else  {

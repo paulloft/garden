@@ -57,7 +57,7 @@ class Query {
         try {
             // Return the SQL string
             return $this->compile(Database::instance());
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return \Exception::text($e);
         }
     }

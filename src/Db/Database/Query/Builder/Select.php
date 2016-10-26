@@ -42,14 +42,16 @@ class Select extends Where {
     /**
      * Sets the initial columns to select from.
      *
-     * @param   array  $columns  column list
+     * @param   mixed  $column  column name or array($column, $alias) or object
+     * @param   string $alias   columns alias
      * @return  void
      */
-    public function __construct(array $columns = NULL)
+    public function __construct($column = NULL, $alias = NULL)
     {
-        if ( ! empty($columns)) {
+        if ( ! empty($column)) {
             // Set the initial columns
-            $this->_select = $columns;
+            $column = $alias ? array($column, $alias) : $column;
+            $this->_select = [$column];
         }
 
         // Start the query with no actual SQL statement
@@ -72,14 +74,14 @@ class Select extends Where {
     /**
      * Choose the columns to select from.
      *
-     * @param   mixed  $columns  column name or array($column, $alias) or object
+     * @param   mixed  $column  column name or array($column, $alias) or object
+     * @param   string $alias   columns alias
      * @return  $this
      */
-    public function select($columns = NULL)
+    public function select($column = NULL, $alias = NULL)
     {
-        $columns = func_get_args();
-
-        $this->_select = array_merge($this->_select, $columns);
+        $column = $alias ? array($column, $alias) : $column;
+        $this->_select[] = $column;
 
         return $this;
     }
@@ -101,13 +103,14 @@ class Select extends Where {
      * Choose the tables to select "FROM ..."
      *
      * @param   mixed  $table  table name or array($table, $alias) or object
+     * @param   string $alias  table alias
      * @return  $this
      */
-    public function from($tables)
+    public function from($table, $alias = NULL)
     {
-        $tables = func_get_args();
+        $table = $alias ? array($table, $alias) : $table;
 
-        $this->_from = array_merge($this->_from, $tables);
+        $this->_from[] = $table;
 
         return $this;
     }
@@ -116,12 +119,13 @@ class Select extends Where {
      * Adds addition tables to "JOIN ...".
      *
      * @param   mixed   $table  column name or array($column, $alias) or object
+     * @param   string  $alias  table alias
      * @param   string  $type   join type (LEFT, RIGHT, INNER, etc)
      * @return  $this
      */
-    public function join($table, $type = NULL)
+    public function join($table, $alias = NULL, $type = NULL)
     {
-        $this->_join[] = $this->_last_join = new Join($table, $type);
+        $this->_join[] = $this->_last_join = new Join($table, $alias, $type);
 
         return $this;
     }

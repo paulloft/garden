@@ -65,7 +65,7 @@ class MySQLi extends SQL {
                 $this->_connection = new mysqli($hostname, $username, $password, $database, $port, $socket);
             }
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             // No connection exists
             $this->_connection = NULL;
@@ -115,7 +115,7 @@ class MySQLi extends SQL {
                 }
             }
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             // Database is probably not disconnected
             $status = ! is_resource($this->_connection);

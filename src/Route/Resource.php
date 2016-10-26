@@ -6,9 +6,8 @@
  */
 
 namespace Garden\Route;
-use Garden\Exception as Exception;
+use Garden\Exception;
 use Garden\Request;
-use Garden\Application;
 use Garden\Addons;
 use Garden\Event;
 
@@ -60,7 +59,7 @@ class Resource extends \Garden\Route {
         $method = strtolower($args['method']);
         $actionArgs = $args['args'];
         $action = $args['action'];
-        $actions = ['get' => 'index', 'post' => 'post', 'options' => 'options'];
+        $actions = ['get' => 'index', 'post' => 'post', 'options' => 'options', 'delete' => 'delete'];
 
         $initialize = method_exists($controller, 'initialize');
 
@@ -69,11 +68,10 @@ class Resource extends \Garden\Route {
             $allowed = array_keys($actions);
             throw new Exception\MethodNotAllowed($method, $allowed);
         }
-
         if (!$action) {
             $action = $this->actionExists($controller, $actions[$method]);
         } else {
-            $action = $this->actionExists($controller, $action, $method, true);
+            $action = $this->actionExists($controller, $action, $method, false);
         }
 
         if(!$action) {
@@ -114,13 +112,18 @@ class Resource extends \Garden\Route {
             }
         }
 
+        $request->setEnv('ACTION', $action);
+        $request->setEnv('CONTROLLER', $args['controller']);
+
+        $response = \Garden\Response::create();
+
         if ($initialize) {
             $initArgs = array_merge(['action' => $action], $actionArgs);
             Event::callUserFuncArray([$controller, 'initialize'], $initArgs);
         }
 
         $result = Event::callUserFuncArray([$controller, $action], $actionArgs);
-        return $result;
+        return $result ?: \Garden\Response::current();
     }
 
     /**
@@ -146,6 +149,7 @@ class Resource extends \Garden\Route {
      * @return string Returns the name of the action method or an empty string if it doesn't exist.
      */
     protected function actionExists($object, $action, $method = '', $special = false) {
+        // p($object, $action);
         if ($special && in_array($action, self::$specialActions)) {
             return '';
         }
@@ -156,7 +160,7 @@ class Resource extends \Garden\Route {
         }
 
         if ($method && $method !== $action) {
-            $calledAction = $method.$action;
+            $calledAction = $method.'_'.$action;
             if (Event::methodExists($object, $calledAction)) {
                 return $calledAction;
             }
@@ -192,10 +196,10 @@ class Resource extends \Garden\Route {
             return $allMethods;
         }
 
-        // Loop through all the methods and check to see if they exist in the form $method.$action.
+        // Loop through all the methods and check to see if they exist in the form $method.'_'.$action.
         $allowed = [];
         foreach ($allMethods as $method) {
-            if (Event::methodExists($object, $method.$action)) {
+            if (Event::methodExists($object, $method.'_'.$action)) {
                 $allowed[] = $method;
             }
         }
@@ -210,7 +214,7 @@ class Resource extends \Garden\Route {
      * @return array|null Whether or not the route matches the request.
      * If the route matches an array of args is returned, otherwise the function returns null.
      */
-    public function matches(Request $request, Application $app) {
+    public function matches(Request $request, \Garden\Application $app) {
         if (!$this->matchesMethods($request)) {
             return null;
         }
@@ -218,7 +222,7 @@ class Resource extends \Garden\Route {
         if ($this->getMatchFullPath()) {
             $path = $request->getFullPath();
         } else {
-            $path = $request->getPath();
+            $path = $request->getPathExt();
         }
 
         $regex = $this->getPatternRegex($this->pattern());

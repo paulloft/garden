@@ -58,7 +58,7 @@ class MySQL extends SQL {
                 $this->_connection = mysql_connect($hostname, $username, $password, TRUE);
             }
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             // No connection exists
             $this->_connection = NULL;
@@ -129,7 +129,7 @@ class MySQL extends SQL {
                 }
             }
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             // Database is probably not disconnected
             $status = ! is_resource($this->_connection);

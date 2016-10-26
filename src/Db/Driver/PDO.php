@@ -133,9 +133,9 @@ class PDO extends SQL {
 
         try  {
             $result = $this->_connection->query($sql);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Convert the exception in a database exception
-            throw new Exception\Custom('%s [ %s ]',array($e->getMessage(), $sql), $e->getCode());
+            throw new Exception\Custom("%s \n[ %s ]", array($e->getMessage(), $sql), $e->getCode());
         }
 
         // Set the last query

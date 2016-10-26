@@ -39,7 +39,7 @@ class DB {
      *
      * @param   integer  $type  type: Database::SELECT, Database::UPDATE, etc
      * @param   string   $sql   SQL statement
-     * @return  Database_Query
+     * @return  Query
      */
     public static function query($type, $sql)
     {
@@ -57,11 +57,11 @@ class DB {
      *     $query = DB::select(array('id', 'user_id'));
      *
      * @param   mixed   $columns  column name or array($column, $alias) or object
-     * @return  Database_Query_Builder_Select
+     * @return  Query\Builder\Select
      */
-    public static function select($columns = NULL)
+    public static function select($column = NULL, $alias = NULL)
     {
-        return new Query\Builder\Select(func_get_args());
+        return new Query\Builder\Select($column, $alias);
     }
 
     /**
@@ -71,7 +71,7 @@ class DB {
      *     $query = DB::select_array(array('id', 'username'));
      *
      * @param   array   $columns  columns to select
-     * @return  Database_Query_Builder_Select
+     * @return  Query\Builder\Select
      */
     public static function select_array(array $columns = NULL)
     {
@@ -86,7 +86,7 @@ class DB {
      *
      * @param   string  $table    table to insert into
      * @param   array   $columns  list of column names or array($column, $alias) or object
-     * @return  Database_Query_Builder_Insert
+     * @return  Query\Builder\Insert
      */
     public static function insert($table = NULL, array $columns = NULL)
     {
@@ -100,7 +100,7 @@ class DB {
      *     $query = DB::update('users');
      *
      * @param   string  $table  table to update
-     * @return  Database_Query_Builder_Update
+     * @return  Query\Builder\Update
      */
     public static function update($table = NULL)
     {
@@ -114,7 +114,7 @@ class DB {
      *     $query = DB::delete('users');
      *
      * @param   string  $table  table to delete from
-     * @return  Database_Query_Builder_Delete
+     * @return  Query\Builder\Delete
      */
     public static function delete($table = NULL)
     {
@@ -131,7 +131,7 @@ class DB {
      *
      * @param   string  $string  expression
      * @param   array   parameters
-     * @return  Database_Expression
+     * @return  Db\Database\Expression
      */
     public static function expr($string, $parameters = array())
     {

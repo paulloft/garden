@@ -24,7 +24,7 @@ class Memcache extends \Garden\Cache
 
         $this->host = val('host', $config, $this->host);
         $this->port = val('port', $config, $this->port);
-        $this->prefix = val('port', $config, $this->prefix);
+        $this->prefix = val('keyPrefix', $config, $this->prefix);
 
         $this->salt = c('main.hashsalt', 'gdn');
 
@@ -51,7 +51,9 @@ class Memcache extends \Garden\Cache
     public function get($id, $default = false)
     {
         $id = $this->fixID($id);
-        if(!$result = $this->dirty->get($id)) {
+        $result = false;
+        
+        if(!self::$clear && !$result = $this->dirty->get($id)) {
             $result = $this->cache->get($id);
             //save to temporary cache
             $this->dirty->add($id, $result);
@@ -63,7 +65,7 @@ class Memcache extends \Garden\Cache
     {
         if(is_null($lifetime)) $lifetime = $this->lifetime;
         $id = $this->fixID($id);
-        $this->dirty->delete($id);
+        $this->dirty->set($id, $data);
 
         return $this->cache->set($id, $data, MEMCACHE_COMPRESSED, intval($lifetime));
     }

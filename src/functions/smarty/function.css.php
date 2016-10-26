@@ -9,9 +9,9 @@ function smarty_function_css($Params, &$Smarty) {
     $html = '';
     $c = count($css);
     $i = 0;
-    foreach ($css as $src) {
+    foreach ($css as $id=>$src) {
         $i++;
-        $html .= '<link href="'.$src.'" rel="stylesheet" type="text/css" />'.($i == $c ? null : "\n    ");
+        $html .= '<link href="'.$src.'?v='.$version.'" rel="stylesheet" type="text/css" id="'.$id.'" />'.($i == $c ? null : "\n    ");
     }
 
     return $html;

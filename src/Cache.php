@@ -4,7 +4,7 @@ use \Garden\Exception as Exception;
 /**
 * 
 */
-abstract class Cache extends Plugin
+abstract class Cache
 {
     const DEFAULT_LIFETIME = 3600;
 
@@ -15,15 +15,26 @@ abstract class Cache extends Plugin
     public static $instances = array();
     public static $enabled = true;
 
+    protected static $clear = false;
+
+    /**
+     * get singletone cache class
+     * @param string $driver driver name
+     * @return self
+     * @throws Exception\Custom
+     */
     public static function instance($driver = null)
     {
-        $options = c('main.cache');
-        self::$enabled = val('enabled', $options);
+        self::$clear = NOCACHE;
+        if($driver !== 'rough') {
+            $options = c('main.cache');
+            self::$enabled = val('enabled', $options);
 
-        if(!self::$enabled) {
-            $driver = 'dirty';
-        } elseif(!$driver) {
-            $driver = val('defaultDriver', $options, self::$default);
+            if(!self::$enabled) {
+                $driver = 'dirty';
+            } elseif(!$driver) {
+                $driver = val('defaultDriver', $options, self::$default);
+            }
         }
 
         if (isset(self::$instances[$driver])) {

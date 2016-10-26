@@ -162,7 +162,7 @@ class Response implements JsonSerializable {
      * @param mixed $result The result to create the response from.
      * @return Response Returns a {@link Response} object.
      */
-    public static function create($result) {
+    public static function create($result = false) {
         if ($result instanceof Response) {
             return $result;
         } elseif ($result instanceof Exception\Response) {
@@ -199,6 +199,9 @@ class Response implements JsonSerializable {
                 } else {
                     // This is a dispatched response.
                     $response = static::create($resultResponse);
+                    if(isset($result['body'])) {
+                        $response->data($result['body']);
+                    }
                 }
 
                 // Set the rest of the result to the response context.

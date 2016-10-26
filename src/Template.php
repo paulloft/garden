@@ -3,150 +3,168 @@ namespace Garden;
 
 class Template extends Controller {
 
-    // default js && css folders
-    public $jsFolder  = 'js';
-    public $cssFolder = 'css';
+    /**
+     * @var Form
+     */
+    public $form;
 
     // template file
     protected $template = 'template';
-    protected $addonName;
+    protected $templateAddon;
 
     protected $_js  = array();
     protected $_css = array();
     protected $meta = array();
-    protected $alone = array();
+    protected $nocache = false;
     
     public function __construct()
     {
         parent::__construct();
+        $this->nocache = NOCACHE;
     }
 
-    public function addJs($src, $addonName = false, $alone = false)
+    /**
+     * Add js library to template
+     * @param string $src path to js file
+     * @param string $addon addon name
+     */
+    public function addJs($src, $addon = null)
     {
-        $addon = $addonName ?: $this->addonName;
-        $src = $this->isLocalSrc($src) ? $addon.'/'.$this->jsFolder.'/'.$src : $src;
-
-        $hash = hash('md4', $src);
-        if($alone) {
-            $this->alone['js'][$hash] = $src;
-        } else {
-            $this->_js[$hash] = $src;
-        }
-
-        if($nocached) {
-            $this->nocached[$hash] = true;
-        }
+        $this->addResurce('js', $src, $addon);
     }
 
-    public function addCss($src, $addonName = false, $alone = false)
+    /**
+     * Add css library to template
+     * @param string $src path to css file
+     * @param string $addon addon name
+     */
+    public function addCss($src, $addon = null)
     {
-        $addon = $addonName ?: $this->addonName;
-        $src =  $this->isLocalSrc($src) ? $addon.'/'.$this->cssFolder.'/'.$src : $src;
-
-        $hash = hash('md4', $src);
-
-        if($alone) {
-            $this->alone['css'][$hash] = $src;
-        } else {
-            $this->_css[$hash] = $src;
-        }
-
-        if($nocached) {
-            $this->nocached[$hash] = true;
-        }
+        $this->addResurce('css', $src, $addon);
     }
 
+    /**
+     * Add meta tag to template
+     * @param string $name
+     * @param string $content
+     * @param string $http_equiv
+     */
     public function meta($name, $content, $http_equiv = false)
     {
         $this->meta[$name] = array($content, $http_equiv);
     }
 
+    /**
+     * Specifies the name of the template
+     * @param string $template file name of template
+     * @param string $addonName addon name
+     * @return string
+     */
     public function template($template = false, $addonName = false)
     {
-        if($template) $this->template   = $template;
-        if($addonName) $this->addonName = $addonName;
+        if($template)  $this->template      = $template;
+        if($addonName) $this->templateAddon = $addonName;
 
         return $this->template;
     }
 
+    /**
+     * Returns generated html template content
+     * @param string $view name of view file
+     * @param string $controllerName controller name
+     * @param string $addonName addon name
+     * @return string html
+     * @throws Exception\NotFound
+     */
+    public function fetchTemplate($view = false, $controllerName = false, $addonFolder = false)
+    {
+        $view = $view ?: $this->callerMethod();
+        $view = $this->fetchView($view, $controllerName, $addonFolder);
+
+        $this->smarty()->assign('gdn', array(
+            'content'  => $view,
+            'meta'     => $this->meta,
+            'js'       => $this->_js,
+            'css'      => $this->_css,
+
+            'action'     => strtolower($this->callerMethod()),
+            'addon'      => strtolower($this->controllerInfo('addon')),
+            'controller' => strtolower($this->controllerInfo('controller')),
+        ));
+
+        $this->smarty()->assign('sitename', c('main.sitename'));
+        $template = $this->fetchView($this->template, '/', $addonFolder?: $this->templateAddon);
+
+        return $template;
+    }
+
+    /**
+     * Render template
+     * @param string $view name of view file
+     * @param string $controllerName controller name
+     * @param string $addonName addon name
+     */
     public function render($view = false, $controllerName = false, $addonFolder = false)
     {
         Event::fire('beforeRender');
 
         $view = $view ?: $this->callerMethod();
-        $view = $this->fetchView($view, $controllerName, $addonFolder);
+        if ($this->renderType() == Request::RENDER_VIEW) {
+            if ($this->_js) {
+                Response::current()->headers('Ajax-Js', json_encode($this->_js));
+            }
+            if ($this->_css) {
+                Response::current()->headers('Ajax-Css', json_encode($this->_css));
+            }
 
-        $css = $this->compress('css');
-        $js = $this->compress('js');
-
-        $this->smarty()->assign('gdn', array(
-            'content'  => $view,
-            'meta'     => $this->meta,
-            'js'       => $js,
-            'css'      => $css,
-        ));
-        $this->smarty()->assign('sitename', c('main.sitename'));
-        $template = $this->fetchView($this->template, '/', $this->addonName);
-
-        echo $template;
+            echo $this->fetchView($view, $controllerName, $addonFolder);
+        } elseif ($this->renderType() == Request::RENDER_JSON) {
+            echo json_encode($this->data);
+        } else {
+            echo $this->fetchTemplate($view, $controllerName, $addonFolder);
+        }
 
         Event::fire('afterRender');
     }
 
-    protected function isLocalSrc($url)
+    /**
+     * @param bool $tablename
+     * @return Form
+     */
+    public function initForm($model = false, $data = false)
     {
-        return !preg_match('#^(http|\/\/)#', $url);
+        $tablename = is_string($model) ? $model : false;
+        $this->form = new Form($tablename);
+
+        if ($model) {
+            $this->form->setModel($model, $data);
+        }
+        
+        $this->setData('gdn_form', $this->form);
+
+        return $this->form;
     }
 
-    protected function compress($type)
+    protected function getResourcePath($resource, $src, $addon = null)
     {
-        $data = $this->{"_$type"};
-        $keys = array_keys($data);
-        $hash = md5(implode($keys));
-
-        $array = array();
-
-        $cacheDir = c('main.mediaCacheDir', 'cache');
-        $path = "/$cacheDir/$type/";
-        $fileName = "$hash.$type";
-        $file = PATH_PUBLIC.$path.$fileName;
-
-        mkdir(PATH_PUBLIC.$path, 0777, true);
-
-        foreach ($this->alone[$type] as $key=>$src) {
-            $aloneName = "$key.$type";
-            $aloneFile = PATH_PUBLIC.$path.$aloneName;
-            if(!file_exists($aloneFile)) {
-                $result = $this->getContent($src);
-                file_put_contents($aloneFile, $result);
-            }
-            $array[] = $path.$aloneName;
-        }
-
-        $result = '';
-        if(!file_exists($file)) {
-            foreach ($data as $key=>$src) {
-                $result .= $this->getContent($src);
-            }
-
-            file_put_contents($file, $result);
-        }
-
-        $array[] = $path.$fileName;
-
-        return $array;
-    }
-
-    protected function getContent($source)
-    {
-        if($this->isLocalSrc($source)) {
-            $realSrc = PATH_ADDONS.'/'.$source;
+        $addon = $addon !== null ? $addon : strtolower($this->getAddonName());
+        $local = is_local_url($src);
+        if ($local && $addon && file_exists(PATH_ADDONS.'/'.ucfirst($addon).'/assets/'.$resource.'/'.$src)) {
+            return "/assets/$addon/$resource/$src";
+        } elseif (!$local OR file_exists(PATH_PUBLIC.'/'.$src)) {
+            return $src;
         } else {
-            $realSrc = str_replace('//', 'http://', $source);
+            return false;
         }
-        $result = "\n/* $source */\n";
-        $result .= file_get_contents($realSrc);
+    }
 
-        return $result;
+    protected function addResurce($resource, $src, $addon = false)
+    {
+        $src = $this->getResourcePath($resource, $src, $addon);
+
+        if ($src) {
+            $hash = hash('md4', $src);
+            $this->{'_'.$resource}[$hash] = $src;
+        }
     }
 }

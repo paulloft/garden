@@ -7,6 +7,7 @@ return [
     "addons" => [],
     "hashsalt" => false,
     "install" => false,
+    "locale" => "en_US",
+    "logs" => true,
     "debug" => false,
-    "locale" => "en_US"
 ];

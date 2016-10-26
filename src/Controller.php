@@ -11,6 +11,8 @@ class Controller extends Plugin {
     protected $addonFolder = 'addons';
     protected $addonName;
 
+    protected $templateBaseDir;
+
     // default view extention
     protected $viewExt = 'tpl';
 
@@ -21,9 +23,14 @@ class Controller extends Plugin {
         $this->addonName = $this->controllerInfo('addon');
     }
 
+    /**
+     * Assign template data by key
+     * @param string $key
+     * @param mixed $value
+     */
     public function setData($key, $value = null)
     {
-        if(is_array($key)) {
+        if (is_array($key)) {
             foreach ($key as $k => $v) {
                 $this->data[$k] = $v;
             }
@@ -32,16 +39,41 @@ class Controller extends Plugin {
         }
     }
 
+    /**
+     * Returns assigned data by key
+     * @param $key
+     * @param mixed $default
+     * @return mixed
+     */
     public function data($key, $default = false)
     {
         return val($key, $this->data, $default);
     }
 
+    /**
+     * Set page title
+     * @param string $title
+     */
     public function title($title)
     {
-        $this->setData('title', $title);
+        $this->setData('title', t($title));
     }
 
+    /**
+     * Set page subtitle
+     * @param string $title
+     */
+    public function subtitle($title)
+    {
+        $this->setData('subtitle', t($title));
+    }
+
+    /**
+     * Assigns the specified view
+     * @param string $view name of view file
+     * @param string $controllerName controller name
+     * @param string $addonName addon name
+     */
     public function setView($view = false, $controllerName = false, $addonName = false)
     {
         $this->view = $view;
@@ -49,6 +81,12 @@ class Controller extends Plugin {
         $this->addonName = $addonName;
     }
 
+    /**
+     * Render template
+     * @param string $view name of view file
+     * @param string $controllerName controller name
+     * @param string $addonName addon name
+     */
     public function render($view = false, $controllerName = false, $addonName = false)
     {
         Event::fire('beforeRender');
@@ -60,17 +98,26 @@ class Controller extends Plugin {
         Event::fire('afterRender');
     }
 
+    /**
+     * Returns generated html view content
+     * @param string $view name of view file
+     * @param string $controllerName controller name
+     * @param string $addonName addon name
+     * @return string html
+     * @throws Exception\NotFound
+     */
     public function fetchView($view, $controllerName = false, $addonName = false)
     {
         $viewPath = $this->getViewPath($view, $controllerName, $addonName);
         $realPath = realpath(PATH_ROOT.'/'.$viewPath);
 
-        if(!is_file($realPath)) {
-            throw new Exception\NotFound('View "'.$view.'" not found in '.$viewPath);
+        if (!is_file($realPath)) {
+            throw new Exception\NotFound('Page', 'View template "'.$view.'" not found in '.$viewPath);
         }
 
-        if(str_ends($realPath, '.'.$this->viewExt)) {
+        if (str_ends($realPath, '.'.$this->viewExt)) {
             $smarty = $this->smarty();
+            $smarty->setTemplateDir(PATH_ROOT.'/'.$this->templateBaseDir);
             $smarty->assign($this->data);
             $view = $smarty->fetch($realPath);
         } else {
@@ -80,15 +127,22 @@ class Controller extends Plugin {
         return $view;
     }
 
+    /**
+     * Returns view absolute file path
+     * @param string $view
+     * @param string $controllerName
+     * @param string $addonName
+     * @return string
+     */
     public function getViewPath($view, $controllerName = false, $addonName = false)
     {
-        $addonName = $addonName ?: $this->addonName;
+        $addonName = ucfirst($addonName ?: $this->addonName);
         $controllerName = $controllerName ?: $this->controllerName;
 
         $addonFolder = $addonName ? $this->addonFolder.'/'.$addonName : $this->controllerInfo('folder');
         $controllerName = $controllerName ?: $this->controllerInfo('controller');
 
-        if(str_ends($controllerName, 'controller')) {
+        if (str_ends($controllerName, 'controller')) {
             $controllerName = substr($controllerName, 0, -10);
         }
 
@@ -96,17 +150,69 @@ class Controller extends Plugin {
         $filename = val('filename', $pathinfo, 'index');
         $ext = val('extension', $pathinfo, $this->viewExt);
 
-        return $addonFolder.'/views/'.strtolower($controllerName).'/'.$filename.'.'.$ext;
+        $this->templateBaseDir = $addonFolder.'/views/'.strtolower($controllerName).'/';
+
+        return $this->templateBaseDir.$filename.'.'.$ext;
+    }
+
+    /**
+     * Return Smarty object
+     * @return \Smarty
+     * @throws Exception\Client
+     */
+    public function smarty()
+    {
+        if (is_null($this->smarty)) {
+            if (!class_exists('\Smarty')) {
+                throw new Exception\Client('Smarty class does not exists');
+            }
+            $this->smarty = new \Smarty();
+            
+            $config = c('smarty');
+            $this->smarty->caching     = val('caching', $config, false);
+            $this->smarty->compile_dir = val('compile_dir', $config, PATH_CACHE.'/smarty/');
+            $this->smarty->cache_dir   = val('cache_dir', $config, PATH_CACHE.'/smarty/');
+            $this->smarty->plugins_dir = val('plugins_dir', $config, false);
+
+            if (NOCACHE) {
+                $this->smarty->clearAllCache();
+            }
+        }
+
+        return $this->smarty;
+    }
+
+    /**
+     * Return current render type
+     * @return string
+     */
+    public function renderType()
+    {
+        return Request::current()->renderType();
+    }
+
+    /**
+     * Return current addon name
+     * @return string
+     */
+    public function getAddonName()
+    {
+        return $this->addonName;
+    }
+
+    protected function callerMethod()
+    {
+        return Request::current()->getEnv('action');
     }
 
     protected function controllerInfo($key = false, $default = false)
     {
         $className = get_called_class();
 
-        if(!$result = Gdn::dirtyCache()->get($className)) {
+        if (!$result = Gdn::dirtyCache()->get($className)) {
             $space = explode('\\', $className);
 
-            if(count($space) < 3) {
+            if (count($space) < 3) {
                 $result = false;
             } else {
                 $result = array(
@@ -121,29 +227,6 @@ class Controller extends Plugin {
         return $key ? val($key, $result, $default) : $result;
     }
 
-    public function smarty()
-    {
-        if(is_null($this->smarty)) {
-            if(!class_exists('\Smarty')) {
-                throw new Exception\Client('Smarty class does not exists');
-            }
-            $this->smarty = new \Smarty();
-            
-            $config = c('smarty');
-            $this->smarty->caching     = val('caching', $config, false);
-            $this->smarty->compile_dir = val('compile_dir', $config, PATH_CACHE.'/smarty/');
-            $this->smarty->cache_dir   = val('cache_dir', $config, PATH_CACHE.'/smarty/');
-            $this->smarty->plugins_dir = val('plugins_dir', $config, false);
-        }
 
-        return $this->smarty;
-    }
-
-    protected function callerMethod($depth = 2)
-    {
-        $trace = debug_backtrace();
-        $controller = val($depth, $trace);
-        return val('function', $controller);
-    }
 
 }

@@ -5,312 +5,6 @@
  * @license MIT
  */
 
-/**
- * This file is part of the array_column library
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * @copyright Copyright (c) 2013 Ben Ramsey <http://benramsey.com>
- * @license http://opensource.org/licenses/MIT MIT
- */
-
-/**
- * Returns the values from a single column of the input array, identified by the $columnKey.
- *
- * Optionally, you may provide an $indexKey to index the values in the returned
- * array by the values from the $indexKey column in the input array.
- *
- * @param array $array A multi-dimensional array (record set) from which to pull a column of values.
- * @param int|string|null $columnKey The column of values to return.
- * This value may be the integer key of the column you wish to retrieve, or it
- * may be the string key name for an associative array.
- * @param mixed $indexKey The column to use as the index/keys for the returned array.
- * This value may be the integer key of the column, or it may be the string key name.
- * @return array Returns an array of values representing a single column from the input array.
- * @category Array Functions
- */
-function array_column_php(array $array, $columnKey = null, $indexKey = null) {
-    if (!is_int($columnKey)
-        && !is_float($columnKey)
-        && !is_string($columnKey)
-        && $columnKey !== null
-        && !(is_object($columnKey) && method_exists($columnKey, '__toString'))
-    ) {
-        trigger_error('array_column(): The column key should be either a string or an integer', E_USER_WARNING);
-    }
-
-    if (isset($indexKey)
-        && !is_int($indexKey)
-        && !is_float($indexKey)
-        && !is_string($indexKey)
-        && !(is_object($indexKey) && method_exists($indexKey, '__toString'))
-    ) {
-        trigger_error('array_column(): The index key should be either a string or an integer', E_USER_WARNING);
-    }
-
-    $paramsColumnKey = ($columnKey !== null) ? (string)$columnKey : null;
-
-    $paramsIndexKey = null;
-    if (isset($indexKey)) {
-        if (is_float($indexKey) || is_int($indexKey)) {
-            $paramsIndexKey = (int)$indexKey;
-        } else {
-            $paramsIndexKey = (string)$indexKey;
-        }
-    }
-
-    $resultArray = array();
-
-    foreach ($array as $row) {
-
-        $key = $value = null;
-        $keySet = $valueSet = false;
-
-        if ($paramsIndexKey !== null && array_key_exists($paramsIndexKey, $row)) {
-            $keySet = true;
-            $key = (string)$row[$paramsIndexKey];
-        }
-
-        if ($paramsColumnKey === null) {
-            $valueSet = true;
-            $value = $row;
-        } elseif (is_array($row) && array_key_exists($paramsColumnKey, $row)) {
-            $valueSet = true;
-            $value = $row[$paramsColumnKey];
-        }
-
-        if ($valueSet) {
-            if ($keySet) {
-                $resultArray[$key] = $value;
-            } else {
-                $resultArray[] = $value;
-            }
-        }
-
-    }
-
-    return $resultArray;
-}
-
-if (!function_exists('array_column')) {
-    /**
-     * A custom implementation of array_column for older versions of php.
-     *
-     * @param array $array The dataset to test.
-     * @param int|string $columnKey The column of values to return.
-     * @param int|string|null $indexKey The column to use as the index/keys for the returned array.
-     * @return array Returns the columns from the {@link $input} array.
-     */
-    function array_column($array, $columnKey, $indexKey = null) {
-        return array_column_php($array, $columnKey, $indexKey);
-    }
-}
-
-/**
- * Converts a quick array into a key/value form.
- *
- * @param array $array The array to work on.
- * @param mixed $default The default value for unspecified keys.
- * @return array Returns the array converted to long syntax.
- */
-function array_quick(array $array, $default) {
-    $result = [];
-    foreach ($array as $key => $value) {
-        if (is_int($key)) {
-            $result[$value] = $default;
-        } else {
-            $result[$key] = $value;
-        }
-    }
-    return $result;
-}
-
-/**
- * Converts a quick array into a key/value form using a callback to convert the short items.
- *
- * @param array $array The array to work on.
- * @param callable $callback The callback used to generate the default values.
- * @return array Returns the array converted to long syntax.
- */
-function array_uquick(array $array, callable $callback) {
-    $result = [];
-    foreach ($array as $key => $value) {
-        if (is_int($key)) {
-            $result[$value] = $callback($value);
-        } else {
-            $result[$key] = $value;
-        }
-    }
-    return $result;
-}
-
-/**
- * Load configuration data from a file into an array.
- *
- * @param string $path The path to load the file from.
- * @return array The configuration data.
- * @throws InvalidArgumentException Throws an exception when the file type isn't supported.
- *
- * @category Array Functions
- */
-function array_load($path) {
-    if (!file_exists($path)) {
-        return false;
-    }
-
-    // Get the extension of the file, but allow for .ini.php, .json.php etc.
-    $ext = strstr(basename($path), '.');
-
-    switch ($ext) {
-        case '.json':
-        case '.json.php':
-            $loaded = json_decode(file_get_contents($path), true);
-            break;
-        case '.php':
-            $loaded = require $path;
-            break;
-        case '.ser':
-        case '.ser.php':
-            $loaded = unserialize(file_get_contents($path));
-            break;
-        case '.yml':
-        case '.yml.php':
-            $loaded = yaml_parse_file($path);
-            break;
-        default:
-            throw new \InvalidArgumentException("Invalid config extension $ext on $path.", 500);
-    }
-    return $loaded;
-}
-
-/**
- * Save an array of data to a specified path.
- *
- * @param array $data The data to save.
- * @param string $path The path to save to.
- * @param string $php_var The name of the php variable to load from if using the php file type.
- * @return bool Returns true if the save was successful or false otherwise.
- * @throws InvalidArgumentException Throws an exception when the file type isn't supported.
- *
- * @category Array Functions
- */
-function array_save($data, $path, $php_var = 'config') {
-    if (!is_array($data)) {
-        throw new \InvalidArgumentException('Config::saveArray(): Argument #1 is not an array.', 500);
-    }
-
-    // Get the extension of the file, but allow for .ini.php, .json.php etc.
-    $ext = strstr(basename($path), '.');
-
-    switch ($ext) {
-        case '.json':
-        case '.json.php':
-            if (defined('JSON_PRETTY_PRINT')) {
-                $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            } else {
-                $json = json_encode($data);
-            }
-            $result = file_put_contents_safe($path, $json);
-            break;
-        case '.php':
-            $php = "<?php\n".php_encode($data, $php_var)."\n";
-            $result = file_put_contents_safe($path, $php);
-            break;
-        case '.ser':
-        case '.ser.php':
-            $ser = serialize($data);
-            $result = file_put_contents_safe($path, $ser);
-            break;
-        case '.yml':
-        case '.yml.php':
-            $yml = yaml_emit($data, YAML_UTF8_ENCODING, YAML_LN_BREAK);
-            $result = file_put_contents_safe($path, $yml);
-            break;
-        default:
-            throw new \InvalidArgumentException("Invalid config extension $ext on $path.", 500);
-    }
-    return $result;
-}
-
-/**
- * Search an array for a value with a user-defined comparison function.
- *
- * @param mixed $needle The value to search for.
- * @param array $haystack The array to search.
- * @param callable $cmp The comparison function to use in the search.
- * @return mixed|false Returns the found value or false if the value is not found.
- */
-function array_usearch($needle, array $haystack, callable $cmp) {
-    $found = array_uintersect($haystack, [$needle], $cmp);
-
-    if (empty($found)) {
-        return false;
-    } else {
-        return array_pop($found);
-    }
-}
-
-/**
- * Select the first non-empty value from an array.
- *
- * @param array $keys An array of keys to try.
- * @param array $array The array to select from.
- * @param mixed $default The default value if non of the keys exist.
- * @return mixed Returns the first non-empty value of {@link $default} if none are found.
- * @category Array Functions
- */
-function array_select(array $keys, array $array, $default = null) {
-    foreach ($keys as $key) {
-        if (isset($array[$key]) && $array[$key]) {
-            return $array[$key];
-        }
-    }
-    return $default;
-}
-
-/**
- * Make sure that a key exists in an array.
- *
- * @param string|int $key The array key to ensure.
- * @param array &$array The array to modify.
- * @param mixed $default The default value to set if key does not exist.
- * @category Array Functions
- */
-function array_touch($key, &$array, $default) {
-    if (!array_key_exists($key, $array)) {
-        $array[$key] = $default;
-    }
-}
-
-/**
- * Take all of the items in an array and make a new array with them specified by mappings.
- *
- * @param array $array The input array to translate.
- * @param array $mappings The mappings to translate the array.
- * @return array
- *
- * @category Array Functions
- */
-function array_translate($array, $mappings) {
-    $array = (array)$array;
-    $result = array();
-    foreach ($mappings as $index => $value) {
-        if (is_numeric($index)) {
-            $key = $value;
-            $newKey = $value;
-        } else {
-            $key = $index;
-            $newKey = $value;
-        }
-        if (isset($array[$key])) {
-            $result[$newKey] = $array[$key];
-        } else {
-            $result[$newKey] = null;
-        }
-    }
-    return $result;
-}
 
 /**
  * Base64 Encode a string, but make it suitable to be passed in a url.
@@ -360,37 +54,6 @@ function c($key = false, $default = null) {
  */
 function config($group, $key = false, $default = null) {
     return Garden\Config::get($group, $key, $default);
-}
-
-/**
- * Compare two dates formatted as either timestamps or strings.
- *
- * @param mixed $date1 The first date to compare expressed as an integer timestamp or a string date.
- * @param mixed $date2 The second date to compare expressed as an integer timestamp or a string date.
- * @return int Returns `1` if {@link $date1} > {@link $date2}, `-1` if {@link $date1} > {@link $date2},
- * or `0` if the two dates are equal.
- * @category Date/Time Functions
- */
-function datecmp($date1, $date2) {
-    if (is_numeric($date1)) {
-        $timestamp1 = $date1;
-    } else {
-        $timestamp1 = strtotime($date1);
-    }
-
-    if (is_numeric($date2)) {
-        $timestamp2 = $date2;
-    } else {
-        $timestamp2 = strtotime($date2);
-    }
-
-    if ($timestamp1 == $timestamp2) {
-        return 0;
-    } elseif ($timestamp1 > $timestamp2) {
-        return 1;
-    } else {
-        return -1;
-    }
 }
 
 /**
@@ -534,51 +197,7 @@ function garden_error_handler($number, $message, $file, $line, $args) {
     throw new Garden\Exception\Error($message, $number, $file, $line, $args, $backtrace);
 }
 
-/**
- * Like {@link implode()}, but joins array keys and values.
- *
- * @param string $elemglue The string that separates each element of the array.
- * @param string $keyglue The string that separates keys and values.
- * @param array $pieces The array of strings to implode.
- * @return string Returns the imploded array as a string.
- *
- * @category Array Functions
- * @category String Functions
- */
-function implode_assoc($elemglue, $keyglue, $pieces) {
-    $result = '';
 
-    foreach ($pieces as $key => $value) {
-        if ($result) {
-            $result .= $elemglue;
-        }
-
-        $result .= $key.$keyglue.$value;
-    }
-    return $result;
-}
-
-/**
- * Whether or not a string is a url in the form http://, https://, or //.
- *
- * @param string $str The string to check.
- * @return bool
- *
- * @category String Functions
- * @category Internet Functions
- */
-function is_url($str) {
-    if (!$str) {
-        return false;
-    }
-    if (substr($str, 0, 2) == '//') {
-        return true;
-    }
-    if (strpos($str, '://', 1) !== false) {
-        return true;
-    }
-    return false;
-}
 
 /**
  * Strip a substring from the beginning of a string.
@@ -784,17 +403,7 @@ function str_ends($haystack, $needle) {
  * @category Localization Functions
  */
 function t($code, $default = null) {
-    global $translations;
-
-    if (substr($code, 0, 1) === '@') {
-        return substr($code, 1);
-    } elseif (isset($translations[$code])) {
-        return $translations[$code];
-    } elseif ($default !== null) {
-        return $default;
-    } else {
-        return $code;
-    }
+    return \Garden\Gdn::translate($code, $default);
 }
 
 /**
@@ -804,7 +413,7 @@ function t($code, $default = null) {
  * @param mixed $arg1 The arguments to pass to {@link sprintf()}.
  * @return string The translated string.
  */
-function sprintft($formatCode, $arg1 = null) {
+function t_sprintf($formatCode, $arg1 = null) {
     $args = func_get_args();
     $args[0] = t($formatCode);
     return call_user_func_array('sprintf', $args);
@@ -904,14 +513,16 @@ function valr($keys, $array, $default = false) {
  * @param mixed $Haystack The array or object to set.
  * @param mixed $Value The value to set.
  */
-function setval($Key, &$Collection, $Value) {
+function setval($Key, &$Collection, $Value)
+{
     if(is_array($Collection))
         $Collection[$Key] = $Value;
     elseif(is_object($Collection))
         $Collection->$Key = $Value;
 }
 
-function getInclude($path, $data = array()) {
+function getInclude($path, $data = array())
+{
     ob_start();
     extract($data);
     
@@ -923,11 +534,14 @@ function getInclude($path, $data = array()) {
     return $result;
 }
 
-function redirect($url, $code = 302) {
+function redirect($url, $code = 302)
+{
     $host = Garden\Request::current()->getHost();
     $scheme = Garden\Request::current()->getScheme();
 
-    header("Location: $scheme://$host$url");
+    $url = is_url($url) ? $url : $scheme.'://'.$host.$url;
+
+    header("Location: $url");
 
     exit;
 }
