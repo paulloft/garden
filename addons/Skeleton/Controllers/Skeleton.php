@@ -13,7 +13,8 @@ class Skeleton extends \Garden\Template
         parent::__construct();
     }
 
-    protected function pageInit() {
+    protected function pageInit()
+    {
         $this->addJs('//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js', false, true);
         $this->addJs('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js', false, true);
 
@@ -32,54 +33,59 @@ class Skeleton extends \Garden\Template
         $this->render();
     }
 
-    public function about() {
+    public function about()
+    {
         $this->pageInit();
         $this->title('About Garden');
 
         $this->render('index');
     }
 
-    public function structure()
+    public function contact()
     {
         $this->pageInit();
-        $this->title('Structure update');
+        $this->title('Contact form');
 
-        $captureOnly = Gdn::request()->getQuery('update', false) === false;
+        $form = $this->initForm();
+        $form->validation()
+             ->rule('name', 'not_empty')
+             ->rule('email', 'email');
 
-        $structure = Gdn::structure();
-        $structure->capture = $captureOnly;
-        include PATH_ADDONS.'/Skeleton/structure.php';
-
-        $capture = $structure->capture();
-        if(!$captureOnly) {
-            redirect('/structure');
+        if ($form->submitted()) {
+            $form->save();
         }
-        // d($capture);
-
-        $this->setData('capturedSql', $capture);
 
         $this->render();
     }
 
-    public function test()
+    public function structure()
     {
+        $this->pageInit();
+        $this->title('Update structure');
 
-        $tableModel = Model\Table::instance();
+        $captureOnly = Gdn::request()->getQuery('update', false) === false;
 
-        $s = $tableModel->test();
+        $structure = Gdn::structure();
+        // $permission = Gdn::factory('permission');
+        $structure->capture = $captureOnly;
+        // $permission->captureOnly = $captureOnly;
 
-        p($s);
+        foreach (\Garden\Addons::enabled() as $addon => $options) {
+            $dir = val('dir', $options);
+            $file = $dir.'/settings/structure.php';
+            if (file_exists($file)) {
+                include_once $file;
+            }
+        }
 
+        // $permission->save();
 
-        $cache = Gdn::cache()->add('test', $s, 10);
+        $capture = $structure->capture();
 
-        $result = Gdn::cache()->get('test', false);
+        // $this->setData('capturePerm', $permission->capture);
+        $this->setData('capturedSql', $capture);
 
-        
-        
+        $this->render();
     }
-
-    
-
 
 }

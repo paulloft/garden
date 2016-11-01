@@ -1,0 +1,22 @@
+html, body {
+    height: 100%;
+}
+body {
+    background-image:url(../img/pattern.png);
+    background-position:center center;
+}
+.switch-primary input:checked + span {
+    background-color: #f4aa44;
+}
+.bg-gray {
+    background-color:#474e5b;
+}
+.b-rounded {
+    border-radius: 5px 5px 2px 2px;
+}
+.b-top-rounded {
+    border-radius:2px 2px 0 0;
+}
+.b-bottom-rounded {
+    border-radius:0 0 2px 2px;
+}

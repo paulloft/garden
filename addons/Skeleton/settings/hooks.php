@@ -1,10 +1,11 @@
 <?php
-/**
-* 
-*/
-class Plugin extends \Garden\Plugin
-{
+namespace Addons\Skeleton;
 
+/**
+ * Skeleton hooks
+ */
+class Hooks extends \Garden\Plugin
+{
     public function bootstrap_handler()
     {
         // echo ('fired ');

@@ -6,42 +6,73 @@ use Garden\Gdn;
 /**
 * 
 */
-class Entry extends \Garden\Template
+class Entry extends Base
 {
-    // protected $template = 'empty'; 
+    protected $template = 'empty'; 
     
     function __construct()
     {
-        parent::__construct();
-    }
-
-    protected function pageInit()
-    {
-        $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
-        $this->addJs('bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js');
-        $this->addJs('entry.js', '/js/Dashboard');
-
-        $this->addCss('bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css');
-        $this->addCss('bootstrap.theme.css', '/css/Dashboard');
-        $this->addCss('main.css', '/css/Dashboard');
+        parent::__construct(false);
     }
 
     public function index()
     {
-        redirect('/entry/login/');
+        redirect('/entry/login');
     }
 
     public function login()
     {
         $this->pageInit();
+        $this->addCss('entry.css');
 
         $this->title('Authorization');
 
-        $target = Request::current()->getQuery('target');
-        $target = ($target ? '?target='.$target : null);
+        $auth = Model\Auth::instance();
+        $request = Request::current();
 
+        $target = $request->getQuery('target');
+
+        if ($auth->logined()) {
+            redirect($target ?: '/');
+        }
+
+        $error = false;
+
+        Gdn::session();
+
+        if($request->isPost()) {
+            $username = $request->getInput('username', false);
+            $password = $request->getInput('password', false);
+            $remember = $request->getInput('remember', false);
+            
+            if($user = $auth->login($username, $password)) {
+                if($user['active']) {
+                    $auth->completeLogin($user, $remember);
+                    redirect($target ?: '/');
+                } else {
+                    $error = t('Account has been deactivated');
+                }
+            } else {
+                $error = t('Login failed');
+            }
+        }
+
+        $target = htmlspecialchars($target ? '?target='.$target : null);
+
+        $this->setData('error', $error);
         $this->setData('target', $target);
         $this->render();
+    }
+
+    public function logout()
+    {
+        $target = Gdn::request()->getQuery('target');
+        $redirect = ($target ? '?target='.$target : '/');
+
+        $auth = Model\Auth::instance();
+        $auth->logout();
+
+        redirect($redirect);
     }
 
     

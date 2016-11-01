@@ -10,7 +10,7 @@
     {javascript}
     {event name="afterHead"}
 </head>
-<body>
+<body class="{$gdn.addon}_addon {$gdn.controller}_controller {$gdn.action}_action">
     {event name="beforeBody"}
     {content}
     {event name="afterBody"}

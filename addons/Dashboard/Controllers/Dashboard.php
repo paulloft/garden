@@ -1,12 +1,11 @@
 <?php
 namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
-use Garden\Request;
 use Garden\Gdn;
 /**
 * 
 */
-class Dashboard extends \Garden\Template
+class Dashboard extends Base
 {
     
     function __construct()
@@ -14,19 +13,49 @@ class Dashboard extends \Garden\Template
         parent::__construct();
     }
 
-    protected function pageInit()
-    {
-        $this->addJs('jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/2.1.0');
-        $this->addJs('bootstrap.min.js', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js');
-
-        $this->addCss('bootstrap.min.css', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css');
-        $this->addCss('bootstrap.theme.css', '/css/Dashboard');
-        $this->addCss('main.css', '/css/Dashboard');
-    }
-
     public function index()
     {
-        
+        $this->pageInit();
+        $this->title('Dashboard');
+
+        $this->render();
+    }
+
+    public function structure()
+    {
+        $this->permission('dashboard.admin');
+
+        $this->pageInit();
+        $this->title('Update database structure');
+        $this->currentUrl('/dashboard/structure');
+
+        $captureOnly = Gdn::request()->getQuery('update', false) === false;
+
+        $structure = Gdn::structure();
+        $permission = Gdn::factory('permission');
+        $structure->capture = $captureOnly;
+        $permission->captureOnly = $captureOnly;
+
+        foreach (\Garden\Addons::enabled() as $addon => $options) {
+            $dir = val('dir', $options);
+            $file = $dir.'/settings/structure.php';
+            if (file_exists($file)) {
+                include_once $file;
+            }
+        }
+
+        $permission->save();
+
+        $capture = $structure->capture();
+
+        if (!$captureOnly) {
+            redirect('/dashboard/structure');
+        }
+
+        $this->setData('capturePerm', $permission->capture);
+        $this->setData('capturedSql', $capture);
+
+        $this->render();
     }
 
 }

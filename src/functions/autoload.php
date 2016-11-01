@@ -1,16 +1,6 @@
 <?php
 
-/*
- * Includes the appropriate function and constant files necessary to run the vanilla framework.
- *
- * This file must be included *after* the framework has been registered with an autoloader.
- *
- * @author Todd Burry <todd@vanillaforums.com>
- * @copyright 2009 Vanilla Forums Inc.
- * @license MIT
- * @package Vanilla
- * @since 1.0
- */
+define('APP_VERSION', '1.0');
 
 use \Garden\Event;
 

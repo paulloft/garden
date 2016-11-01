@@ -210,7 +210,7 @@ class Form
                     $errField = val(0, $error);
                     $error = val(1, $error);
                 } else {
-                    $errField = t($this->model->table . '.' . $field);
+                    $errField = t($this->model ? $this->model->table : 'form' . '.' . $field, $field);
                 }
                 if ($text) {
                     $html[] = $errField . ' ' . $error;
@@ -237,10 +237,14 @@ class Form
 
         if ($this->valid()) {
             $post = $this->getFormValues();
-            $id = val($this->model->primaryKey, $post);
             $post = $this->fixPostData($post);
 
-            $result = $this->model->save($post, $id);
+            if ($this->model) {
+                $id = val($this->model->primaryKey, $post);
+                $result = $this->model->save($post, $id);
+            } else {
+                $result = $post;
+            }
         }
 
         Response::current()->headers('Form-Error', !$result);

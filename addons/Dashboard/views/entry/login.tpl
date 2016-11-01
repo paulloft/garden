@@ -1,30 +1,57 @@
+<!-- Login Content -->
 <div class="container full-height">
     <div class="center-wrapper">
-        <div class="center-content text-center">
+        <div class="center-content">
+
             <div class="row">
-                <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
-                    <div class="sitename">{config code="main.sitename"}</div>
-                    <p class="mb-20">{t code="Authorization"}</p>
-                    <form method="POST" action="/entry/signin{$target}" class="form-signin">
-                        <fieldset>
-                        {if ($message)}
-                            <div class="alert alert-danger" role="alert">
-                                {$message}
-                            </div>
-                        {/if}
-                            <div class="form-group">
-                                <input type="text" name="login" placeholder="{t code='Login'}" class="form-control input-lg" required autofocus />
-                            </div>
-                            <div class="form-group password">
-                                <input type="password" name="password" placeholder="{t code='Password'}" class="form-control input-lg" required />
-                                <span class="show-password" title="Показать пароль"><i class="mdi mdi-eye"></i></span>
-                            </div>
-                            <input type="submit" class="btn btn-success btn-block btn-lg mb-15" value="{t code='Sign in'}" />
-                        </fieldset>
-                    </form>
+                <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                    <!-- Login Block -->
+                    <div class="text-center mb-20">
+                        <h2 class="text-white">{c('main.sitename')}</h2>
+                    </div>
+                    
+                    <div class="block block-themed animated fadeIn b-rounded">
+                        <div class="block-header bg-success b-top-rounded">
+                            <h3 class="block-title">{t code="Authorization"}</h3>
+                        </div>
+                        <div class="block-content">
+                            <form method="post" action="/entry/login{$target}" class="form-horizontal push-5-t">
+                            {if ($error)}
+                                <div class="alert alert-danger" role="alert">
+                                    {$error}
+                                </div>
+                            {/if}
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="login-username">{t code='Username'}</label>
+                                    <div class="col-xs-12">
+                                        <input class="form-control" type="text" id="login-username" name="username" placeholder="{t code='Username'}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="login-password">{t code='Password'}</label>
+                                    <div class="col-xs-12">
+                                        <input class="form-control" type="password" id="login-password" name="password" placeholder="{t code='Password'}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12">
+                                        <label class="css-input switch switch-sm switch-success">
+                                            <input type="checkbox" id="login-remember" name="remember"><span></span> {t code="Remember me"}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12">
+                                        <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-arrow-right push-5-r"></i> {t code='Sign in'}</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- END Login Block -->
                 </div>
             </div>
+
         </div>
     </div>
-
-</div> <!-- /container -->
+</div>
