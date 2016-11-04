@@ -1,6 +1,6 @@
 <div class="content">
 {if $errors}{$errors}{/if}
-    <form class="form-horizontal" action="/users/{if $data.id}groupedit/{$data.id}{else}groupadd{/if}" method="post" data-success-reload="1" data-success-close="1">
+    <form class="form-horizontal" action="/dashboard/users/{if $data.id}groupedit/{$data.id}{else}groupadd{/if}" method="post" data-success-reload="1" data-success-close="1">
         <input type="hidden" name="id" value="{$data.id|format_form}">
         <div class="block block-bordered block-themed">
             <div class="block-header bg-primary">
@@ -54,7 +54,9 @@
                                 {foreach from=$opt.columns item=column}
                                 {if $perm.$column}
                                 <td class="text-center gc gc-check">
-                                    <label class="css-input css-checkbox css-checkbox-sm css-checkbox-primary"><input type="checkbox" name="permission[]" value="{$perm.$column.id}" {if in_array($perm.$column.id, $data.permission) OR (!isset($data.permission) && $perm.$column.default)}checked{/if} /><span></span></label>
+                                    <label class="css-input css-checkbox css-checkbox-sm css-checkbox-primary">
+                                        <input type="checkbox" name="permission[]" value="{$perm.$column.id}" {if in_array($perm.$column.id, $data.permission) OR (!isset($data.permission) && $perm.$column.default)}checked{/if} /><span></span>
+                                    </label>
                                 </td>
                                 {else}
                                 <td>&nbsp;</td>
@@ -73,7 +75,7 @@
             <div class="block-content">
                 <div class="mb-20">
                     <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {t code="Save"}</button>
-                    <a href="/users/groups" class="btn btn-default"><i class="fa fa-reply"></i> {t code="Cancel"}</a>
+                    <a href="/dashboard/users/groups" class="btn btn-default"><i class="fa fa-reply"></i> {t code="Cancel"}</a>
                 </div>
             </div>
         </div>

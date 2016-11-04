@@ -2,7 +2,7 @@
 {if $errors}{$errors}{/if}
 
 <!-- Notifications -->
-<form class="form-horizontal" action="/users/{if $data.id}edit/{$data.id}{else}add{/if}" method="post" data-success-reload="1" data-success-close="1">
+<form class="form-horizontal" action="/dashboard/users/{if $data.id}edit/{$data.id}{else}add{/if}" method="post" data-success-reload="1" data-success-close="1">
     <input type="hidden" name="id" value="{$data.id|format_form}">
     <div class="block block-bordered block-themed">
         <div class="block-header bg-primary">
@@ -24,7 +24,7 @@
             <div class="form-group">
                 <label class="col-xs-12">{t code="User name"} </label>
                 <div class="col-xs-12">
-                    <input class="form-control" type="text" name="name" placeholder="{t code="User name"}" value="{$data.name|format_form}" required />
+                    <input class="form-control" type="text" name="name" placeholder="{t code="User name"}" value="{$data.name|format_form}" />
                 </div>
             </div>
             <div class="form-group">

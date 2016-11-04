@@ -4,6 +4,11 @@ use \Garden\Exception as Exception;
 
 class Controller extends Plugin {
 
+    /**
+     * @var Form
+     */
+    public $form;
+
     // data storage
     protected $data;
     protected $view;
@@ -22,6 +27,13 @@ class Controller extends Plugin {
     {
         $this->addonName = $this->controllerInfo('addon');
     }
+
+    /**
+     * Automatically executed before the controller action. Can be used to set
+     * class properties, do authorization checks, and execute other custom code.
+     *
+     */
+    public function initialize(){}
 
     /**
      * Assign template data by key
@@ -57,15 +69,6 @@ class Controller extends Plugin {
     public function title($title)
     {
         $this->setData('title', t($title));
-    }
-
-    /**
-     * Set page subtitle
-     * @param string $title
-     */
-    public function subtitle($title)
-    {
-        $this->setData('subtitle', t($title));
     }
 
     /**
@@ -156,7 +159,7 @@ class Controller extends Plugin {
     }
 
     /**
-     * Return Smarty object
+     * Return lazyload Smarty object
      * @return \Smarty
      * @throws Exception\Client
      */
@@ -167,12 +170,13 @@ class Controller extends Plugin {
                 throw new Exception\Client('Smarty class does not exists');
             }
             $this->smarty = new \Smarty();
-            
+
             $config = c('smarty');
-            $this->smarty->caching     = val('caching', $config, false);
-            $this->smarty->compile_dir = val('compile_dir', $config, PATH_CACHE.'/smarty/');
-            $this->smarty->cache_dir   = val('cache_dir', $config, PATH_CACHE.'/smarty/');
-            $this->smarty->plugins_dir = val('plugins_dir', $config, false);
+            $this->smarty->caching = val('caching', $config, false);
+            $this->smarty
+                ->setCompileDir( val('compile_dir', $config, PATH_CACHE.'/smarty/') )
+                ->setCacheDir( val('cache_dir', $config, PATH_CACHE.'/smarty/') )
+                ->setPluginsDir( val('plugins_dir', $config, false) );
 
             if (NOCACHE) {
                 $this->smarty->clearAllCache();
@@ -198,6 +202,24 @@ class Controller extends Plugin {
     public function getAddonName()
     {
         return $this->addonName;
+    }
+
+    /**
+     * @param bool $tablename
+     * @return Form
+     */
+    public function initForm($model = false, $data = false)
+    {
+        $tablename = is_string($model) ? $model : false;
+        $this->form = new Form($tablename);
+
+        if ($model) {
+            $this->form->setModel($model, $data);
+        }
+
+        $this->setData('gdn_form', $this->form);
+
+        return $this->form;
     }
 
     protected function callerMethod()

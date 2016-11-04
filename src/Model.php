@@ -237,7 +237,7 @@ class Model extends Plugin {
      */
     public function getTableFields()
     {
-        $cacheKey = 'allowed_fields_'.get_class($this);
+        $cacheKey = 'table_columns_'.$this->table;
         $result = Gdn::cache()->get($cacheKey);
 
         if (!$result) {

@@ -9,11 +9,6 @@ use Garden\Gdn;
 */
 class Users extends Base
 {
-    
-    function __construct()
-    {
-        parent::__construct();
-    }
 
     public function index()
     {
@@ -21,7 +16,6 @@ class Users extends Base
 
         $this->pageInit();
         $this->title('Users');
-        $this->currentUrl('/users');
 
         $userModel = Model\Users::instance();
 
@@ -38,7 +32,6 @@ class Users extends Base
         
         $this->pageInit();
         $this->title('User groups');
-        $this->currentUrl('/users/groups');
 
         $groupModel = Model\Groups::instance();
 
@@ -57,7 +50,7 @@ class Users extends Base
     {
         $this->pageInit();
         $this->title($id ? 'Edit user' : 'New user');
-        $this->currentUrl('/users');
+        $this->currentUrl('/dashboard/users');
 
         $userModel = Model\Users::instance();
         $groupModel = Model\Groups::instance();
@@ -92,6 +85,7 @@ class Users extends Base
             if ($id = $form->save()) {
                 $userGroups = val('groupsID', $user);
                 $userModel->updateGroups($id, $form->getValues(), $userGroups);
+                redirect('/dashboard/users');
             }
         }
 
@@ -113,7 +107,7 @@ class Users extends Base
         $this->pageInit();
         $this->title($id ? 'Edit user group' : 'New user group');
         $this->addJs('user_group.js');
-        $this->currentUrl('/users/groups');
+        $this->currentUrl('/dashboard/users/groups');
 
         $groupModel = Model\Groups::instance();
         $permission = Model\Permission::instance();
@@ -126,7 +120,7 @@ class Users extends Base
                 throw new Exception\NotFound();
 
             $groupPerm = $permission->getForGroup($id);
-            $group->permission = array_column($groupPerm, 'id');
+            $group['permission'] = array_column($groupPerm, 'id');
         } else {
             $this->permission('dashboard.group.add');
             $group = array('active' => 1);
@@ -135,11 +129,10 @@ class Users extends Base
         $form = new \Garden\Form();
         $form->setModel($groupModel, $group);
 
-
         if ($form->submitted()) {
             if ($id = $form->save()) {
                 $permission->saveGroup($id, $form->getValues(), $group);
-                redirect('/users/groups');
+                redirect('/dashboard/users/groups');
             }
         }
 
@@ -161,7 +154,7 @@ class Users extends Base
         redirect('/dashboard');
     }
 
-    public function delete_user($id)
+    public function deleteUser($id)
     {
         $this->permission('dashboard.user.delete');
 
@@ -169,9 +162,11 @@ class Users extends Base
 
         $userModel = Model\Users::instance();
         $userModel->delete(array('id' => $id));
+
+        redirect('/dashboard/users');
     }
 
-    public function delete_group($id)
+    public function deleteGroup($id)
     {
         $this->permission('dashboard.group.delete');
 
@@ -179,6 +174,8 @@ class Users extends Base
 
         $groupModel = Model\Groups::instance();
         $groupModel->delete(array('id' => $id));
+
+        redirect('/dashboard/users/groups');
     }
 
 }

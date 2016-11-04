@@ -99,17 +99,19 @@ class SidebarModule extends \Garden\Plugin
             }
 
 
-            $html .= '<li'.($this->open ? ' class="open"' : null).($groups ? ' data-group="'.$group.'"': '').'>';
-            if ($groups) {
-                $html .= '<a href="'.$url.'"'.$class.$attributes.'>'.$icon.'<span class="text-wrapper sidebar-mini-hide">'.t($option['name']).'</span></a>';
-            } else {
-                $html .= '<a href="'.$url.'"'.$class.$attributes.'>'.$icon.t($option['name']).'</a>';
-            }
+            if ($option['url'] OR $items) {
+                $html .= '<li'.($this->open ? ' class="open"' : null).($groups ? ' data-group="'.$group.'"': '').'>';
+                if ($groups) {
+                    $html .= '<a href="'.$url.'"'.$class.$attributes.'>'.$icon.'<span class="text-wrapper sidebar-mini-hide">'.t($option['name']).'</span></a>';
+                } else {
+                    $html .= '<a href="'.$url.'"'.$class.$attributes.'>'.$icon.t($option['name']).'</a>';
+                }
 
-            if ($items) {
-                $html .= '<ul>'.$htmlItems.'</ul>';
+                if ($items) {
+                    $html .= '<ul>'.$htmlItems.'</ul>';
+                }
+                $html .= '</li>';
             }
-            $html .= '</li>';
         }
 
         return $html;

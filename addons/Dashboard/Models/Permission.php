@@ -179,8 +179,8 @@ class Permission extends \Garden\Plugin
 
     public function saveGroup($groupID, $data, $oldData)
     {
-        $oldPerm = val('permission', $oldData);
-        $newPerm = val('permission', $data);
+        $oldPerm = val('permission', $oldData, []);
+        $newPerm = val('permission', $data, []);
 
         $insert = array_diff($newPerm, $oldPerm);
         $delete = array_diff($oldPerm, $newPerm);

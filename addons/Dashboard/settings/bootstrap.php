@@ -21,12 +21,6 @@ Gdn::app()->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpac
         'id' => '\d+'
     ));
 
-Gdn::app()->route('/users/?{action}?/?{id}?/?(\?.*)?', $defSpace.'\\Users')
-    ->conditions(array(
-        'action' => '[a-zA-Z]+',
-        'id' => '\d+'
-    ));
-
 
 Gdn::factoryInstall('auth',  '\\Addons\\Dashboard\\Models\\Auth');
 Gdn::factoryInstall('users', '\\Addons\\Dashboard\\Models\\Users');

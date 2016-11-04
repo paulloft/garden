@@ -9,14 +9,16 @@ use Garden\Gdn;
 class Base extends \Garden\Template
 {
     protected $template = 'dashboard';
-    protected $needAuth;
+    protected $needAuth = true;
 
     protected $auth;
     
-    function __construct($needAuth = true)
+    function __construct($needAuth = null)
     {
         parent::__construct();
-        $this->needAuth = $needAuth;
+        if (!is_null($needAuth)) {
+            $this->needAuth = $needAuth;
+        }
         $this->checkAuth();
     }
 

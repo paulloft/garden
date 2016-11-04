@@ -66,11 +66,15 @@ var App = function() {
                 toggleMenu('close');
                 break;
 
+            case 'confirm':
+                return confirm('Confirm your action');
+                break;
+
             default: 
-                return false;
+                return true;
         }
 
-        return true;
+        return false;
     }
 
     var initEvents = function() {        
@@ -85,7 +89,7 @@ var App = function() {
         body.on('click', '[data-action]', function(e){
             var mode = jQuery(this).attr('data-action');
 
-            if (layout(mode)) {
+            if (!layout(mode)) {
                 e.preventDefault();
             }
         });

@@ -8,12 +8,8 @@ use Garden\Gdn;
 */
 class Entry extends Base
 {
-    protected $template = 'empty'; 
-    
-    function __construct()
-    {
-        parent::__construct(false);
-    }
+    protected $template = 'empty';
+    protected $needAuth = false;
 
     public function index()
     {

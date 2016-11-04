@@ -54,6 +54,7 @@ class Session extends Plugin
         $lifetime = c('session.lifetime');
         $sessionID = md5($salt.$userID.session_id());
 
+
         $data = array(
             "sessionID" => $sessionID,
             "userID" => $userID,
@@ -61,9 +62,10 @@ class Session extends Plugin
             "lastActivity" => DB::expr('now()'),
             "userAgent" => Gdn::request()->getEnv('HTTP_USER_AGENT')
         );
+//        d($data);
 
         // if ($remember) {
-            // $data["lastActivity"] = DB::expr('now()');
+        // $data["lastActivity"] = DB::expr('now()');
             if ($this->model->getID($sessionID)) {
                 $this->model->update($sessionID, $data);
             } else {

@@ -75,7 +75,8 @@ class DB {
      */
     public static function select_array(array $columns = NULL)
     {
-        return new Query\Builder\Select($columns);
+        $sql = new Query\Builder\Select();
+        return $sql->select_array($columns);
     }
 
     /**

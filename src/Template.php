@@ -3,11 +3,6 @@ namespace Garden;
 
 class Template extends Controller {
 
-    /**
-     * @var Form
-     */
-    public $form;
-
     // template file
     protected $template = 'template';
     protected $templateAddon;
@@ -15,12 +10,10 @@ class Template extends Controller {
     protected $_js  = array();
     protected $_css = array();
     protected $meta = array();
-    protected $nocache = false;
-    
+
     public function __construct()
     {
         parent::__construct();
-        $this->nocache = NOCACHE;
     }
 
     /**
@@ -125,24 +118,6 @@ class Template extends Controller {
         }
 
         Event::fire('afterRender');
-    }
-
-    /**
-     * @param bool $tablename
-     * @return Form
-     */
-    public function initForm($model = false, $data = false)
-    {
-        $tablename = is_string($model) ? $model : false;
-        $this->form = new Form($tablename);
-
-        if ($model) {
-            $this->form->setModel($model, $data);
-        }
-        
-        $this->setData('gdn_form', $this->form);
-
-        return $this->form;
     }
 
     protected function getResourcePath($resource, $src, $addon = null)

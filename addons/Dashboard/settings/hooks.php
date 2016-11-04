@@ -34,11 +34,11 @@ class Hooks extends \Garden\Plugin
 
         $sidebar->addGroup('dashboard', 'Dashboard', '/dashboard', 10, 'dashboard', ['icon' => 'fa fa-dashboard']);
 
-        $sidebar->addGroup('users', 'Users', false, 20, 'dashboard', ['icon' => 'fa fa-user']);
-        $sidebar->addItem('users', 'Users', '/users', 10, 'dashboard.user.view');
-        $sidebar->addItem('users', 'User groups', '/users/groups', 20, 'dashboard.group.view');
+        $sidebar->addGroup('users', 'Users', false, 20, false, ['icon' => 'fa fa-user']);
+        $sidebar->addItem('users', 'Users', '/dashboard/users', 10, 'dashboard.user.view');
+        $sidebar->addItem('users', 'User groups', '/dashboard/users/groups', 20, 'dashboard.group.view');
 
-        $sidebar->addGroup('system', 'System settings', false, 500, 'dashboard', ['icon' => 'fa fa-cog']);
+        $sidebar->addGroup('system', 'System settings', false, 500, false, ['icon' => 'fa fa-cog']);
         $sidebar->addItem('system', 'Update database', '/dashboard/structure', 300, 'dashboard.admin');
 
         \HeaderModule::instance()->addLink('Clear cache', '?nocache', 'success', false, array('icon' => 'fa fa-refresh'));

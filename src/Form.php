@@ -16,6 +16,9 @@ class Form
      */
     public $inputClass = 'form-control';
 
+    /**
+     * @var \Garden\Model
+     */
     protected $model;
     protected $validation;
     protected $data;
@@ -237,10 +240,10 @@ class Form
 
         if ($this->valid()) {
             $post = $this->getFormValues();
-            $post = $this->fixPostData($post);
 
             if ($this->model) {
                 $id = val($this->model->primaryKey, $post);
+                $post = $this->fixPostData($post);
                 $result = $this->model->save($post, $id);
             } else {
                 $result = $post;

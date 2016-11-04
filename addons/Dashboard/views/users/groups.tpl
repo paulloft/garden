@@ -30,10 +30,10 @@
                         <td class="text-right">
                             <div class="btn-group inlile-group" style="min-width: 74px;">
                             {if checkPermission('dashboard.group.edit')}
-                                <a class="btn btn-default" title="{t code="Edit"}" href="/users/groupedit/{$group.id}"><i class="fa fa-pencil"></i></a>
+                                <a class="btn btn-default" title="{t code="Edit"}" href="/dashboard/users/groupedit/{$group.id}"><i class="fa fa-pencil"></i></a>
                             {/if}
                             {if $group.id != 1 AND checkPermission('dashboard.group.delete')}
-                                <button class="btn btn-default" title="{t code="Remove"}" data-href="/users/group/{$group.id}" data-confirm="true" data-layout="ajax" data-reload="true" data-ajax-type="delete"><i class="fa fa-times"></i></button>
+                                <a class="btn btn-default" title="{t code="Remove"}" href="/dashboard/users/deletegroup/{$group.id}" data-action="confirm"><i class="fa fa-times"></i></a>
                             {/if}
                             </div>
                         </td>
@@ -46,7 +46,7 @@
 
     <div>
         {if checkPermission('dashboard.group.add')}
-        <a class="btn btn-primary" href="/users/groupadd"><i class="fa fa-plus with-text"></i> {t code="New group"}</a>
+        <a class="btn btn-primary" href="/dashboard/users/groupadd"><i class="fa fa-plus with-text"></i> {t code="New group"}</a>
         {/if}
     </div>
 </div>

@@ -7,15 +7,13 @@ use Garden\Gdn;
 */
 class Dashboard extends Base
 {
-    
-    function __construct()
+    public function initialize()
     {
-        parent::__construct();
+        $this->pageInit();
     }
 
     public function index()
     {
-        $this->pageInit();
         $this->title('Dashboard');
 
         $this->render();
@@ -25,7 +23,6 @@ class Dashboard extends Base
     {
         $this->permission('dashboard.admin');
 
-        $this->pageInit();
         $this->title('Update database structure');
         $this->currentUrl('/dashboard/structure');
 
