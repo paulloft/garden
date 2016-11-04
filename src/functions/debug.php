@@ -7,10 +7,8 @@
 if (!function_exists('p')) {
     function p() {
         $Args = func_get_args();
-        if (count($Args) > 0) {
-            foreach ($Args as $A) {
-                \Dumphper\Dumphper::dump($A);
-            }
+        foreach ($Args as $A) {
+            \Dumphper\Dumphper::dump($A);
         }
     }
 }
