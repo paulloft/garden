@@ -5,11 +5,16 @@ namespace Garden;
 require_once PATH_ROOT.'/vendor/autoload.php';
 
 // Path to the primary configuration file
-define('PATH_CONF', PATH_ROOT.'/conf');
-define('PATH_CACHE', PATH_ROOT.'/cache');
-define('PATH_ADDONS', PATH_ROOT.'/addons');
-define('PATH_LOGS', PATH_CACHE.'/logs');
-define('PATH_SRC', PATH_ROOT.'/system');
+define('GDN_CONF', PATH_ROOT.'/conf');
+define('GDN_CACHE', PATH_ROOT.'/cache');
+define('GDN_LOGS', GDN_CACHE.'/logs');
+
+if (!defined('GDN_SRC')) {
+    define('GDN_SRC', PATH_ROOT.'/system');
+}
+if (!defined('PATH_ADDONS')) {
+    define('PATH_ADDONS', PATH_ROOT.'/addons');
+}
 
 define('NOCACHE', isset($_GET['nocache']));
 
