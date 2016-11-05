@@ -34,21 +34,15 @@
 	},
 	"require-dev": {
 		"bobthecow/faker": "dev-master",
-		"paulloft/dumphper": "dev-master"
+		"paulloft/dumphper": "*"
 	},
 	"autoload": {
 		"psr-4": {
-			"Garden\\": "src",
+			"Garden\\": "system",
 			"Addons\\": "addons"
 		},
 		"files": [
-			"src/functions/autoload.php"
+			"system/functions/autoload.php"
 		]
-	},
-	"repositories":[
-        {
-            "type":"git",
-            "url":"https://github.com/paulloft/phpdumpher"
-        }
-    ]
+	}
 }
