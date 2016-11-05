@@ -8,7 +8,7 @@ require_once PATH_ROOT.'/vendor/autoload.php';
 define('PATH_CONF', PATH_ROOT.'/conf');
 define('PATH_CACHE', PATH_ROOT.'/cache');
 define('PATH_ADDONS', PATH_ROOT.'/addons');
-define('PATH_LOGS', PATH_ROOT.'/logs');
+define('PATH_LOGS', PATH_CACHE.'/logs');
 define('PATH_SRC', PATH_ROOT.'/system');
 
 define('NOCACHE', isset($_GET['nocache']));
