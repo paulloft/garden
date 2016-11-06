@@ -1,5 +1,6 @@
 <?php
 namespace Addons\Dashboard;
+use Garden\Factory;
 use Garden\Gdn;
 
 include_once 'functions.php';
@@ -22,6 +23,6 @@ Gdn::app()->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpac
     ));
 
 
-Gdn::factoryInstall('auth',  '\\Addons\\Dashboard\\Models\\Auth');
-Gdn::factoryInstall('users', '\\Addons\\Dashboard\\Models\\Users');
-Gdn::factoryInstall('permission', '\\Addons\\Dashboard\\Models\\Permission');
+Factory::install('auth',  '\\Addons\\Dashboard\\Models\\Auth');
+Factory::install('users', '\\Addons\\Dashboard\\Models\\Users');
+Factory::install('permission', '\\Addons\\Dashboard\\Models\\Permission');

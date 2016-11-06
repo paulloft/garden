@@ -33,7 +33,7 @@ class Base extends \Garden\Template {
             $this->addCss('bootstrap.theme.css');
             $this->addCss('dashboard.css');
 
-            \Garden\Event::fire('dashboardPageInit');
+            \Garden\Event::fire('dashboard_page_init');
         }
     }
 

@@ -1,8 +1,9 @@
 <?php
 namespace Addons\Dashboard;
+use Garden\Factory;
 use Garden\Gdn;
 $construct = Gdn::structure();
-$permission = Gdn::factory('permission');
+$permission = Factory::get('permission');
 
 // User Table
 $explicit = true;

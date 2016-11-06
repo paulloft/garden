@@ -1,5 +1,6 @@
 <?php
 namespace Addons\Dashboard\Models;
+use Garden\Factory;
 use Garden\Gdn;
 use Garden\DB;
 
@@ -148,7 +149,7 @@ class Users extends \Garden\Model
 
     public function updateGroups($userID, $post, $groups)
     {
-        $groupModel = Gdn::factory('\Garden\Model', 'users_groups');
+        $groupModel = Factory::get('\Garden\Model', 'users_groups');
         $groupsNew = val('groupsID', $post, array());
 
         $insert = array_diff($groupsNew, $groups);

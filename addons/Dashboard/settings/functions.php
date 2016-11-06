@@ -2,6 +2,6 @@
 if (!function_exists('checkPermission')) {
     function checkPermission($permission, $userID = false)
     {
-        return Garden\Gdn::factory('permission')->check($permission, $userID);
+        return Garden\Factory::get('permission')->check($permission, $userID);
     }
 }

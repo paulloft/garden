@@ -16,5 +16,9 @@ define('DEBUG', TRUE);
 // Require bootstrap.
 require_once PATH_ROOT.'/bootstrap.php';
 
-// Instantiate and run the application.
-Gdn::app()->run();
+if (PHP_SAPI == 'cli') {
+    Gdn::tasks()->run();
+} else {
+    // Instantiate and run the application.
+    Gdn::app()->run();
+}

@@ -28,7 +28,7 @@ class Hooks extends \Garden\Plugin {
         }
     }
 
-    public function dashboardPageInit_handler()
+    public function dashboard_page_init_handler()
     {
         $sidebar = \SidebarModule::instance();
 

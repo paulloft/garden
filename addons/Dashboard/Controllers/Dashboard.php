@@ -1,6 +1,7 @@
 <?php
 namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
+use Garden\Factory;
 use Garden\Gdn;
 
 class Dashboard extends Base {
@@ -27,7 +28,7 @@ class Dashboard extends Base {
         $captureOnly = Gdn::request()->getQuery('update', false) === false;
 
         $structure = Gdn::structure();
-        $permission = Gdn::factory('permission');
+        $permission = Factory::get('permission');
         $structure->capture = $captureOnly;
         $permission->captureOnly = $captureOnly;
 
