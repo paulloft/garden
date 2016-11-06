@@ -2,11 +2,9 @@
 namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Garden\Gdn;
-/**
-* 
-*/
-class Dashboard extends Base
-{
+
+class Dashboard extends Base {
+
     public function initialize()
     {
         $this->pageInit();

@@ -3,11 +3,9 @@ namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Garden\Exception as Exception;
 use Garden\Gdn;
-/**
-* 
-*/
-class Base extends \Garden\Template
-{
+
+class Base extends \Garden\Template {
+
     protected $template = 'dashboard';
     protected $needAuth = true;
 

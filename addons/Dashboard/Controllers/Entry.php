@@ -3,11 +3,8 @@ namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Garden\Request;
 use Garden\Gdn;
-/**
-* 
-*/
-class Entry extends Base
-{
+
+class Entry extends Base {
     protected $template = 'empty';
     protected $needAuth = false;
 

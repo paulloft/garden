@@ -4,37 +4,31 @@ use Addons\Dashboard\Models as Model;
 use Garden\Exception;
 use Garden\Gdn;
 
-/**
-* 
-*/
-class Users extends Base
-{
+class Users extends Base {
+
+    public function initialize()
+    {
+        $this->pageInit();
+    }
 
     public function index()
     {
+        $this->title('Users');
         $this->permission('dashboard.user.view');
 
-        $this->pageInit();
-        $this->title('Users');
-
         $userModel = Model\Users::instance();
-
         $users = $userModel->getWhere();
 
         $this->setData('users', $users->as_array());
-
         $this->render();
     }
 
     public function groups()
     {
-        $this->permission('dashboard.group.view');
-        
-        $this->pageInit();
         $this->title('User groups');
+        $this->permission('dashboard.group.view');
 
         $groupModel = Model\Groups::instance();
-
         $groups = $groupModel->getWhere();
 
         $this->setData('groups', $groups->as_array());
@@ -48,7 +42,6 @@ class Users extends Base
 
     public function edit($id = false)
     {
-        $this->pageInit();
         $this->title($id ? 'Edit user' : 'New user');
         $this->currentUrl('/dashboard/users');
 
@@ -104,7 +97,6 @@ class Users extends Base
 
     public function groupEdit($id = false)
     {
-        $this->pageInit();
         $this->title($id ? 'Edit user group' : 'New user group');
         $this->addJs('user_group.js');
         $this->currentUrl('/dashboard/users/groups');
