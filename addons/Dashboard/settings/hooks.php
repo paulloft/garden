@@ -4,8 +4,8 @@ use Garden\Gdn;
 /**
  * Dashboard hooks
  */
-class Hooks extends \Garden\Plugin
-{
+class Hooks extends \Garden\Plugin {
+
     public function dispatch_handler()
     {
         Models\Auth::instance()->autoLogin();
