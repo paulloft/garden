@@ -15,11 +15,11 @@ body.Entry {
 h1 {
     font-weight: 300;
     color: #22222a;
-    font-size: 30px;
+    font-size: 36px;
 }
 h2 {
     font-weight: 300;
-    font-size: 36px;
+    font-size: 30px;
     color: #22222a;
 }
 h1 small {

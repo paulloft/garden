@@ -1,0 +1,6 @@
+{
+  "name": "Installer",
+  "description": "Installation module",
+  "version": "1.0",
+  "system": true
+}

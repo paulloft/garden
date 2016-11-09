@@ -22,7 +22,6 @@ Gdn::app()->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpac
         'id' => '\d+'
     ));
 
-
 Factory::install('auth',  '\\Addons\\Dashboard\\Models\\Auth');
 Factory::install('users', '\\Addons\\Dashboard\\Models\\Users');
 Factory::install('permission', '\\Addons\\Dashboard\\Models\\Permission');
