@@ -92,7 +92,7 @@
             <?php endif; ?>
         </div>
         <div class="col-xs-4 text-right">
-            <a href="/install" class="btn btn-success <?php if ($errors): ?>disabled<?php endif; ?>">
+            <a href="/install?step=2" class="btn btn-success <?php if ($errors): ?>disabled<?php endif; ?>">
                 Continue <i class="fa fa-chevron-right"></i>
             </a>
         </div>
