@@ -17,7 +17,7 @@ class Auth extends \Garden\Plugin
     protected $userModel;
     protected $session;
     
-    function __construct()
+    public function __construct()
     {
         $this->userModel = Users::instance();
         $this->session = Gdn::session();

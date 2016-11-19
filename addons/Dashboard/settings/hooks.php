@@ -43,4 +43,26 @@ class Hooks extends \Garden\Plugin {
 
         \HeaderModule::instance()->addLink('Clear cache', '?nocache', 'success', false, array('icon' => 'fa fa-refresh'));
     }
+
+    public function permission_update_handler()
+    {
+        $permission = Factory::get('permission');
+
+        $permission
+            ->define('dashboard.user.view')
+            ->define('dashboard.user.add')
+            ->define('dashboard.user.edit')
+            ->define('dashboard.user.delete')
+
+            ->define('dashboard.group.view')
+            ->define('dashboard.group.add')
+            ->define('dashboard.group.edit')
+            ->define('dashboard.group.delete')
+        ;
+    }
+
+    public function install()
+    {
+
+    }
 }

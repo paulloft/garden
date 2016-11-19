@@ -92,7 +92,7 @@ class Users extends Base {
 
     public function groupAdd()
     {
-        $this->groupedit();
+        $this->groupEdit();
     }
 
     public function groupEdit($id = false)

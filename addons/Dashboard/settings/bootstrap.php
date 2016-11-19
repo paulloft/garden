@@ -3,8 +3,6 @@ namespace Addons\Dashboard;
 use Garden\Factory;
 use Garden\Gdn;
 
-include_once 'functions.php';
-
 $defSpace = '\\Addons\\Dashboard\\Controllers';
 
 Gdn::app()->route('/entry/?(\?.*)?', $defSpace.'\\Entry');
@@ -25,3 +23,10 @@ Gdn::app()->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpac
 Factory::install('auth',  '\\Addons\\Dashboard\\Models\\Auth');
 Factory::install('users', '\\Addons\\Dashboard\\Models\\Users');
 Factory::install('permission', '\\Addons\\Dashboard\\Models\\Permission');
+
+if (!function_exists('checkPermission')) {
+    function checkPermission($permission, $userID = false)
+    {
+        return Garden\Factory::get('permission')->check($permission, $userID);
+    }
+}

@@ -7,11 +7,6 @@ use Garden\Gdn;
 */
 class Skeleton extends \Garden\Template
 {
-    
-    function __construct()
-    {
-        parent::__construct();
-    }
 
     protected function pageInit()
     {

@@ -12,8 +12,8 @@ define('GDN_LOGS', GDN_CACHE.'/logs');
 if (!defined('GDN_SRC')) {
     define('GDN_SRC', PATH_ROOT.'/system');
 }
-if (!defined('PATH_ADDONS')) {
-    define('PATH_ADDONS', PATH_ROOT.'/addons');
+if (!defined('GDN_ADDONS')) {
+    define('GDN_ADDONS', PATH_ROOT.'/addons');
 }
 
 define('NOCACHE', isset($_GET['nocache']));

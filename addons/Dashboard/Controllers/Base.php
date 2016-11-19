@@ -11,10 +11,10 @@ class Base extends \Garden\Template {
 
     protected $auth;
     
-    function __construct($needAuth = null)
+    public function __construct($needAuth = null)
     {
         parent::__construct();
-        if (!is_null($needAuth)) {
+        if ($needAuth !== null) {
             $this->needAuth = $needAuth;
         }
         $this->checkAuth();

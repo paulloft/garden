@@ -1,6 +1,6 @@
 {
     "name": "Dashboard",
-    "description": "Administrate panel",
+    "description": "Administrative panel",
     "version": "1.0",
     "system": true
 }

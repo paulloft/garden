@@ -6,7 +6,7 @@ class Groups extends \Garden\Model
 {
     public $table = 'groups';
     
-    function __construct()
+    public function __construct()
     {
         parent::__construct($this->table);
     }

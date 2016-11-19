@@ -6,11 +6,6 @@
 class HeaderModule extends \Garden\Controller
 {
     protected $buttons = array();
-    
-    function __construct()
-    {
-        parent::__construct();
-    }
 
     public function addLink($name, $href, $type = 'default', $permission = false, $attributes = array())
     {

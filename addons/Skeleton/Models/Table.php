@@ -8,8 +8,8 @@ use Garden\DB;
 class Table extends \Garden\Model
 {
     public $table = 'php_st';
-    
-    function __construct()
+
+    public function __construct()
     {
         parent::__construct($this->table);
     }

@@ -17,7 +17,7 @@ class PagerModule extends \Garden\Controller
 
     protected $request;
 
-    function __construct($count, $perPage = false, $options = [])
+    public function __construct($count, $perPage = false, $options = [])
     {
         if ($perPage) $this->perPage = $perPage;
         $this->count = $count;

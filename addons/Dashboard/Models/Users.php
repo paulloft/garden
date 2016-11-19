@@ -11,8 +11,8 @@ use Garden\DB;
 class Users extends \Garden\Model
 {
     public $table = 'users';
-    
-    function __construct()
+
+    public function __construct()
     {
         parent::__construct($this->table);
     }
@@ -23,8 +23,8 @@ class Users extends \Garden\Model
 
         if (!$result) {
             $query = DB::select('u.*')
-                ->select(DB::Expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
-                ->select(DB::Expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
+                ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
+                ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
                 ->from($this->table, 'u')
 
                 ->join('users_groups', 'ug', 'LEFT')
@@ -74,8 +74,8 @@ class Users extends \Garden\Model
     protected function baseQuery($where = array(), $order = array(), $limit = false, $offset = 0)
     {
         $this->_query = DB::select('u.*')
-            ->select(DB::Expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
-            ->select(DB::Expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
+            ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
+            ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
             ->from($this->table, 'u')
 
             ->join('users_groups', 'ug', 'LEFT')

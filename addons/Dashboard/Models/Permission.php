@@ -16,7 +16,7 @@ class Permission extends \Garden\Plugin
     private $_groupTable = 'groups_permissions';
 
 
-    function __construct()
+    public function __construct()
     {
         $this->groupModel = new \Garden\Model($this->_groupTable);
     }

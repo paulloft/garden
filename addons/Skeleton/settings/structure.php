@@ -3,7 +3,6 @@ namespace Addons\Skeleton;
 use Garden\Factory;
 use Garden\Gdn;
 $construct = Gdn::structure();
-$permission = Factory::get('permission');
 
 // User Table
 
@@ -28,18 +27,4 @@ $construct
     ->column('active', 'tinyint(1)', '1')
     ->column('deleted', 'tinyint(1)', '0')
     ->set($explicit, $drop);
-*/
-
-/*
-$permission
-    ->define('dashboard.user.view')
-    ->define('dashboard.user.add')
-    ->define('dashboard.user.edit')
-    ->define('dashboard.user.delete')
-
-    ->define('dashboard.group.view')
-    ->define('dashboard.group.add')
-    ->define('dashboard.group.edit')
-    ->define('dashboard.group.delete')
-;
 */
