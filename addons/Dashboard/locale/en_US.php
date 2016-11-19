@@ -12,6 +12,7 @@
     "validate_regexp" => "The value does not coincide with the pattern",
     "validate_sql_date" => "Invalid date format",
     "validate_emailAvailable" => "This Email is already registered",
+    "validate_loginAvailable" => "This login is already registered",
 
     "users.login" => "Login",
     "users.email" => "Email",

@@ -42,6 +42,7 @@
     "validate_regexp" => "Значение не совпадает с шаблоном",
     "validate_sql_date" => "Неверный формат даты",
     "validate_emailAvailable" => "Такой Email уже зарегистрирован",
+    "validate_loginAvailable" => "Такой логин уже зарегистрирован",
 
 
     "users.login" => "Имя пользователя",

@@ -80,7 +80,7 @@ class Users extends \Garden\Model
 
             ->join('users_groups', 'ug', 'LEFT')
               ->on('u.id', '=', 'ug.userID')
-              
+
             ->join('groups', 'g', 'LEFT')
               ->on('ug.groupID', '=', 'g.id')
 
@@ -89,7 +89,7 @@ class Users extends \Garden\Model
 
         $this->_where($where);
 
-        foreach ($order as $field => $direction) 
+        foreach ($order as $field => $direction)
         {
             $this->_query->order_by($field, $direction);
         }
@@ -100,10 +100,10 @@ class Users extends \Garden\Model
             $this->_query->offset($offset);
         }
     }
-     
-    public function getWhere($where = array(), $order = array(), $limit = false, $offset = 0)
+
+    public function getWhere(array $where = array(), array $order = array(), $limit = false, $offset = 0)
     {
-        $_where = $where; $where = []; 
+        $_where = $where; $where = [];
         foreach ($_where as $key => $value) {
             $where['u.'.$key] = $value;
         }
@@ -115,7 +115,7 @@ class Users extends \Garden\Model
 
     public function getByGroupID($groupID, $where = array(), $order = array(), $limit = false, $offset = 0)
     {
-        $_where = $where; $where = []; 
+        $_where = $where; $where = [];
         foreach ($_where as $key => $value) {
             $where['u.'.$key] = $value;
         }
@@ -135,7 +135,7 @@ class Users extends \Garden\Model
             ->execute();
     }
 
-    public function delete($where = array())
+    public function delete(array $where = array())
     {
         $this->_query = DB::update($this->table)
             ->set([
@@ -143,7 +143,7 @@ class Users extends \Garden\Model
                 'dateDeleted' => DB::expr('now()')
             ]);
 
-        $this->_where($where);  
+        $this->_where($where);
         $this->_query->execute();
     }
 
@@ -170,9 +170,9 @@ class Users extends \Garden\Model
 
     }
 
-    public function usernameAvailable($username, $id = false)
+    public function loginAvailable($login, $id = false)
     {
-        $where = array('login'=>$username);
+        $where = ['login' => $login];
         if ($id) $where['id<>'] = $id;
 
         $result = $this->getCount($where);
@@ -182,12 +182,40 @@ class Users extends \Garden\Model
 
     public function emailAvailable($email, $id = false)
     {
-        $where = array('email'=>$email);
+        $where = array('email'=> $email);
         if ($id) $where['id<>'] = $id;
 
         $result = $this->getCount($where);
 
         return $result > 0 ? false : true;
     }
-    
+
+    public function validation()
+    {
+        if (!$this->validation) {
+            $this->validation = new \Garden\Validation($this);
+            $id = $this->validation->getData('id');
+
+            $this->validation
+                ->rule('password', 'min_length', 6)
+                ->rule('login', array($this, 'loginAvailable'), ':id')
+                ->rule('email', 'email')
+                ->rule('email', array($this, 'emailAvailable'), ':id');
+        }
+
+        return $this->validation;
+
+    }
+
+    public function save(array $post, $id = false)
+    {
+        $password = val('password', $post);
+        if ($password) {
+            $password = Auth::instance()->hash($password);
+            $post['password'] = $password;
+        }
+
+        return parent::save($post, $id);
+    }
+
 }

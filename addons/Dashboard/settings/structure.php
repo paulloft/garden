@@ -70,3 +70,18 @@ $construct
     ->column('expire', 'datetime', true)
     ->column('userAgent', 'varchar(250)', true)
     ->set($explicit, $drop);
+
+
+
+Gdn::permission()
+    ->define('dashboard.user.view')
+    ->define('dashboard.user.add')
+    ->define('dashboard.user.edit')
+    ->define('dashboard.user.delete')
+
+    ->define('dashboard.group.view')
+    ->define('dashboard.group.add')
+    ->define('dashboard.group.edit')
+    ->define('dashboard.group.delete')
+
+    ->save();

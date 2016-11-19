@@ -40,10 +40,6 @@ class Dashboard extends Base {
             }
         }
 
-        \Garden\Event::fire('permissions_update');
-
-        $permission->save();
-
         if (!$captureOnly) {
             redirect('/dashboard/structure');
         }

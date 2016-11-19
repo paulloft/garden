@@ -10,16 +10,9 @@ class Permission extends \Garden\Plugin
     public $captureOnly = false;
 
     protected $define;
-    protected $groupModel;
 
     private $_table = 'permissions';
     private $_groupTable = 'groups_permissions';
-
-
-    public function __construct()
-    {
-        $this->groupModel = new \Garden\Model($this->_groupTable);
-    }
 
     public function define($permission, $default = false)
     {
@@ -30,6 +23,7 @@ class Permission extends \Garden\Plugin
 
     public function save()
     {
+        $groupModel = new \Garden\Model($this->_groupTable);
         $permissions = $this->getList();
         $permissions = array_column($permissions, 'id', 'code');
 
@@ -64,7 +58,7 @@ class Permission extends \Garden\Plugin
                 ];
             } else {
                 $this->delete($id, $this->_table);
-                $this->groupModel->delete(['id'=>$id]);
+                $groupModel->delete(['id'=>$id]);
             }
         }
 
@@ -179,6 +173,7 @@ class Permission extends \Garden\Plugin
 
     public function saveGroup($groupID, $data, $oldData)
     {
+        $groupModel = new \Garden\Model($this->_groupTable);
         $oldPerm = val('permission', $oldData, []);
         $newPerm = val('permission', $data, []);
 
@@ -187,7 +182,7 @@ class Permission extends \Garden\Plugin
 
         foreach ($insert as $permissionID)
         {
-            $this->groupModel->insert([
+            $groupModel->insert([
                 'groupID'      => $groupID,
                 'permissionID' => $permissionID
             ]);
@@ -195,7 +190,7 @@ class Permission extends \Garden\Plugin
 
         if (!empty($delete))
         {
-            $this->groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
+            $groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
         }
     }
 
