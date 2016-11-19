@@ -292,75 +292,6 @@ select.form-control:after {
     border-radius: 3px;
 }
 
-/* mini bootstrap*/
-
-.toright {float: right;}
-.toleft  {float: left;}
-.clear   {clear: both;}
-
-.fs-10 {font-size: 10px;}
-.fs-12 {font-size: 12px;}
-.fs-13 {font-size: 13px;}
-.fs-14 {font-size: 14px;}
-.fs-16 {font-size: 16px;}
-.fs-18 {font-size: 18px;}
-.fs-20 {font-size: 20px;}
-.fs-22 {font-size: 22px;}
-
-.mt-0  {margin-top: 0px;}
-.mt-5  {margin-top: 5px;}
-.mt-10 {margin-top: 10px;}
-.mt-15 {margin-top: 15px;}
-.mt-20 {margin-top: 20px;}
-.mt-25 {margin-top: 25px;}
-.mt-30 {margin-top: 30px;}
-.mt-35 {margin-top: 35px;}
-.mt-40 {margin-top: 40px;}
-.mt-45 {margin-top: 45px;}
-.mt-50 {margin-top: 50px;}
-
-.mb-0  {margin-bottom: 0px;}
-.mb-5  {margin-bottom: 5px;}
-.mb-10 {margin-bottom: 10px;}
-.mb-15 {margin-bottom: 15px;}
-.mb-20 {margin-bottom: 20px;}
-.mb-25 {margin-bottom: 25px;}
-.mb-30 {margin-bottom: 30px;}
-.mb-35 {margin-bottom: 35px;}
-.mb-40 {margin-bottom: 40px;}
-.mb-45 {margin-bottom: 45px;}
-.mb-50 {margin-bottom: 50px;}
-
-.pt-0  {padding-top: 0px;}
-.pt-5  {padding-top: 5px;}
-.pt-10 {padding-top: 10px;}
-.pt-15 {padding-top: 15px;}
-.pt-20 {padding-top: 20px;}
-.pt-25 {padding-top: 25px;}
-.pt-30 {padding-top: 30px;}
-.pt-35 {padding-top: 35px;}
-.pt-40 {padding-top: 40px;}
-.pt-45 {padding-top: 45px;}
-.pt-50 {padding-top: 50px;}
-
-.pb-0  {padding-bottom: 0px;}
-.pb-5  {padding-bottom: 5px;}
-.pb-10 {padding-bottom: 10px;}
-.pb-15 {padding-bottom: 15px;}
-.pb-20 {padding-bottom: 20px;}
-.pb-25 {padding-bottom: 25px;}
-.pb-30 {padding-bottom: 30px;}
-.pb-35 {padding-bottom: 35px;}
-.pb-40 {padding-bottom: 40px;}
-.pb-45 {padding-bottom: 45px;}
-.pb-50 {padding-bottom: 50px;}
-
-.text-muted {
-  color: #999999;
-}
-.text-white {
-  color: #fff;
-}
 a.text-muted:hover,
 a.text-muted:active,
 a.text-muted:focus,
@@ -1092,4 +1023,74 @@ a.bg-gray-lighter:hover {
 }
 .alert-danger .alert-link {
   color: #9d392b;
+}
+
+/* mini bootstrap*/
+
+.toright {float: right;}
+.toleft  {float: left;}
+.clear   {clear: both;}
+
+.fs-10 {font-size: 10px !important;}
+.fs-12 {font-size: 12px !important;}
+.fs-13 {font-size: 13px !important;}
+.fs-14 {font-size: 14px !important;}
+.fs-16 {font-size: 16px !important;}
+.fs-18 {font-size: 18px !important;}
+.fs-20 {font-size: 20px !important;}
+.fs-22 {font-size: 22px !important;}
+
+.mt-0  {margin-top: 0px !important;}
+.mt-5  {margin-top: 5px !important;}
+.mt-10 {margin-top: 10px !important;}
+.mt-15 {margin-top: 15px !important;}
+.mt-20 {margin-top: 20px !important;}
+.mt-25 {margin-top: 25px !important;}
+.mt-30 {margin-top: 30px !important;}
+.mt-35 {margin-top: 35px !important;}
+.mt-40 {margin-top: 40px !important;}
+.mt-45 {margin-top: 45px !important;}
+.mt-50 {margin-top: 50px !important;}
+
+.mb-0  {margin-bottom: 0px !important;}
+.mb-5  {margin-bottom: 5px !important;}
+.mb-10 {margin-bottom: 10px !important;}
+.mb-15 {margin-bottom: 15px !important;}
+.mb-20 {margin-bottom: 20px !important;}
+.mb-25 {margin-bottom: 25px !important;}
+.mb-30 {margin-bottom: 30px !important;}
+.mb-35 {margin-bottom: 35px !important;}
+.mb-40 {margin-bottom: 40px !important;}
+.mb-45 {margin-bottom: 45px !important;}
+.mb-50 {margin-bottom: 50px !important;}
+
+.pt-0  {padding-top: 0px !important;}
+.pt-5  {padding-top: 5px !important;}
+.pt-10 {padding-top: 10px !important;}
+.pt-15 {padding-top: 15px !important;}
+.pt-20 {padding-top: 20px !important;}
+.pt-25 {padding-top: 25px !important;}
+.pt-30 {padding-top: 30px !important;}
+.pt-35 {padding-top: 35px !important;}
+.pt-40 {padding-top: 40px !important;}
+.pt-45 {padding-top: 45px !important;}
+.pt-50 {padding-top: 50px !important;}
+
+.pb-0  {padding-bottom: 0px !important;}
+.pb-5  {padding-bottom: 5px !important;}
+.pb-10 {padding-bottom: 10px !important;}
+.pb-15 {padding-bottom: 15px !important;}
+.pb-20 {padding-bottom: 20px !important;}
+.pb-25 {padding-bottom: 25px !important;}
+.pb-30 {padding-bottom: 30px !important;}
+.pb-35 {padding-bottom: 35px !important;}
+.pb-40 {padding-bottom: 40px !important;}
+.pb-45 {padding-bottom: 45px !important;}
+.pb-50 {padding-bottom: 50px !important;}
+
+.text-muted {
+    color: #999999;
+}
+.text-white {
+    color: #fff;
 }
