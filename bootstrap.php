@@ -16,8 +16,6 @@ if (!defined('GDN_ADDONS')) {
     define('GDN_ADDONS', PATH_ROOT.'/addons');
 }
 
-define('NOCACHE', isset($_GET['nocache']));
-
 // Make sure a default time zone is set
 // date_default_timezone_set('Europe/Samara');
 
