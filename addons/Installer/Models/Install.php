@@ -10,7 +10,7 @@ class Install extends \Garden\Plugin {
         $config = !$rewrite && file_exists($file) ? include($file) : [];
         $newConfig = array_merge($config, $data);
 
-        array_save($newConfig, $file, 777);
+        array_save($newConfig, $file);
     }
 
     public function installAddons($addons)

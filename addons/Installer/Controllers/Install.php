@@ -1,6 +1,7 @@
 <?php
 namespace Addons\Installer\Controllers;
 
+use Garden\Config;
 use Garden\Gdn;
 use \Addons\Installer\Models as Model;
 
@@ -50,8 +51,6 @@ class Install extends \Garden\Template {
 
     protected function step_2()
     {
-        $model = Model\Install::instance();
-
         $form = $this->initForm();
         $form->validation()->rule('sitename', 'not_empty')->rule('locale', 'not_empty');
 
@@ -65,7 +64,7 @@ class Install extends \Garden\Template {
                 $post['logs'] = val('logs', $post) ? true : false;
                 $post['debug'] = val('debug', $post) ? true : false;
 
-                $model->saveConfig($post, 'main');
+                Config::save($post, 'main');
 
                 redirect('/install?step=3');
             }
@@ -101,7 +100,7 @@ class Install extends \Garden\Template {
             }
 
             if ($form->valid()) {
-                $model->saveConfig($post, 'cache');
+                Config::save($post, 'cache');
                 redirect('/install?step=4');
             }
         }
@@ -113,7 +112,6 @@ class Install extends \Garden\Template {
 
     protected function step_4()
     {
-        $model = Model\Install::instance();
         $form = $this->initForm();
 
         $data = c('database');
@@ -130,7 +128,7 @@ class Install extends \Garden\Template {
             }
 
             if ($form->valid()) {
-                $model->saveConfig($post, 'database');
+                Config::save($post, 'database');
                 redirect('/install?step=5');
             }
         }
@@ -189,8 +187,7 @@ class Install extends \Garden\Template {
 
     protected function step_7()
     {
-        $model = Model\Install::instance();
-        $model->saveConfig(['install' => true], 'main');
+        Config::save(['install' => true], 'main');
 
         $this->render('step_7.php');
     }

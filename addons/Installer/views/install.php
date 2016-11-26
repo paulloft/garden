@@ -5,7 +5,7 @@
     $meta = val('meta', $gdn);
     $separator = c('main.titleSeparator', '-');
 
-    echo "<title>".strip_tags($title.' '.$separator.' '.$sitename)."</title>\n".(empty($meta) ? null : "    ");
+    echo "<title>".strip_tags($title.' '.$separator.' Garden framework')."</title>\n".(empty($meta) ? null : "    ");
 
     if(!empty($meta)){
         $c = count($meta);
