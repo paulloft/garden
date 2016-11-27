@@ -21,9 +21,7 @@ class Dashboard extends Base {
     public function structure()
     {
         $this->permission('dashboard.admin');
-
         $this->title('Update database structure');
-        $this->currentUrl('/dashboard/structure');
 
         $captureOnly = Gdn::request()->getQuery('update', false) === false;
 
@@ -47,6 +45,61 @@ class Dashboard extends Base {
         $this->setData('capturePerm', $permission->capture);
         $this->setData('capturedSql', $structure->capture());
 
+        $this->render();
+    }
+
+    public function settings()
+    {
+        $this->permission('dashboard.admin');
+        $this->title('System settings');
+
+        $form = $this->form();
+        $form->validation()
+            ->rule('sitename', 'not_empty')
+            ->rule('locale', 'not_empty');
+
+        $data = c('main');
+        $form->setData($data);
+
+        if ($form->submitted()) {
+            if ($form->valid()) {
+                $post = $form->getFormValues();
+                $post['logs'] = val('logs', $post) ? true : false;
+                $post['debug'] = val('debug', $post) ? true : false;
+
+                \Garden\Config::save($post, 'main');
+//                \Garden\Cache::clear();
+            }
+        }
+        $locales = [
+            'en_US' => '[en_US] English',
+            'ru_RU' => '[ru_RU] Русский'
+        ];
+
+        $this->setData('locales', $locales);
+        $this->render();
+    }
+
+    public function addons()
+    {
+        $this->permission('dashboard.admin');
+        $this->title('Addon manager');
+
+        $form = $this->form();
+
+        $data = c('addons');
+        $form->setData($data);
+        $addons = \Garden\Addons::all();
+
+        if ($form->submitted()) {
+            $post = $form->getFormValues();
+
+            if ($form->valid()) {
+
+            }
+        }
+
+        $this->setData('addons', $addons);
         $this->render();
     }
 

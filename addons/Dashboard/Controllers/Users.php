@@ -61,20 +61,14 @@ class Users extends Base {
             $user = array('active' => 1);
         }
 
-        $form = new \Garden\Form();
-        $form->setModel($userModel, $user);
-//        $form->validation()
-//            ->rule('newpassword', 'min_length', 6)
-//            ->rule('email', 'email')
-//            ->rule('email', array($userModel, 'emailAvailable'), $id);
+        $form = $this->form($userModel, $user);
 
-
-        if ($form->submitted()) {
+        if ($form->submittedValid()) {
             $newPass = $form->getValue('newpassword');
             if (!empty($newPass)) {
-//                $newPass = Model\Auth::instance()->hash($newPass);
                 $form->setFormValue('password', $newPass);
             }
+
             if ($id = $form->save()) {
                 $userGroups = val('groupsID', $user);
                 $userModel->updateGroups($id, $form->getValues(), $userGroups);

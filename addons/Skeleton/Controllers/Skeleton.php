@@ -41,7 +41,7 @@ class Skeleton extends \Garden\Template
         $this->pageInit();
         $this->title('Contact form');
 
-        $form = $this->initForm();
+        $form = $this->form();
         $form->validation()
              ->rule('name', 'not_empty')
              ->rule('email', 'email');

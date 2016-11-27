@@ -51,8 +51,10 @@ class Install extends \Garden\Template {
 
     protected function step_2()
     {
-        $form = $this->initForm();
-        $form->validation()->rule('sitename', 'not_empty')->rule('locale', 'not_empty');
+        $form = $this->form();
+        $form->validation()
+            ->rule('sitename', 'not_empty')
+            ->rule('locale', 'not_empty');
 
         $data = c('main');
         $form->setData($data);
@@ -77,7 +79,7 @@ class Install extends \Garden\Template {
     {
         $this->addJs('step_3.js');
         $model = Model\Install::instance();
-        $form = $this->initForm();
+        $form = $this->form();
 
         $cacheDrivers = $model->cacheDrivers();
 
@@ -112,7 +114,7 @@ class Install extends \Garden\Template {
 
     protected function step_4()
     {
-        $form = $this->initForm();
+        $form = $this->form();
 
         $data = c('database');
         $form->setData($data);
@@ -139,7 +141,7 @@ class Install extends \Garden\Template {
     protected function step_5()
     {
         $model = Model\Install::instance();
-        $form = $this->initForm();
+        $form = $this->form();
 
         $data = c('addons');
         $form->setData($data);
@@ -169,7 +171,7 @@ class Install extends \Garden\Template {
         }
 
 
-        $form = $this->initForm();
+        $form = $this->form();
 
         $userModel = Gdn::users();
         $form->setModel($userModel);

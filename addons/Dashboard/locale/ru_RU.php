@@ -44,13 +44,13 @@
     "validate_emailAvailable" => "Такой Email уже зарегистрирован",
     "validate_loginAvailable" => "Такой логин уже зарегистрирован",
 
+    "These fields are different from the form fields" => "Полученные данные отличаются от данных формы",
 
     "users.login" => "Имя пользователя",
     "users.email" => "Email",
     "users.name" => "ФИО",
     "users.phone" => "Внутренний телефон",
     "groups.name" => "Название группы",
-
 
     "permission_dashboard" => "Панель управления",
     "permission_dashboard_user" => "Пользователи",
@@ -70,11 +70,20 @@
     "System settings" => "Системные настройки",
     "Update database" => "Обновление базы данных",
 
+    "Name" => "Имя",
+    "Groups" => "Группы",
+    "Date inserted" => "Дата добавления",
+    "Date updated" => "Дата обновления",
+    "Active" => "Активность",
     "New user" => "Новый пользователь",
     "Edit user" => "Редактирование пользователя",
     "New user group" => "Новая группа",
     "Edit user group" => "Редактирование группы",
     "All users" => "Все пользователи",
+    "Add new user" => "Добавить пользователя",
+    "New group" => "Новая группа",
+    "Group info" => "Информация о группе",
+    "Group permissions" => "Права группы",
 
     "Update database structure" => "Обновление структуры БД",
     "Start update structure" => "Запустить обновление структуры",
@@ -89,8 +98,6 @@
     "Will be updated" => "Будет обновлено",
     "Will be deleted" => "Будет удалено",
 
-
-
     "Change password" => "Задать новый пароль",
     "User info" => "Информация о пользователе",
     "User active" => "Пользователь активен",
@@ -104,4 +111,16 @@
     "1" => "Добавить группу",
     "Description" => "Описание",
     "Group name" => "Название группы",
+    "Group active" => "Группа активна",
+
+    "Addons" => "Приложения",
+    "Addon manager" => "Управление приложениями",
+
+    "Addon name" => "Название приложения",
+    "Version" => "Версия",
+    "Site name" => "Название сайта",
+    "Localization" => "Язык системы",
+
+    "Enable debug messages" => "Показывать подробную информацию при возникновении ошибки (debug mode)",
+    "Enable error logs" => "Ведение логов ошибок",
 ];
