@@ -1,26 +1,4 @@
 {
-	"name": "paulloft/garden",
-	"description": "The garden framework.",
-	"type": "library",
-	"keywords": ["garden", "framework", "php"],
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Todd Burry",
-			"email": "todd@vanillaforums.com",
-			"role": "developer"
-		},
-		{
-			"name": "Tim Gunter",
-			"email": "tim@vanillaforums.com",
-			"role": "developer"
-		},
-		{
-			"name": "Paul Loft",
-			"email": "info@paulloft.ru",
-			"role": "developer"
-		}
-	],
 	"require": {
 		"php": ">=5.4.0",
 		"ext-json": "*",
