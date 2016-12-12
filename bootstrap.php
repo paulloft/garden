@@ -8,6 +8,7 @@ require_once PATH_ROOT.'/vendor/autoload.php';
 define('GDN_CONF', PATH_ROOT.'/conf');
 define('GDN_CACHE', PATH_ROOT.'/cache');
 define('GDN_LOGS', GDN_CACHE.'/logs');
+define('GDN_LOCALE', PATH_ROOT.'/locales');
 
 if (!defined('GDN_SRC')) {
     define('GDN_SRC', PATH_ROOT.'/system');
@@ -26,10 +27,13 @@ Config::autoload();
 ErrorHandler::register();
 
 // Enable addon functionality.
-Addons::bootstrap(); // enables config('addons')
+Addons::bootstrap();
 
 // Fire the bootstrap event so that overridable function files can be included.
 Event::fire('bootstrap');
+
+// Load translates
+Translate::autoload();
 
 // Saving all configurations in the cache
 Config::cache();

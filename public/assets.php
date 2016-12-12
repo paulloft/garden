@@ -3,7 +3,6 @@ namespace Garden;
 
 define('PATH_PUBLIC', __DIR__);
 define('PATH_ROOT', realpath(PATH_PUBLIC.'/../'));
-define('DEBUG', false);
 
 require_once PATH_ROOT.'/bootstrap.php';
 
