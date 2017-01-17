@@ -12,11 +12,6 @@ class Users extends \Garden\Model
 {
     public $table = 'users';
 
-    public function __construct()
-    {
-        parent::__construct($this->table);
-    }
-
     public function getID($id)
     {
         $result = Gdn::cache('dirty')->get('user_'.$id);
@@ -47,7 +42,7 @@ class Users extends \Garden\Model
 
     public function getLogin($username)
     {
-        $result = $this->getWhere(array('login'=>$username))->current();
+        $result = $this->getWhere(['login'=>$username])->current();
 
         return $result;
     }
@@ -66,12 +61,12 @@ class Users extends \Garden\Model
 
     public function getEmail($email)
     {
-        $result = $this->getWhere(array('email'=>$email))->current();
+        $result = $this->getWhere(['email'=>$email])->current();
 
         return $result;
     }
 
-    protected function baseQuery($where = array(), $order = array(), $limit = false, $offset = 0)
+    protected function baseQuery($where = [], $order = [], $limit = false, $offset = 0)
     {
         $this->_query = DB::select('u.*')
             ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
@@ -101,7 +96,7 @@ class Users extends \Garden\Model
         }
     }
 
-    public function getWhere(array $where = array(), array $order = array(), $limit = false, $offset = 0)
+    public function getWhere(array $where = [], array $order = [], $limit = false, $offset = 0)
     {
         $_where = $where; $where = [];
         foreach ($_where as $key => $value) {
@@ -113,7 +108,7 @@ class Users extends \Garden\Model
         return $this->_query->execute();
     }
 
-    public function getByGroupID($groupID, $where = array(), $order = array(), $limit = false, $offset = 0)
+    public function getByGroupID($groupID, $where = [], $order = [], $limit = false, $offset = 0)
     {
         $_where = $where; $where = [];
         foreach ($_where as $key => $value) {
@@ -130,12 +125,12 @@ class Users extends \Garden\Model
     public function updateVisit($userID)
     {
         DB::update($this->table)
-            ->set(array('lastVisit' => DB::expr('now()')))
+            ->set(['lastVisit' => DB::expr('now()')])
             ->where($this->primaryKey, '=', $userID)
             ->execute();
     }
 
-    public function delete(array $where = array())
+    public function delete(array $where = [])
     {
         $this->_query = DB::update($this->table)
             ->set([
@@ -149,23 +144,29 @@ class Users extends \Garden\Model
 
     public function updateGroups($userID, $post, $groups)
     {
+        /**
+         * @var $groupModel \Garden\Model
+         */
         $groupModel = Factory::get('\Garden\Model', 'users_groups');
-        $groupsNew = val('groupsID', $post, array());
+        $groupsNew = val('groupsID', $post, []);
 
         $insert = array_diff($groupsNew, $groups);
         $delete = array_diff($groups, $groupsNew);
 
         foreach ($insert as $groupID)
         {
-            $groupModel->insert(array(
+            $groupModel->insert([
                 'userID' => $userID,
                 'groupID' => $groupID
-            ));
+            ]);
         }
 
         if (!empty($delete))
         {
-            $groupModel->delete(array('userID' => $userID, 'groupID' => $delete));
+            $groupModel->delete([
+                'userID' => $userID,
+                'groupID' => $delete
+            ]);
         }
 
     }
@@ -182,7 +183,7 @@ class Users extends \Garden\Model
 
     public function emailAvailable($email, $id = false)
     {
-        $where = array('email'=> $email);
+        $where = ['email'=> $email];
         if ($id) $where['id<>'] = $id;
 
         $result = $this->getCount($where);
@@ -194,13 +195,12 @@ class Users extends \Garden\Model
     {
         if (!$this->validation) {
             $this->validation = new \Garden\Validation($this);
-            $id = $this->validation->getData('id');
 
             $this->validation
                 ->rule('password', 'min_length', 6)
-                ->rule('login', array($this, 'loginAvailable'), ':id')
+                ->rule('login', [$this, 'loginAvailable'], ':id')
                 ->rule('email', 'email')
-                ->rule('email', array($this, 'emailAvailable'), ':id');
+                ->rule('email', [$this, 'emailAvailable'], ':id');
         }
 
         return $this->validation;

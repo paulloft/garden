@@ -48,20 +48,23 @@ class Auth extends \Garden\Plugin
      *
      * @param string $username 
      * @param string $password 
-     * @return object 
+     * @return bool|object
      */
     public function login($username, $password)
     {
-        if (!$user = $this->userModel->getLogin($username))
+        if (!$user = $this->userModel->getLogin($username)){
             return false;
+        }
 
-        if (!$user['active'])
+        if (!$user['active']) {
             return false;
+        }
 
         $this->user = $user;
 
-        if (!$this->checkPassword($password))
+        if (!$this->checkPassword($password)){
             return false;
+        }
 
         return $this->user;
     }
@@ -91,8 +94,9 @@ class Auth extends \Garden\Plugin
     public function autoLogin()
     {
         $userID = $this->session->get();
-        if (!$userID) 
+        if (!$userID) {
             return false;
+        }
 
         $user = $this->userModel->getID($userID);
 
@@ -161,6 +165,4 @@ class Auth extends \Garden\Plugin
             $_SESSION['visited'] = true;
         }
     }
-
-
 }

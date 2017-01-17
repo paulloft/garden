@@ -5,26 +5,21 @@ use Garden\Db;
 class Groups extends \Garden\Model
 {
     public $table = 'groups';
-    
-    public function __construct()
-    {
-        parent::__construct($this->table);
-    }
 
     public function getID($id)
     {
-        $result = $this->getWhere(array($this->primaryKey=>$id, 'deleted'=>0))->current();
+        $result = $this->getWhere([$this->primaryKey=>$id, 'deleted'=>0])->current();
 
         return $result;
     }
      
-    public function getWhere($where = array(), $order = array(), $limit = false, $offset = 0)
+    public function getWhere(array $where = [], array $order =[], $limit = false, $offset = 0)
     {
         $where['deleted'] = 0;
         return parent::getWhere($where, $order, $limit, $offset);
     }
 
-    public function delete($where = array())
+    public function delete(array $where = [])
     {
         $this->_query = DB::update($this->table)
             ->set([

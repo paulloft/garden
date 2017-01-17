@@ -41,6 +41,7 @@ class Permission extends \Garden\Plugin
                 'def'  => val($permission, $this->define), 
                 'sort' => $sort++
             ];
+
             if ($this->captureOnly) {
                 $fields['action'] = 'insert';
                 $this->capture[] = $fields;
@@ -57,8 +58,8 @@ class Permission extends \Garden\Plugin
                     'action' => 'delete'
                 ];
             } else {
-                $this->delete($id, $this->_table);
-                $groupModel->delete(['id'=>$id]);
+                $this->delete($id);
+                $groupModel->deleteID($id);
             }
         }
 
@@ -67,11 +68,14 @@ class Permission extends \Garden\Plugin
 
     public function check($permission, $userID = false)
     {
-        if (Auth::instance()->admin())
+        if (Auth::instance()->admin()) {
             return true;
+        }
 
         $permissions = $this->get($userID);
-        if (!$permissions) return false;
+        if (!$permissions) {
+            return false;
+        }
 
         $arrPerm = (array)$permission;
         
@@ -86,13 +90,17 @@ class Permission extends \Garden\Plugin
 
     public function get($userID = false)
     {
-        if (!$userID) $userID = Gdn::session()->userID;
-        if (!$userID) return false;
+        if (!$userID) {
+            $userID = Gdn::session()->userID;
+        }
+
+        if (!$userID) {
+            return false;
+        }
 
         $cacheKey = "permission_user_$userID";
 
-        if (!$return = Gdn::cache()->get($cacheKey))
-        {
+        if (!$return = Gdn::cache()->get($cacheKey)) {
             $result = DB::select_array(['p.id', 'p.code'])
             ->from('users_groups', 'ug')
 
@@ -132,14 +140,18 @@ class Permission extends \Garden\Plugin
             ->from($this->_table)
             ->order_by('sort', 'asc');
 
-        if (!$formatted) return $query->execute()->as_array();
+        if (!$formatted) {
+            return $query->execute()->as_array();
+        }
 
         $permissions = $query->as_object()->execute()->as_array();
 
         $result = [];
         foreach ($permissions as $permission) {
             list($group, $module, $action) = explode('.', $permission->code);
-            if (!$action) $action = 'view';
+            if (!$action) {
+                $action = 'view';
+            }
             
             if (!in_array($action, $result[$group]['columns'])) {
                 $result[$group]['columns'][] = $action;
@@ -180,16 +192,14 @@ class Permission extends \Garden\Plugin
         $insert = array_diff($newPerm, $oldPerm);
         $delete = array_diff($oldPerm, $newPerm);
 
-        foreach ($insert as $permissionID)
-        {
+        foreach ($insert as $permissionID) {
             $groupModel->insert([
                 'groupID'      => $groupID,
                 'permissionID' => $permissionID
             ]);
         }
 
-        if (!empty($delete))
-        {
+        if (!empty($delete)) {
             $groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
         }
     }

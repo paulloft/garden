@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class PagerModule
+ * For page output switch module
+ */
+
 class PagerModule extends \Garden\Controller
 {
     protected $current;
@@ -7,16 +12,21 @@ class PagerModule extends \Garden\Controller
 
     protected $perPage = 20;
     protected $count = 0;
-    protected $options = array(
+    protected $options = [
         'parameter'  => 'p',
-        // 'direction'  => 'asc',
         'showAlways' => true,
         'arrows'     => true,
         'range'      => 3,
-    );
+    ];
 
     protected $request;
 
+    /**
+     * PagerModule constructor.
+     * @param int $count count items
+     * @param int $perPage items per page
+     * @param array $options optiont from PagerModule::$options
+     */
     public function __construct($count, $perPage = false, $options = [])
     {
         if ($perPage) $this->perPage = $perPage;
@@ -28,11 +38,19 @@ class PagerModule extends \Garden\Controller
         parent::__construct();
     }
 
+    /**
+     * Returned offset from sql query
+     * @return int|null
+     */
     public function offset()
     {
         return ($this->curentPage() - 1) * $this->perPage;
     }
 
+    /**
+     * Return count of pages
+     * @return int
+     */
     public function countPage()
     {
         if(!$this->pageCount) {
@@ -42,6 +60,11 @@ class PagerModule extends \Garden\Controller
         return $this->pageCount;
     }
 
+    /**
+     * Return number of current page
+     * @param null $num
+     * @return int|null
+     */
     public function curentPage($num = null)
     {
         if ($num) {
@@ -56,17 +79,10 @@ class PagerModule extends \Garden\Controller
         return $this->current;
     }
 
-    protected function getUri()
-    {
-        $path = $this->request->getPath();
-        $query = $this->request->getQuery();
-        unset($query['p']);
-
-        $query = http_build_query($query);
-
-        return $path.'?p=<page>'.($query ? '&'.$query : null);
-    }
-
+    /**
+     * Rendering function
+     * @return bool|string
+     */
     public function toString()
     {
         $pageCount = $this->countPage();
@@ -89,6 +105,17 @@ class PagerModule extends \Garden\Controller
         $this->setData('showArrows', val('arrows', $this->options));
 
         return $this->fetchView('pager', 'modules', 'dashboard');
+    }
+
+    protected function getUri()
+    {
+        $path = $this->request->getPath();
+        $query = $this->request->getQuery();
+        unset($query['p']);
+
+        $query = http_build_query($query);
+
+        return $path.'?p=<page>'.($query ? '&'.$query : null);
     }
 
     protected function getPages($current, $defaultStart, $defaultEnd)
@@ -115,7 +142,7 @@ class PagerModule extends \Garden\Controller
             $end   = $current + $range;
         }
 
-        $pages = array();
+        $pages = [];
         if($start !== $defaultStart) {
             $pages[] = $defaultStart;
             $pages[] = null;

@@ -1,8 +1,8 @@
 <?php
 namespace Addons\Dashboard\Controllers;
+
 use Addons\Dashboard\Models as Model;
 use Garden\Exception;
-use Garden\Gdn;
 
 class Users extends Base {
 
@@ -55,10 +55,10 @@ class Users extends Base {
             if (!$user = $userModel->getID($id))
                 throw new Exception\NotFound();
 
-            $user['groupsID'] = $user['groupsID'] ? explode(';', $user['groupsID']) : array();
+            $user['groupsID'] = $user['groupsID'] ? explode(';', $user['groupsID']) : [];
         } else {
             $this->permission('dashboard.user.add');
-            $user = array('active' => 1);
+            $user = ['active' => 1];
         }
 
         $form = $this->form($userModel, $user);
@@ -109,7 +109,7 @@ class Users extends Base {
             $group['permission'] = array_column($groupPerm, 'id');
         } else {
             $this->permission('dashboard.group.add');
-            $group = array('active' => 1);
+            $group = ['active' => 1];
         }
 
         $form = new \Garden\Form();
@@ -144,10 +144,12 @@ class Users extends Base {
     {
         $this->permission('dashboard.user.delete');
 
-        if ($id == 1) return false;
+        if ($id == 1) {
+            return false;
+        }
 
         $userModel = Model\Users::instance();
-        $userModel->delete(array('id' => $id));
+        $userModel->deleteID($id);
 
         redirect('/dashboard/users');
     }
@@ -156,10 +158,12 @@ class Users extends Base {
     {
         $this->permission('dashboard.group.delete');
 
-        if ($id == 1) return false;
+        if ($id == 1) {
+            return false;
+        }
 
         $groupModel = Model\Groups::instance();
-        $groupModel->delete(array('id' => $id));
+        $groupModel->deleteID($id);
 
         redirect('/dashboard/users/groups');
     }

@@ -1,8 +1,8 @@
 <?php
 namespace Addons\Dashboard\Controllers;
+
 use Addons\Dashboard\Models as Model;
 use Garden\Exception as Exception;
-use Garden\Gdn;
 
 class Base extends \Garden\Template {
 

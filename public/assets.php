@@ -15,7 +15,7 @@ $addon = Addons::enabled($addonName);
 
 if ($addon) {
     $addonDir = val('dir', $addon);
-    $filePath = $addonDir.'/assets/'.$path;
+    $filePath = $addonDir.'/Assets/'.$path;
     $filePath = str_replace('../', '/', $filePath);
     if (file_exists($filePath)) {
         $pathinfo = pathinfo($filePath);
