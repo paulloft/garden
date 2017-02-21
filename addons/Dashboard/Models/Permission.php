@@ -8,22 +8,35 @@ class Permission extends \Garden\Plugin
 {
     public $capture = [];
     public $captureOnly = false;
+    public $addonEnabled = true;
 
-    protected $define;
+    protected $define = [];
+    protected $disabled = [];
 
+    protected $groupModel;
     private $_table = 'permissions';
     private $_groupTable = 'groups_permissions';
+
+
+    public function __construct()
+    {
+        $this->groupModel = new \Garden\Model($this->_groupTable);
+    }
 
     public function define($permission, $default = false)
     {
         $permission = strtolower($permission);
-        $this->define[$permission] = $default ? 1 : 0;
+        if ($this->addonEnabled) {
+            $this->define[$permission] = $default ? 1 : 0;
+        } else {
+            $this->disabled[$permission] = $default ? 1 : 0;
+        }
+
         return $this;
     }
 
     public function save()
     {
-        $groupModel = new \Garden\Model($this->_groupTable);
         $permissions = $this->getList();
         $permissions = array_column($permissions, 'id', 'code');
 
@@ -36,9 +49,12 @@ class Permission extends \Garden\Plugin
         $sort = count($permissions) - count($delete) + 1;
 
         foreach ($insert as $permission) {
+            if (val($permission, $this->disabled) !== false) {
+                continue;
+            }
             $fields = [
-                'code' => $permission, 
-                'def'  => val($permission, $this->define), 
+                'code' => $permission,
+                'def'  => val($permission, $this->define),
                 'sort' => $sort++
             ];
 
@@ -51,6 +67,9 @@ class Permission extends \Garden\Plugin
         }
 
         foreach ($delete as $permission) {
+            if (val($permission, $this->disabled) !== false) {
+                continue;
+            }
             $id = val($permission, $permissions);
             if ($this->captureOnly) {
                 $this->capture[] = [
@@ -59,7 +78,7 @@ class Permission extends \Garden\Plugin
                 ];
             } else {
                 $this->delete($id);
-                $groupModel->deleteID($id);
+                $this->groupModel->delete(['id'=>$id]);
             }
         }
 
@@ -78,9 +97,9 @@ class Permission extends \Garden\Plugin
         }
 
         $arrPerm = (array)$permission;
-        
-        foreach ($arrPerm as $permission) {
-            if (!valr($permission, $permissions)) {
+
+        foreach ($arrPerm as $perm) {
+            if (!valr($perm, $permissions)) {
                 return false;
             }
         }
@@ -102,25 +121,25 @@ class Permission extends \Garden\Plugin
 
         if (!$return = Gdn::cache()->get($cacheKey)) {
             $result = DB::select_array(['p.id', 'p.code'])
-            ->from('users_groups', 'ug')
+                ->from('users_groups', 'ug')
 
-            ->join('groups', 'g')
-              ->on('g.id', '=', 'ug.groupID')
+                ->join('groups', 'g')
+                ->on('g.id', '=', 'ug.groupID')
 
-            ->join($this->_groupTable, 'gp')
-              ->on('gp.groupID', '=', 'ug.groupID')
+                ->join($this->_groupTable, 'gp')
+                ->on('gp.groupID', '=', 'ug.groupID')
 
-            ->join($this->_table, 'p')
-              ->on('p.id', '=', 'gp.permissionID')
+                ->join($this->_table, 'p')
+                ->on('p.id', '=', 'gp.permissionID')
 
-            ->where('ug.userID', '=', $userID)
-            ->where('g.active', '=', 1)
-            ->where('g.deleted', '=', 0)
+                ->where('ug.userID', '=', $userID)
+                ->where('g.active', '=', 1)
+                ->where('g.deleted', '=', 0)
 
-            ->group_by('p.id')
-            ->as_object()
-            ->execute()
-            ->as_array();
+                ->group_by('p.id')
+                ->as_object()
+                ->execute()
+                ->as_array();
 
             $return = [];
             foreach ($result as $permission) {
@@ -152,7 +171,7 @@ class Permission extends \Garden\Plugin
             if (!$action) {
                 $action = 'view';
             }
-            
+
             if (!in_array($action, $result[$group]['columns'])) {
                 $result[$group]['columns'][] = $action;
             }
@@ -164,7 +183,7 @@ class Permission extends \Garden\Plugin
             ];
         }
 
-        return $result; 
+        return $result;
     }
 
     public function getForGroup($groupID)
@@ -174,8 +193,8 @@ class Permission extends \Garden\Plugin
             ->from($this->_groupTable, 'gp')
 
             ->join($this->_table, 'p')
-              ->on('gp.permissionID', '=', 'p.id')
-              
+            ->on('gp.permissionID', '=', 'p.id')
+
             ->where('gp.groupID', '=', $groupID)
             ->execute()
             ->as_array();
@@ -185,7 +204,6 @@ class Permission extends \Garden\Plugin
 
     public function saveGroup($groupID, $data, $oldData)
     {
-        $groupModel = new \Garden\Model($this->_groupTable);
         $oldPerm = val('permission', $oldData, []);
         $newPerm = val('permission', $data, []);
 
@@ -193,14 +211,14 @@ class Permission extends \Garden\Plugin
         $delete = array_diff($oldPerm, $newPerm);
 
         foreach ($insert as $permissionID) {
-            $groupModel->insert([
+            $this->groupModel->insert([
                 'groupID'      => $groupID,
                 'permissionID' => $permissionID
             ]);
         }
 
         if (!empty($delete)) {
-            $groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
+            $this->groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
         }
     }
 
@@ -211,7 +229,7 @@ class Permission extends \Garden\Plugin
             ->where('code', '=', $permission)
             ->limit(1);
 
-        $result = $query->execute()->current(); 
+        $result = $query->execute()->current();
         return val('id', $result);
     }
 

@@ -89,13 +89,19 @@ class Dashboard extends Base {
 
         $data = c('addons');
         $form->setData($data);
-        $addons = \Garden\Addons::all();
+        $model = Model\Addons::instance();
+        $addons = $model->getAll();
 
         if ($form->submitted()) {
-            $post = $form->getFormValues();
+            $name = $form->getFormValue('addon');
+            $enable = $form->getFormValue('enable');
 
-            if ($form->valid()) {
-
+            if ($enable && !$model->install($name)) {
+                $form->addError($model->error);
+            } else {
+                $model->save($name, $enable);
+                \Garden\Cache::clear();
+                redirect('/dashboard/addons');
             }
         }
 
