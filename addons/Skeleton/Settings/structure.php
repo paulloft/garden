@@ -1,6 +1,5 @@
 <?php
 namespace Addons\Skeleton;
-use Garden\Factory;
 use Garden\Gdn;
 $construct = Gdn::structure();
 

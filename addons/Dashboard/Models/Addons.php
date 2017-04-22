@@ -1,9 +1,14 @@
 <?php
+
 namespace Addons\Dashboard\Models;
 
-class Addons extends \Garden\Plugin {
+use Garden\Traits\Instance;
+
+class Addons {
 
     public $error;
+
+    use Instance;
 
     public function getAll()
     {

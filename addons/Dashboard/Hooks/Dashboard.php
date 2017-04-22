@@ -3,10 +3,14 @@ namespace Addons\Dashboard\Hooks;
 
 use Addons\Dashboard\Models;
 use Addons\Dashboard\Controllers;
+use Garden\Traits\Instance;
+
 /**
  * Dashboard hooks
  */
-class Dashboard extends \Garden\Plugin {
+class Dashboard {
+
+    use Instance;
 
     public function dispatch_handler()
     {

@@ -52,13 +52,14 @@ class Users extends Base {
 
         if ($id) {
             $this->permission('dashboard.user.edit');
-            if (!$user = $userModel->getID($id))
+            if (!$user = $userModel->getID($id)) {
                 throw new Exception\NotFound();
+            }
 
             $user['groupsID'] = $user['groupsID'] ? explode(';', $user['groupsID']) : [];
         } else {
             $this->permission('dashboard.user.add');
-            $user = ['active' => 1];
+            $user = ['active' => 1, 'groupsID' => []];
         }
 
         $form = $this->form($userModel, $user);
@@ -102,8 +103,9 @@ class Users extends Base {
 
         if ($id) {
             $this->permission('dashboard.group.edit');
-            if (!$group = $groupModel->getID($id))
+            if (!$group = $groupModel->getID($id)) {
                 throw new Exception\NotFound();
+            }
 
             $groupPerm = $permission->getForGroup($id);
             $group['permission'] = array_column($groupPerm, 'id');

@@ -2,9 +2,10 @@
 namespace Addons\Dashboard\Models;
 use Garden\Gdn;
 use Garden\DB;
+use Garden\Traits\Instance;
 
 
-class Permission extends \Garden\Plugin
+class Permission
 {
     public $capture = [];
     public $captureOnly = false;
@@ -17,6 +18,7 @@ class Permission extends \Garden\Plugin
     private $_table = 'permissions';
     private $_groupTable = 'groups_permissions';
 
+    use Instance;
 
     public function __construct()
     {
@@ -77,7 +79,7 @@ class Permission extends \Garden\Plugin
                     'action' => 'delete'
                 ];
             } else {
-                $this->delete($id);
+                $this->delete($id, $this->_table);
                 $this->groupModel->delete(['id'=>$id]);
             }
         }
@@ -193,7 +195,7 @@ class Permission extends \Garden\Plugin
             ->from($this->_groupTable, 'gp')
 
             ->join($this->_table, 'p')
-            ->on('gp.permissionID', '=', 'p.id')
+              ->on('gp.permissionID', '=', 'p.id')
 
             ->where('gp.groupID', '=', $groupID)
             ->execute()

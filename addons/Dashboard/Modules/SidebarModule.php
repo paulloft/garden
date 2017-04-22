@@ -5,12 +5,14 @@ use Garden\Gdn;
  * Class SidebarModule
  * Left menu module
  */
-class SidebarModule extends \Garden\Plugin {
+class SidebarModule {
 
     protected $current;
     protected $menu = [];
 
     private $sort = 1000;
+
+    use \Garden\Traits\Instance;
 
     /**
      * Set the url to select the active menu item

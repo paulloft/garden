@@ -26,24 +26,35 @@ class Dashboard extends Base {
         $captureOnly = Gdn::request()->getQuery('update', false) === false;
 
         $structure = Gdn::structure();
-        $permission = Model\Permission::instance();
+        $permission = Gdn::permission();
         $structure->capture = $captureOnly;
         $permission->captureOnly = $captureOnly;
 
-        foreach (\Garden\Addons::enabled() as $addon => $options) {
+        $addons = \Garden\Addons::all();
+        $enabled = \Garden\Addons::enabled();
+
+        foreach ($addons as $addon => $options) {
+            $addonEnabled = val($addon, $enabled) ? true : false;
+            $permission->addonEnabled = $addonEnabled;
+            $structure->addonEnabled = $addonEnabled;
             $dir = val('dir', $options);
-            $file = $dir . '/settings/structure.php';
+            $file = $dir.'/Settings/structure.php';
             if (file_exists($file)) {
                 include_once $file;
             }
         }
 
+        $permission->save();
+
+        $capture = $structure->capture();
+
         if (!$captureOnly) {
+            \Garden\Cache::clear();
             redirect('/dashboard/structure');
         }
 
         $this->setData('capturePerm', $permission->capture);
-        $this->setData('capturedSql', $structure->capture());
+        $this->setData('capturedSql', $capture);
 
         $this->render();
     }
@@ -61,16 +72,14 @@ class Dashboard extends Base {
         $data = c('main');
         $form->setData($data);
 
-        if ($form->submitted()) {
-            if ($form->valid()) {
-                $post = $form->getFormValues();
-                $post['logs'] = val('logs', $post) ? true : false;
-                $post['debug'] = val('debug', $post) ? true : false;
+        if ($form->submitted() && $form->valid()) {
+            $post = $form->getFormValues();
+            $post['logs'] = val('logs', $post) ? true : false;
+            $post['debug'] = val('debug', $post) ? true : false;
 
-                \Garden\Config::save($post, 'main');
-//                \Garden\Cache::clear();
-            }
+            \Garden\Config::save($post, 'main');
         }
+
         $locales = [
             'en_US' => '[en_US] English',
             'ru_RU' => '[ru_RU] Русский'

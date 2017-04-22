@@ -1,8 +1,8 @@
 <?php
 namespace Addons\Dashboard\Models;
-use Garden\Factory;
 use Garden\Gdn;
 use Garden\DB;
+use Garden\Model;
 
 /**
  * Base users model
@@ -14,7 +14,7 @@ class Users extends \Garden\Model
 
     public function getID($id)
     {
-        $result = Gdn::cache('dirty')->get('user_'.$id);
+        $result = Gdn::cache('dirty')->get('user_' . $id);
 
         if (!$result) {
             $query = DB::select('u.*')
@@ -34,15 +34,8 @@ class Users extends \Garden\Model
 
             $result = $query->execute()->current();
 
-            Gdn::cache('dirty')->set('user_'.$id, $result);
+            Gdn::cache('dirty')->set('user_' . $id, $result);
         }
-
-        return $result;
-    }
-
-    public function getLogin($username)
-    {
-        $result = $this->getWhere(['login'=>$username])->current();
 
         return $result;
     }
@@ -59,11 +52,14 @@ class Users extends \Garden\Model
         return val('login', $user);
     }
 
-    public function getEmail($email)
+    public function getByLogin($username)
     {
-        $result = $this->getWhere(['email'=>$email])->current();
+        return $this->getWhere(['login' => $username])->current();
+    }
 
-        return $result;
+    public function getByEmail($email)
+    {
+        return $this->getWhere(['email' => $email])->current();
     }
 
     protected function baseQuery($where = [], $order = [], $limit = false, $offset = 0)
@@ -84,23 +80,22 @@ class Users extends \Garden\Model
 
         $this->_where($where);
 
-        foreach ($order as $field => $direction)
-        {
+        foreach ($order as $field => $direction) {
             $this->_query->order_by($field, $direction);
         }
 
-        if ($limit)
-        {
+        if ($limit) {
             $this->_query->limit($limit);
             $this->_query->offset($offset);
         }
     }
 
-    public function getWhere(array $where = [], array $order = [], $limit = false, $offset = 0)
+    public function getWhere(array $where = [], array $order = [], $limit = 0, $offset = 0)
     {
-        $_where = $where; $where = [];
+        $_where = $where;
+        $where = [];
         foreach ($_where as $key => $value) {
-            $where['u.'.$key] = $value;
+            $where['u.' . $key] = $value;
         }
 
         $this->baseQuery($where, $order, $limit, $offset);
@@ -110,9 +105,10 @@ class Users extends \Garden\Model
 
     public function getByGroupID($groupID, $where = [], $order = [], $limit = false, $offset = 0)
     {
-        $_where = $where; $where = [];
+        $_where = $where;
+        $where = [];
         foreach ($_where as $key => $value) {
-            $where['u.'.$key] = $value;
+            $where['u.' . $key] = $value;
         }
 
         $where['g.id'] = $groupID;
@@ -134,39 +130,53 @@ class Users extends \Garden\Model
     {
         $this->_query = DB::update($this->table)
             ->set([
-                'deleted' => 1,
-                'dateDeleted' => DB::expr('now()')
+                'deleted'     => 1,
+                'dateDeleted' => DB::expr('now()'),
+                'userDeleted' => $this->userID,
             ]);
 
         $this->_where($where);
         $this->_query->execute();
+
+        return true;
+    }
+
+    public function deleteID($id)
+    {
+        $data = [
+            'deleted' => 1,
+            'dateDeleted' => DB::expr('now()'),
+            'userDeleted' => $this->userID,
+        ];
+
+        $data = $this->fixPostData($data);
+
+        DB::update($this->table)
+            ->set($data)
+            ->where($this->primaryKey, '=', $id)
+            ->execute()
+        ;
+
+        return true;
     }
 
     public function updateGroups($userID, $post, $groups)
     {
-        /**
-         * @var $groupModel \Garden\Model
-         */
-        $groupModel = Factory::get('\Garden\Model', 'users_groups');
+        $groupModel = Model::instance('users_groups');
         $groupsNew = val('groupsID', $post, []);
 
         $insert = array_diff($groupsNew, $groups);
         $delete = array_diff($groups, $groupsNew);
 
-        foreach ($insert as $groupID)
-        {
+        foreach ($insert as $groupID) {
             $groupModel->insert([
-                'userID' => $userID,
+                'userID'  => $userID,
                 'groupID' => $groupID
             ]);
         }
 
-        if (!empty($delete))
-        {
-            $groupModel->delete([
-                'userID' => $userID,
-                'groupID' => $delete
-            ]);
+        if (!empty($delete)) {
+            $groupModel->delete(['userID' => $userID, 'groupID' => $delete]);
         }
 
     }
@@ -176,19 +186,17 @@ class Users extends \Garden\Model
         $where = ['login' => $login];
         if ($id) $where['id<>'] = $id;
 
-        $result = $this->getCount($where);
-
-        return $result > 0 ? false : true;
+        return  $this->getCount($where) <= 0;
     }
 
     public function emailAvailable($email, $id = false)
     {
-        $where = ['email'=> $email];
-        if ($id) $where['id<>'] = $id;
+        $where = ['email' => $email];
+        if ($id) {
+            $where['id<>'] = $id;
+        }
 
-        $result = $this->getCount($where);
-
-        return $result > 0 ? false : true;
+        return  $this->getCount($where) <= 0;
     }
 
     public function validation()

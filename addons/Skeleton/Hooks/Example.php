@@ -1,11 +1,12 @@
 <?php
 namespace Addons\Skeleton\Hooks;
+use Garden\Traits\Instance;
 
 /**
  * Skeleton hooks
  */
-class Example extends \Garden\Plugin
-{
+class Example {
+    use Instance;
     //public function bootstrap_handler(){}
 
     // Triggered matched route

@@ -1,8 +1,11 @@
 <?php
 namespace Addons\Installer\Models;
 use Garden\Gdn;
+use Garden\Traits\Instance;
 
-class Install extends \Garden\Plugin {
+class Install {
+
+    use Instance;
 
     public function saveConfig($data, $name, $rewrite = false)
     {

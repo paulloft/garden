@@ -4,20 +4,18 @@ namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Garden\Exception as Exception;
 
-class Base extends \Garden\Template {
-
-    protected $template = 'dashboard';
-    protected $needAuth = true;
+class Base extends \Garden\Template
+{
+    protected $needAuth;
 
     protected $auth;
-    
-    public function __construct($needAuth = null)
+
+    public function __construct($needAuth = true)
     {
         parent::__construct();
-        if ($needAuth !== null) {
-            $this->needAuth = $needAuth;
-        }
+        $this->needAuth = $needAuth;
         $this->checkAuth();
+        $this->template('dashboard', 'Dashboard');
     }
 
     public function pageInit()
@@ -41,7 +39,7 @@ class Base extends \Garden\Template {
     {
         if ($this->needAuth && !Model\Auth::instance()->logined()) {
             $uri = url_local();
-            redirect('/entry/login?target='.$uri);
+            redirect('/entry/login?target=' . $uri);
         }
     }
 

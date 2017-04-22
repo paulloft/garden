@@ -5,9 +5,21 @@ use Addons\Dashboard\Models as Model;
 use Garden\Request;
 use Garden\Gdn;
 
-class Entry extends Base {
+class Entry extends \Garden\Template
+{
     protected $template = 'empty';
-    protected $needAuth = false;
+
+    protected function pageInit()
+    {
+        $this->addJs('/js/jquery.min.js');
+        $this->addJs('/js/bootstrap.min.js');
+        $this->addJs('entry.js');
+
+        $this->addCss('/css/oneui.css');
+        $this->addCss('/css/bootstrap.theme.css');
+        $this->addCss('//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400italic,600,700%7COpen+Sans:300,400,400italic,600,700');
+        $this->addCss('entry.css');
+    }
 
     public function index()
     {
@@ -17,7 +29,6 @@ class Entry extends Base {
     public function login()
     {
         $this->pageInit();
-        $this->addCss('entry.css');
 
         $this->title('Authorization');
 
@@ -25,10 +36,6 @@ class Entry extends Base {
         $request = Request::current();
 
         $target = $request->getQuery('target');
-
-        if ($auth->logined()) {
-            redirect($target ?: '/');
-        }
 
         $error = false;
 

@@ -7,8 +7,7 @@ use \Garden\Gdn;
  * @uses Auth::instance() 
  */
 
-class Auth extends \Garden\Plugin
-{
+class Auth {
     /**
      * @var object $user User data object
      */
@@ -16,11 +15,21 @@ class Auth extends \Garden\Plugin
 
     protected $userModel;
     protected $session;
-    
-    public function __construct()
+
+    private static $loaded = false;
+
+    use \Garden\Traits\Singleton;
+
+    private function __construct()
     {
         $this->userModel = Users::instance();
         $this->session = Gdn::session();
+        self::$loaded = true;
+    }
+
+    public static function loaded()
+    {
+        return self::$loaded;
     }
 
     /**
@@ -52,7 +61,7 @@ class Auth extends \Garden\Plugin
      */
     public function login($username, $password)
     {
-        if (!$user = $this->userModel->getLogin($username)){
+        if (!$user = $this->userModel->getByLogin($username)) {
             return false;
         }
 
@@ -62,7 +71,7 @@ class Auth extends \Garden\Plugin
 
         $this->user = $user;
 
-        if (!$this->checkPassword($password)){
+        if (!$this->checkPassword($password)) {
             return false;
         }
 
@@ -78,7 +87,9 @@ class Auth extends \Garden\Plugin
      */
     public function completeLogin($user, $remember = false)
     {
-        if ($userID = val('id', $user)) {
+        $userID = val('id', $user);
+
+        if ($userID) {
             $this->session->create($userID, $remember);
             $this->updateVisit($userID);
 
@@ -107,10 +118,10 @@ class Auth extends \Garden\Plugin
             $this->updateVisit($userID);
 
             return $this->user;
-        } else {
-            $this->session->end($userID);
-            return false;
         }
+
+        $this->session->end($userID);
+        return false;
     }
 
     /**
@@ -121,13 +132,14 @@ class Auth extends \Garden\Plugin
      */
     public function forceLogin($userID)
     {
-        if ($user = $this->userModel->getID($userID)) {
+        $user = $this->userModel->getID($userID);
+        if ($user) {
             $this->logout();
             $this->completeLogin($user);
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function logout($logoutAll = false)
