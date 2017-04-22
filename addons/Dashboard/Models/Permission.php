@@ -50,6 +50,8 @@ class Permission
 
         $sort = count($permissions) - count($delete) + 1;
 
+//        d($insert, $delete);
+
         foreach ($insert as $permission) {
             if (val($permission, $this->disabled) !== false) {
                 continue;
@@ -79,10 +81,12 @@ class Permission
                     'action' => 'delete'
                 ];
             } else {
-                $this->delete($id, $this->_table);
+                $this->delete($id);
                 $this->groupModel->delete(['id'=>$id]);
             }
         }
+
+//        d(1);
 
         $this->define = [];
     }
