@@ -148,13 +148,11 @@ class Install extends \Garden\Template {
         $addons = \Garden\Addons::all();
 
         if ($form->submitted()) {
-            $post = $form->getFormValues();
-
-            $install = val('addons', $post);
+            $install = $form->getFormValues();
             $model->installAddons($install);
 
             if ($form->valid()) {
-                $model->saveAddons($post);
+                $model->saveAddons($install);
                 redirect('/install?step=6');
             }
         }

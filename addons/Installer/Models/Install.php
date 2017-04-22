@@ -15,7 +15,7 @@ class Install extends \Garden\Plugin {
 
     public function installAddons($addons)
     {
-        $structure = Gdn::structure();
+        Gdn::structure();
         $allAddons = \Garden\Addons::all();
 
         foreach ($allAddons as $addon => $options) {
@@ -23,14 +23,14 @@ class Install extends \Garden\Plugin {
             $installed = c("addons.$addon", null) !== null;
             $dir = val('dir', $options);
 
-            $structureFile = $dir.'/settings/structure.php';
+            $structureFile = $dir.'/Settings/structure.php';
             if (file_exists($structureFile)) {
                 call_user_func(function($structureFile) {
                     include_once $structureFile;
                 }, $structureFile);
             }
 
-            $installFile = $dir.'/settings/install.php';
+            $installFile = $dir.'/Settings/install.php';
 
             if (!$installed && file_exists($installFile)) {
                 call_user_func(function($installFile) {
