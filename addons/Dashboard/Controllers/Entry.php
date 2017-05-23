@@ -5,20 +5,19 @@ use Addons\Dashboard\Models as Model;
 use Garden\Request;
 use Garden\Gdn;
 
-class Entry extends \Garden\Template
+class Entry extends Base
 {
-    protected $template = 'empty';
-
-    protected function pageInit()
+    public function __construct()
     {
-        $this->addJs('/js/jquery.min.js');
-        $this->addJs('/js/bootstrap.min.js');
-        $this->addJs('entry.js');
+        parent::__construct(false);
+    }
 
-        $this->addCss('/css/oneui.css');
-        $this->addCss('/css/bootstrap.theme.css');
-        $this->addCss('//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400italic,600,700%7COpen+Sans:300,400,400italic,600,700');
+    public function pageInit()
+    {
+        parent::pageInit();
+        $this->addJs('entry.js');
         $this->addCss('entry.css');
+        $this->template('empty', 'Dashboard');
     }
 
     public function index()
@@ -45,14 +44,14 @@ class Entry extends \Garden\Template
             $username = $request->getInput('username', false);
             $password = $request->getInput('password', false);
             $remember = $request->getInput('remember', false);
-            
-            if($user = $auth->login($username, $password)) {
-                if($user['active']) {
-                    $auth->completeLogin($user, $remember);
-                    redirect($target ?: '/');
-                } else {
-                    $error = t('Account has been deactivated');
-                }
+
+            $user = $auth->login($username, $password);
+
+            if(val('active', $user)) {
+                $auth->completeLogin($user, $remember);
+                redirect($target ?: '/');
+            } elseif($user) {
+                $error = t('Account has been deactivated');
             } else {
                 $error = t('Login failed');
             }
@@ -75,8 +74,4 @@ class Entry extends \Garden\Template
 
         redirect($redirect);
     }
-
-    
-
-
 }
