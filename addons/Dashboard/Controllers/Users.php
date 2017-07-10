@@ -37,10 +37,10 @@ class Users extends Base {
 
     public function add()
     {
-        $this->edit();
+        $this->edit(false);
     }
 
-    public function edit($id = false)
+    public function edit($id)
     {
         $this->title($id ? 'Edit user' : 'New user');
         $this->currentUrl('/dashboard/users');
@@ -70,7 +70,8 @@ class Users extends Base {
                 $form->setFormValue('password', $newPass);
             }
 
-            if ($id = $form->save()) {
+            $id = $form->save();
+            if ($id) {
                 $userGroups = val('groupsID', $user);
                 $userModel->updateGroups($id, $form->getValues(), $userGroups);
                 redirect('/dashboard/users');
@@ -114,11 +115,11 @@ class Users extends Base {
             $group = ['active' => 1];
         }
 
-        $form = new \Garden\Form();
-        $form->setModel($groupModel, $group);
+        $form = $this->form($groupModel, $group);
 
         if ($form->submitted()) {
-            if ($id = $form->save()) {
+            $id = $form->save();
+            if ($id) {
                 $permission->saveGroup($id, $form->getValues(), $group);
                 redirect('/dashboard/users/groups');
             }

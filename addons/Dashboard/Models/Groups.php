@@ -1,5 +1,7 @@
 <?php
+
 namespace Addons\Dashboard\Models;
+
 use Garden\Db;
 
 class Groups extends \Garden\Model
@@ -8,12 +10,10 @@ class Groups extends \Garden\Model
 
     public function getID($id)
     {
-        $result = $this->getWhere([$this->primaryKey=>$id, 'deleted'=>0])->current();
-
-        return $result;
+        return $this->getWhere([$this->primaryKey => $id, 'deleted' => 0])->current();
     }
-     
-    public function getWhere(array $where = [], array $order =[], $limit = false, $offset = 0)
+
+    public function getWhere(array $where = [], array $order = [], $limit = false, $offset = 0)
     {
         $where['deleted'] = 0;
         return parent::getWhere($where, $order, $limit, $offset);
@@ -27,8 +27,8 @@ class Groups extends \Garden\Model
                 'dateDeleted' => DB::expr('now()')
             ]);
 
-        $this->_where($where);  
+        $this->_where($where);
         $this->_query->execute();
     }
-    
+
 }

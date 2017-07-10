@@ -1,6 +1,7 @@
 <?php
 namespace Addons\Dashboard\Models;
 use \Garden\Gdn;
+use \Garden\Traits\Singleton;
 
 /**
  * Basic auth model
@@ -9,7 +10,7 @@ use \Garden\Gdn;
 
 class Auth {
     /**
-     * @var object $user User data object
+     * @var array $user User data object
      */
     public $user;
 
@@ -18,7 +19,7 @@ class Auth {
 
     private static $loaded = false;
 
-    use \Garden\Traits\Singleton;
+    use Singleton;
 
     private function __construct()
     {
@@ -57,7 +58,7 @@ class Auth {
      *
      * @param string $username 
      * @param string $password 
-     * @return bool|object
+     * @return bool|array
      */
     public function login($username, $password)
     {
@@ -81,11 +82,11 @@ class Auth {
     /**
      * Authorizes the user who came for the data
      *
-     * @param object  $user     User data object
+     * @param array  $user     User data object
      * @param boolean $remember if FALSE user will be authorized only for the current session 
-     * @return object 
+     * @return bool
      */
-    public function completeLogin($user, $remember = false)
+    public function completeLogin(array $user, $remember = false)
     {
         $userID = val('id', $user);
 
@@ -94,13 +95,16 @@ class Auth {
             $this->updateVisit($userID);
 
             \Garden\Event::fire('after_login');
-        }  
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Check and autologin user, if cookie is exist and valid
      *
-     * @return boolean|object user data object
+     * @return boolean|array user data object
      */
     public function autoLogin()
     {

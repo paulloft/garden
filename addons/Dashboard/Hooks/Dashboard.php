@@ -1,4 +1,5 @@
 <?php
+
 namespace Addons\Dashboard\Hooks;
 
 use Addons\Dashboard\Models;
@@ -8,7 +9,8 @@ use Garden\Traits\Instance;
 /**
  * Dashboard hooks
  */
-class Dashboard {
+class Dashboard
+{
 
     use Instance;
 
@@ -19,12 +21,13 @@ class Dashboard {
 
     /**
      * @param $exception \Garden\Exception\Client
+     * @throws \Garden\Exception\NotFound
      * @return bool|string
      */
     public function exception_handler($exception)
     {
         $code = $exception->getCode();
-        if(in_array($code, [400, 401, 403, 404])) {
+        if (in_array($code, [400, 401, 403, 404])) {
             $template = new Controllers\Base(false);
             $template->title($exception->getMessage());
             $template->setData('description', $exception->getDescription());
@@ -33,9 +36,9 @@ class Dashboard {
             $template->template('empty');
 
             return $template->fetchTemplate($code, 'exception');
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function dashboard_page_init_handler()

@@ -2,6 +2,7 @@
 namespace Addons\Dashboard\Models;
 use Garden\Gdn;
 use Garden\DB;
+use Garden\Model;
 use Garden\Traits\Instance;
 
 
@@ -14,16 +15,10 @@ class Permission
     protected $define = [];
     protected $disabled = [];
 
-    protected $groupModel;
     private $_table = 'permissions';
     private $_groupTable = 'groups_permissions';
 
     use Instance;
-
-    public function __construct()
-    {
-        $this->groupModel = new \Garden\Model($this->_groupTable);
-    }
 
     public function define($permission, $default = false)
     {
@@ -50,8 +45,6 @@ class Permission
 
         $sort = count($permissions) - count($delete) + 1;
 
-//        d($insert, $delete);
-
         foreach ($insert as $permission) {
             if (val($permission, $this->disabled) !== false) {
                 continue;
@@ -70,10 +63,12 @@ class Permission
             }
         }
 
+        $groupModel = Model::instance($this->_groupTable);
         foreach ($delete as $permission) {
             if (val($permission, $this->disabled) !== false) {
                 continue;
             }
+
             $id = val($permission, $permissions);
             if ($this->captureOnly) {
                 $this->capture[] = [
@@ -82,11 +77,9 @@ class Permission
                 ];
             } else {
                 $this->delete($id);
-                $this->groupModel->delete(['id'=>$id]);
+                $groupModel->delete(['id'=>$id]);
             }
         }
-
-//        d(1);
 
         $this->define = [];
     }
@@ -216,15 +209,16 @@ class Permission
         $insert = array_diff($newPerm, $oldPerm);
         $delete = array_diff($oldPerm, $newPerm);
 
+        $groupModel = Model::instance($this->_groupTable);
         foreach ($insert as $permissionID) {
-            $this->groupModel->insert([
+            $groupModel->insert([
                 'groupID'      => $groupID,
                 'permissionID' => $permissionID
             ]);
         }
 
         if (!empty($delete)) {
-            $this->groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
+            $groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
         }
     }
 

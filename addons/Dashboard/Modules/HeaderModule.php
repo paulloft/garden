@@ -17,7 +17,9 @@ class HeaderModule extends \Garden\Controller {
      */
     public function addLink($name, $href, $type = 'default', $permission = false, $attributes = array())
     {
-        if ($permission && !\checkPermission($permission)) return false;
+        if ($permission && !\checkPermission($permission)) {
+            return false;
+        }
 
         if ($href) {
             $attributes['href'] = $href;
@@ -30,11 +32,13 @@ class HeaderModule extends \Garden\Controller {
         unset($attributes['icon']);
 
         $this->buttons[] = [
-            'type' => ($href ? 'a' : 'button'),
+            'type' => $href ? 'a' : 'button',
             'name' => $name,
             'icon' => $icon,
             'attributes' => implode_assoc('" ', '="', $attributes) . '"'
         ];
+
+        return true;
     }
 
     /**
@@ -43,21 +47,24 @@ class HeaderModule extends \Garden\Controller {
      * @param string $type bootstrap class
      * @param bool $permission
      * @param array $attributes html attributes
+     * @return bool
      */
     public function addButton($name, $type = 'default', $permission = false, $attributes = [])
     {
-        $this->addLink($name, false, $type, $permission, $attributes);
+        return $this->addLink($name, false, $type, $permission, $attributes);
     }
 
     /**
      * Rendering functtion
+     * @throws \Garden\Exception\NotFound
      * @return string
      */
     public function toString()
     {
         $auth = \Garden\Gdn::auth();
+        $username = val('name', $auth->user, '');
 
-        $shortName = mb_strlen($auth->user->name) > 12 ? mb_substr($auth->user->name, 0, 12) . '...' : $auth->user->name;
+        $shortName = mb_strlen($username) > 12 ? mb_substr($username, 0, 12) . '...' : $username;
 
         $this->setData('buttons', $this->buttons);
         $this->setData('user', $auth->user);

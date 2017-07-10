@@ -19,7 +19,7 @@ class SidebarModule {
      * @param bool $uri
      * @return string
      */
-    public function current($uri = false)
+    public function currentUrl($uri = false)
     {
         if ($uri) {
             $this->current = trim($uri, '/');
@@ -54,6 +54,8 @@ class SidebarModule {
             'items' => valr("$group.items", $this->menu, []),
             'attributes' => $attributes
         ];
+
+        return true;
     }
 
     /**
@@ -67,7 +69,9 @@ class SidebarModule {
      */
     public function addItem($group, $name, $url, $sort = false, $permission = false, $attributes = [])
     {
-        if ($permission && !\checkPermission($permission)) return false;
+        if ($permission && !\checkPermission($permission)) {
+            return false;
+        }
 
         $this->menu[$group]['items'][] = [
             'name' => $name,
@@ -75,6 +79,8 @@ class SidebarModule {
             'sort' => $sort ?: $this->sort++,
             'attributes' => $attributes
         ];
+
+        return true;
     }
 
     /**
@@ -91,7 +97,7 @@ class SidebarModule {
     }
 
     private $open = false;
-    private function generateItems($array, $groups = false)
+    private function generateItems(array $array, $groups = false)
     {
         uasort($array, [$this, 'cmp']);
         $html = '';
@@ -116,16 +122,18 @@ class SidebarModule {
                 $this->open = false;
             }
 
-            if (trim($url, '/') == $this->current()) {
+            if (trim($url, '/') == $this->currentUrl()) {
                 $class .= ' active';
                 if (!$groups) {
                     $this->open = true;
                 }
             }
 
+            $htmlItems = false;
             if ($items) {
                 $class .= ' nav-submenu';
                 $attributes['data-toggle'] = 'nav-submenu';
+                $htmlItems = $this->generateItems($items);
             } elseif ($url == '#') {
                 continue;
             }
@@ -149,7 +157,7 @@ class SidebarModule {
             }
 
             if ($items) {
-                $html .= '<ul>' . $this->generateItems($items) . '</ul>';
+                $html .= '<ul>' . $htmlItems . '</ul>';
             }
             $html .= '</li>';
         }

@@ -52,6 +52,6 @@ class Base extends \Garden\Template
 
     public function currentUrl($url)
     {
-        \SidebarModule::instance()->current($url);
+        \SidebarModule::instance()->currentUrl($url);
     }
 }

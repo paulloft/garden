@@ -62,7 +62,7 @@ class Users extends \Garden\Model
         return $this->getWhere(['email' => $email])->current();
     }
 
-    protected function baseQuery($where = [], $order = [], $limit = false, $offset = 0)
+    protected function baseQuery(array $where = [], array $order = [], $limit = false, $offset = 0)
     {
         $this->_query = DB::select('u.*')
             ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
@@ -103,7 +103,7 @@ class Users extends \Garden\Model
         return $this->_query->execute();
     }
 
-    public function getByGroupID($groupID, $where = [], $order = [], $limit = false, $offset = 0)
+    public function getByGroupID($groupID, array $where = [], array $order = [], $limit = false, $offset = 0)
     {
         $_where = $where;
         $where = [];
@@ -184,7 +184,9 @@ class Users extends \Garden\Model
     public function loginAvailable($login, $id = false)
     {
         $where = ['login' => $login];
-        if ($id) $where['id<>'] = $id;
+        if ($id) {
+            $where['id<>'] = $id;
+        }
 
         return  $this->getCount($where) <= 0;
     }
@@ -201,17 +203,17 @@ class Users extends \Garden\Model
 
     public function validation()
     {
-        if (!$this->validation) {
-            $this->validation = new \Garden\Validation($this);
+        if (!$this->_validation) {
+            $this->_validation = new \Garden\Validation($this);
 
-            $this->validation
+            $this->_validation
                 ->rule('password', 'min_length', 6)
                 ->rule('login', [$this, 'loginAvailable'], ':id')
                 ->rule('email', 'email')
                 ->rule('email', [$this, 'emailAvailable'], ':id');
         }
 
-        return $this->validation;
+        return $this->_validation;
 
     }
 
