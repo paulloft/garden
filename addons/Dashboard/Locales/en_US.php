@@ -34,4 +34,9 @@
 
     'notify_group_default' => 'General',
     'No notifications' => 'No new notifications',
+
+    'form_save_error' => 'Form save error',
+    'form_save_error_debug' => 'Form save error. <br>(%s)',
+    'form_html_error' => '<strong>%1$s</strong>: %2$s',
+    'form_html_error_wrapper' => '<div class="alert alert-danger">%s</div>',
 ];

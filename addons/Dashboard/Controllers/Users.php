@@ -64,7 +64,7 @@ class Users extends Base {
 
         $form = $this->form($userModel, $user);
 
-        if ($form->submittedValid()) {
+        if ($form->submitted()) {
             $newPass = $form->getValue('newpassword');
             if (!empty($newPass)) {
                 $form->setFormValue('password', $newPass);

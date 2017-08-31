@@ -123,4 +123,12 @@
 
     'Enable debug messages' => 'Показывать подробную информацию при возникновении ошибки (debug mode)',
     'Enable error logs' => 'Ведение логов ошибок',
+
+    'form_save_error' => 'Произошла ошибка сохранения формы.',
+    'form_save_error_debug' => 'Произошла ошибка сохранения формы. <br>(%s)',
+    'form_html_error' => '<strong>%1$s</strong>: %2$s',
+    'form_html_error_wrapper' => '<div class="alert alert-danger">%s</div>',
+
+    'Secure key is empty' => '<b>Ключ безопасности отсутствует.</b> Выполните повторную отправку формы или обратитесь к администратору.',
+    'Form session timeout' => '<b>Время сесии остекло.</b> Выполните повторную отправку формы',
 ];

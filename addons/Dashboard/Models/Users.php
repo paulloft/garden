@@ -1,5 +1,6 @@
 <?php
 namespace Addons\Dashboard\Models;
+use Garden\Form;
 use Garden\Gdn;
 use Garden\DB;
 use Garden\Model;
@@ -201,20 +202,13 @@ class Users extends \Garden\Model
         return  $this->getCount($where) <= 0;
     }
 
-    public function validation()
+    public function initFormValidation(Form $form)
     {
-        if (!$this->_validation) {
-            $this->_validation = new \Garden\Validation($this);
-
-            $this->_validation
-                ->rule('password', 'min_length', 6)
-                ->rule('login', [$this, 'loginAvailable'], ':id')
-                ->rule('email', 'email')
-                ->rule('email', [$this, 'emailAvailable'], ':id');
-        }
-
-        return $this->_validation;
-
+        $this->_validation
+            ->rule('password', 'min_length', 6)
+            ->rule('login', [$this, 'loginAvailable'], ':id')
+            ->rule('email', 'email')
+            ->rule('email', [$this, 'emailAvailable'], ':id');
     }
 
     public function save(array $post, $id = false)
