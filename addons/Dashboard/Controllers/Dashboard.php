@@ -118,4 +118,33 @@ class Dashboard extends Base {
         $this->render();
     }
 
+    public function errorlog()
+    {
+        $this->permission('dashboard.admin');
+        $this->title('Error log');
+        $date = strtotime(Gdn::request()->getQuery('date', 'now'));
+
+        $pattern = '/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.*|.*\n.*) in file (.+) on line (\d+)/u';
+        $file = GDN_LOGS.'/'.date('Y', $date).'/'.date('m', $date).'/'.date('d', $date).'.log';
+        $content = file_get_contents($file);
+
+        $matches = [];
+        preg_match_all($pattern, $content, $matches);
+
+        $count = count($matches[0]) - 1;
+
+        $result = [];
+        for ($i = $count; $i >= 0; $i--) {
+            $result[] = [
+                'date' => $matches[1][$i],
+                'text' => $matches[2][$i],
+                'file' => str_replace([PATH_ROOT,'/'], ['', '/<wbr>'], $matches[3][$i]),
+                'line' => $matches[4][$i],
+            ];
+        }
+
+        $this->setData('date', date_convert($date, 'Y-m-d'));
+        $this->setData('data', $result);
+        $this->render();
+    }
 }

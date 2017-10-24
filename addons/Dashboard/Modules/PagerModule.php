@@ -5,7 +5,7 @@
  * For page output switch module
  */
 
-class PagerModule extends \Garden\Controller
+class PagerModule
 {
     protected $current;
     protected $pageCount;
@@ -16,10 +16,12 @@ class PagerModule extends \Garden\Controller
         'parameter'  => 'p',
         'showAlways' => true,
         'arrows'     => true,
-        'range'      => 3,
+        'range'      => 3
     ];
 
     protected $request;
+
+    use \Garden\Traits\Instance;
 
     /**
      * PagerModule constructor.
@@ -27,15 +29,15 @@ class PagerModule extends \Garden\Controller
      * @param int $perPage items per page
      * @param array $options optiont from PagerModule::$options
      */
-    public function __construct($count, $perPage = false, $options = [])
+    public function __construct($count, $perPage = false, array $options = [])
     {
-        if ($perPage) $this->perPage = $perPage;
+        if ($perPage) {
+            $this->perPage = $perPage;
+        }
         $this->count = $count;
         $this->options = array_merge($this->options, $options);
 
         $this->request = \Garden\Gdn::request();
-
-        parent::__construct();
     }
 
     /**
@@ -83,12 +85,13 @@ class PagerModule extends \Garden\Controller
      * Rendering function
      * @return bool|string
      */
-    public function toString()
+    public function render()
     {
         $pageCount = $this->countPage();
 
-        if ($pageCount <= 1 && !val('showAlways', $this->options))
+        if ($pageCount <= 1 && !val('showAlways', $this->options)) {
             return false;
+        }
 
         $current = $this->curentPage();
 
@@ -97,14 +100,16 @@ class PagerModule extends \Garden\Controller
 
         $pages = $this->getPages($current, $defaultStart, $defaultEnd);
 
-        $this->setData('pages', $pages);
-        $this->setData('current', $current);
-        $this->setData('start', $defaultStart);
-        $this->setData('end', $defaultEnd);
-        $this->setData('uri', $this->getUri());
-        $this->setData('showArrows', val('arrows', $this->options));
+        $controller = new \Garden\Controller;
 
-        return $this->fetchView('pager', 'modules', 'dashboard');
+        $controller->setData('pages', $pages);
+        $controller->setData('current', $current);
+        $controller->setData('start', $defaultStart);
+        $controller->setData('end', $defaultEnd);
+        $controller->setData('uri', $this->getUri());
+        $controller->setData('showArrows', val('arrows', $this->options));
+
+        return $controller->fetchView('pager', 'modules', 'dashboard');
     }
 
     protected function getUri()

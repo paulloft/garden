@@ -50,7 +50,7 @@ class Auth {
      */
     public function admin()
     {
-        return (bool)($this->user && $this->user['admin']);
+        return ($this->user && $this->user['admin']);
     }
 
     /**
@@ -58,7 +58,7 @@ class Auth {
      *
      * @param string $username 
      * @param string $password 
-     * @return bool|array
+     * @return mixed
      */
     public function login($username, $password)
     {
@@ -121,7 +121,7 @@ class Auth {
             $this->user = $user;
             $this->updateVisit($userID);
 
-            return $this->user;
+            return true;
         }
 
         $this->session->end($userID);

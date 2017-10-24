@@ -69,7 +69,7 @@
         <div class="block-content">
             
         <p>
-            <a href="?refresh" class="btn btn-primary"><i class="fa fa-repeat"></i> {t code="Refresh"}</a>
+            <a href="?refresh" class="btn btn-primary"><i class="fa fa-repeat"></i> {t code="Refresh structure"}</a>
             {if $capturePerm OR $capturedSql}
             <a href="?update" class="btn btn-primary"><i class="fa fa-chevron-right"></i> {t code="Start update structure"}</a>
             {/if}

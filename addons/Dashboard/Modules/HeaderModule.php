@@ -3,7 +3,10 @@
 /**
  * Class HeaderModule
  */
-class HeaderModule extends \Garden\Controller {
+class HeaderModule {
+
+    use \Garden\Traits\Singleton;
+
     protected $buttons = [];
 
     /**
@@ -59,17 +62,18 @@ class HeaderModule extends \Garden\Controller {
      * @throws \Garden\Exception\NotFound
      * @return string
      */
-    public function toString()
+    public function render()
     {
         $auth = \Garden\Gdn::auth();
-        $username = val('name', $auth->user, '');
+        $controller = new \Garden\Controller;
 
+        $username = val('name', $auth->user, '');
         $shortName = mb_strlen($username) > 12 ? mb_substr($username, 0, 12) . '...' : $username;
 
-        $this->setData('buttons', $this->buttons);
-        $this->setData('user', $auth->user);
-        $this->setData('shortName', $shortName);
+        $controller->setData('buttons', $this->buttons);
+        $controller->setData('user', $auth->user);
+        $controller->setData('shortName', $shortName);
 
-        return $this->fetchView('header', 'modules', 'dashboard');
+        return $controller->fetchView('header', 'modules', 'dashboard');
     }
 }

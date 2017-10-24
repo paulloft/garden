@@ -12,7 +12,7 @@ class SidebarModule {
 
     private $sort = 1000;
 
-    use \Garden\Traits\Instance;
+    use \Garden\Traits\Singleton;
 
     /**
      * Set the url to select the active menu item
@@ -87,7 +87,7 @@ class SidebarModule {
      * Rendering function
      * @return string
      */
-    public function toString()
+    public function render()
     {
         $html = '<ul class="nav-main">';
         $html .= $this->generateItems($this->menu, true);
