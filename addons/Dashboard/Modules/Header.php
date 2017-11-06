@@ -1,11 +1,13 @@
 <?php
 
-/**
- * Class HeaderModule
- */
-class HeaderModule {
+namespace Addons\Dashboard\Modules;
 
-    use \Garden\Traits\Singleton;
+use Garden\Interfaces\Module;
+use Garden\Traits\Singleton;
+
+class Header implements Module {
+
+    use Singleton;
 
     protected $buttons = [];
 
@@ -62,7 +64,7 @@ class HeaderModule {
      * @throws \Garden\Exception\NotFound
      * @return string
      */
-    public function render()
+    public function render(array $params = [])
     {
         $auth = \Garden\Gdn::auth();
         $controller = new \Garden\Controller;

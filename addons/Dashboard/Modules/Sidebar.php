@@ -1,18 +1,22 @@
 <?php
-use Garden\Gdn;
-
 /**
  * Class SidebarModule
  * Left menu module
  */
-class SidebarModule {
+
+namespace Addons\Dashboard\Modules;
+use Garden\Gdn;
+use Garden\Interfaces\Module;
+use Garden\Traits\Singleton;
+
+class Sidebar implements Module {
 
     protected $current;
     protected $menu = [];
 
     private $sort = 1000;
 
-    use \Garden\Traits\Singleton;
+    use Singleton;
 
     /**
      * Set the url to select the active menu item
@@ -87,7 +91,7 @@ class SidebarModule {
      * Rendering function
      * @return string
      */
-    public function render()
+    public function render(array $params = [])
     {
         $html = '<ul class="nav-main">';
         $html .= $this->generateItems($this->menu, true);
@@ -165,7 +169,7 @@ class SidebarModule {
         return $html;
     }
 
-    protected function cmp($a, $b)
+    protected function cmp(array $a, array $b)
     {
         if ($a['sort'] == $b['sort']) {
             return 0;

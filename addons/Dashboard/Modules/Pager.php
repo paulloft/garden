@@ -4,9 +4,13 @@
  * Class PagerModule
  * For page output switch module
  */
+namespace Addons\Dashboard\Modules;
 
-class PagerModule
-{
+use Garden\Gdn;
+use Garden\Interfaces\Module;
+use Garden\Traits\Instance;
+
+class Pager implements Module {
     protected $current;
     protected $pageCount;
 
@@ -21,7 +25,7 @@ class PagerModule
 
     protected $request;
 
-    use \Garden\Traits\Instance;
+    use Instance;
 
     /**
      * PagerModule constructor.
@@ -37,7 +41,7 @@ class PagerModule
         $this->count = $count;
         $this->options = array_merge($this->options, $options);
 
-        $this->request = \Garden\Gdn::request();
+        $this->request = Gdn::request();
     }
 
     /**
@@ -85,7 +89,7 @@ class PagerModule
      * Rendering function
      * @return bool|string
      */
-    public function render()
+    public function render(array $params = [])
     {
         $pageCount = $this->countPage();
 

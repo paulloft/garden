@@ -4,6 +4,8 @@ namespace Addons\Dashboard\Hooks;
 
 use Addons\Dashboard\Models;
 use Addons\Dashboard\Controllers;
+use Addons\Dashboard\Modules\Header as HeaderModule;
+use Addons\Dashboard\Modules\Sidebar;
 use Garden\Traits\Instance;
 
 /**
@@ -43,7 +45,7 @@ class Dashboard
 
     public function dashboard_page_init_handler()
     {
-        $sidebar = \SidebarModule::instance();
+        $sidebar = Sidebar::instance();
 
         $sidebar->addGroup('dashboard', t('Dashboard'), '/dashboard', 10, 'dashboard', ['icon' => 'fa fa-dashboard']);
 
@@ -57,7 +59,7 @@ class Dashboard
         $sidebar->addItem('system', t('Update database'), '/dashboard/structure', 30, 'dashboard.admin');
         $sidebar->addItem('system', t('Error log'), '/dashboard/errorlog', 40, 'dashboard.admin');
 
-        \HeaderModule::instance()->addLink('Clear cache', '?nocache', 'success', false, ['icon' => 'fa fa-refresh']);
+        HeaderModule::instance()->addLink('Clear cache', '?nocache', 'success', false, ['icon' => 'fa fa-refresh']);
     }
 
     public function install()

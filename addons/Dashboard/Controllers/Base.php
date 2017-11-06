@@ -2,6 +2,7 @@
 namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
+use Addons\Dashboard\Modules\Sidebar;
 use Garden\Exception;
 
 class Base extends \Garden\Template
@@ -52,6 +53,6 @@ class Base extends \Garden\Template
 
     public function currentUrl($url)
     {
-        \SidebarModule::instance()->currentUrl($url);
+        Sidebar::instance()->currentUrl($url);
     }
 }

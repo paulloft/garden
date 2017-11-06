@@ -22,13 +22,13 @@
                     <div class="close" data-action="menu_close"><i class="fa fa-close"></i></div>
                 </div>
                 <h3>{t code="Navigation"}</h3>
-                {module name="sidebar"}
+                {module name="dashboard/sidebar"}
             </div>
         </div>
     </div>
     <div class="main-block transition">
         <div class="top-menu">
-            {module name="header"}
+            {module name="dashboard/header"}
         </div>
         <div class="content-wrapper clearfix">
             <div class="main-container" id="content">
