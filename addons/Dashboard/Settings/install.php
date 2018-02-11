@@ -1,10 +1,10 @@
 <?php
-namespace Addons\Dashboard;
 
-$groupModel = Models\Groups::instance();
+use Addons\Dashboard\Models\Groups;
+
+$groupModel = Groups::instance();
 
 $groupModel->insertOrUpdate(1, [
     'name' => t('Administrator'),
     'description' => 'Full access to all',
 ]);
-

@@ -1,5 +1,4 @@
 <?php
-namespace Addons\Dashboard;
 use Garden\Gdn;
 
 $defSpace = '\\Addons\\Dashboard\\Controllers';

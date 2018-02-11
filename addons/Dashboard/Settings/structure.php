@@ -1,6 +1,4 @@
 <?php
-namespace Addons\Dashboard;
-
 use Garden\Gdn;
 $construct = Gdn::structure();
 
