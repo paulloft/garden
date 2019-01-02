@@ -7,9 +7,9 @@
 {/foreach}
     </pre>
     {else}
-    <div class="alert alert-info" role="alert">{t code="Nothing to update"}</div>
+    <div class="alert alert-info" role="alert">{"Nothing to update"|translate}</div>
     {/if}
-    <a href="?refresh" class="btn btn-primary">{t code="Refresh structure"}</a>
-    <a href="?update" class="btn btn-primary">{t code="Start update structure"}</a>
+    <a href="?refresh" class="btn btn-primary">{"Refresh structure"|translate}</a>
+    <a href="?update" class="btn btn-primary">{"Start update structure"|translate}</a>
 </div>
 

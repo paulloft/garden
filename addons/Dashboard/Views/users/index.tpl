@@ -1,7 +1,7 @@
 <div class="content">
     <div class="block">
         <div class="block-header">
-            <h3 class="block-title">{t code="All users"}</h3>
+            <h3 class="block-title">{'All users'|translate}</h3>
         </div>
         <div class="block-content">
             <table class="table table-hover vertical-center">
@@ -9,12 +9,12 @@
                     <tr>
                         <th class="fs-13 text-center hidden-xs hidden-sm">ID</th>
                         <th class="fs-13 text-center"><i class="fa fa-user-circle"></i></th>
-                        <th class="fs-13">{t code="Login"}</th>
-                        <th class="fs-13 hidden-xs hidden-sm">{t code="Name"}</th>
+                        <th class="fs-13">{"Login"|translate}</th>
+                        <th class="fs-13 hidden-xs hidden-sm">{"Name"|translate}</th>
                         <th class="fs-13 hidden-xs hidden-sm hidden-md">Email</th>
-                        <th class="fs-13 hidden-xs hidden-sm" style="width: 15%;">{t code="Groups"}</th>
-                        <th class="fs-13 hidden-xs hidden-sm hidden-md" style="width: 15%;">{t code="Date inserted"}</th>
-                        <th class="fs-13 hidden-xs hidden-sm text-center" style="width: 15%;">{t code="Active"}</th>
+                        <th class="fs-13 hidden-xs hidden-sm" style="width: 15%;">{"Groups"|translate}</th>
+                        <th class="fs-13 hidden-xs hidden-sm hidden-md" style="width: 15%;">{"Date inserted"|translate}</th>
+                        <th class="fs-13 hidden-xs hidden-sm text-center" style="width: 15%;">{"Active"|translate}</th>
                         <th class="fs-13 text-right"></th>
                     </tr>
                 </thead>
@@ -34,21 +34,21 @@
                             {/foreach}
                         </td>
                         <td class="hidden-xs hidden-sm hidden-md">
-                            <em class="text-muted">{$user.dateInserted|date_convert:datetime}</em>
+                            <em class="text-muted">{Date::create($user.dateInserted)->toDateTime()}</em>
                         </td>
                         <td class="hidden-xs hidden-sm text-center">
-                            {if $user.active}{t code="Yes"}{else}{t code="No"}{/if}
+                            {if $user.active}{"Yes"|translate}{else}{"No"|translate}{/if}
                         </td>
                         <td class="text-right">
                             <div class="btn-group inlile-group" style="min-width: 112px;">
                                 {if checkPermission('dashboard.user.edit')}
-                                <a class="btn btn-default" title="{t code="Edit"}" href="/dashboard/users/edit/{$user.id}"><i class="fa fa-pencil"></i></a>
+                                <a class="btn btn-default" title="{"Edit"|translate}" href="/dashboard/users/edit/{$user.id}"><i class="fa fa-pencil"></i></a>
                                 {/if}
                                 {if checkPermission('dashboard.admin')}
-                                <a class="btn btn-default" title="{t code="Log in as user"}" href="/dashboard/users/forceauth/{$user.id}" data-confirm="true"><i class="fa fa-sign-in"></i></a>
+                                <a class="btn btn-default" title="{"Log in as user"|translate}" href="/dashboard/users/forceauth/{$user.id}" data-confirm="true"><i class="fa fa-sign-in"></i></a>
                                 {/if}
                                 {if checkPermission('dashboard.user.delete')}
-                                <a class="btn btn-default" title="{t code="Remove"}" href="/dashboard/users/user/{$user.id}" data-confirm="true"><i class="fa fa-times"></i></a>
+                                <a class="btn btn-default" title="{"Remove"|translate}" href="/dashboard/users/user/{$user.id}" data-confirm="true"><i class="fa fa-times"></i></a>
                                 {/if}
                             </div>
                         </td>
@@ -61,7 +61,7 @@
 
     <div>
         {if checkPermission('dashboard.user.add')}
-        <a class="btn btn-primary" href="/dashboard/users/add"><i class="fa fa-plus with-text"></i> {t code="Add new user"}</a>
+        <a class="btn btn-primary" href="/dashboard/users/add"><i class="fa fa-plus with-text"></i> {"Add new user"|translate}</a>
         {/if}
     </div>
 </div>

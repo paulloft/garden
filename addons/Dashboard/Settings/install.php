@@ -5,6 +5,6 @@ use Addons\Dashboard\Models\Groups;
 $groupModel = Groups::instance();
 
 $groupModel->insertOrUpdate(1, [
-    'name' => t('Administrator'),
+    'name' => \Garden\Translate::get('Administrator'),
     'description' => 'Full access to all',
 ]);

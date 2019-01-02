@@ -3,7 +3,7 @@
 
     <div class="block block-bordered block-themed">
         <div class="block-header bg-primary">
-            <h3 class="block-title">{t code="Database structure"}</h3>
+            <h3 class="block-title">{"Database structure"|translate}</h3>
         </div>
 
         <div class="block-content">
@@ -14,7 +14,7 @@
 {/foreach}
 </pre>
 {else}
-        <div class="alert alert-info"><i class="fa fa-check"></i> {t code="Nothing to update"}</div>
+        <div class="alert alert-info"><i class="fa fa-check"></i> {"Nothing to update"|translate}</div>
 {/if}
     </div>
 </div>
@@ -22,7 +22,7 @@
 
     <div class="block block-bordered block-themed">
         <div class="block-header bg-primary">
-            <h3 class="block-title">{t code="Permissions"}</h3>
+            <h3 class="block-title">{"Permissions"|translate}</h3>
         </div>
 
         <div class="block-content">
@@ -32,9 +32,9 @@
                         <table class="table table-striped table-vcenter">
                             <thead>
                                 <tr>
-                                    <th>{t code="Code"}</th>
-                                    <th class="text-center">{t code="Is default"}</th>
-                                    <th class="text-center" style="width: 100px;">{t code="Status"}</th>
+                                    <th>{"Code"|translate}</th>
+                                    <th class="text-center">{"Is default"|translate}</th>
+                                    <th class="text-center" style="width: 100px;">{"Status"|translate}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -44,13 +44,13 @@
                                     <td class="text-center">{if $perm.def}Да{else}Нет{/if}</td>
                                     <td class="text-center">
                                         {if $perm.action == 'insert'}
-                                        <span class="label label-success"><i class="fa fa-plus"></i> {t code="Will be addedd"}</span>
+                                        <span class="label label-success"><i class="fa fa-plus"></i> {"Will be addedd"|translate}</span>
                                         {/if}
                                         {if $perm.action == 'update'}
-                                        <span class="label label-info"><i class="fa fa-refresh"></i> {t code="Will be updated"}</span>
+                                        <span class="label label-info"><i class="fa fa-refresh"></i> {"Will be updated"|translate}</span>
                                         {/if}
                                         {if $perm.action == 'delete'}
-                                        <span class="label label-danger"><i class="fa fa-close"></i> {t code="Will be deleted"}</span>
+                                        <span class="label label-danger"><i class="fa fa-close"></i> {"Will be deleted"|translate}</span>
                                         {/if}
                                     </td>
                                 </tr>
@@ -60,7 +60,7 @@
 
                     </div>
                     {else}
-                    <div class="alert alert-info"><i class="fa fa-check"></i> {t code="Nothing to update"}</div>
+                    <div class="alert alert-info"><i class="fa fa-check"></i> {"Nothing to update"|translate}</div>
                     {/if}
         </div>
     </div>
@@ -69,9 +69,9 @@
         <div class="block-content">
             
         <p>
-            <a href="?refresh" class="btn btn-primary"><i class="fa fa-repeat"></i> {t code="Refresh structure"}</a>
+            <a href="?refresh" class="btn btn-primary"><i class="fa fa-repeat"></i> {"Refresh structure"|translate}</a>
             {if $capturePerm OR $capturedSql}
-            <a href="?update" class="btn btn-primary"><i class="fa fa-chevron-right"></i> {t code="Start update structure"}</a>
+            <a href="?update" class="btn btn-primary"><i class="fa fa-chevron-right"></i> {"Start update structure"|translate}</a>
             {/if}
         </p>
         </div>

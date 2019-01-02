@@ -21,7 +21,7 @@
                     <div class="sitename">{c('main.sitename')}</div>
                     <div class="close" data-action="menu_close"><i class="fa fa-close"></i></div>
                 </div>
-                <h3>{t code="Navigation"}</h3>
+                <h3>{"Navigation"|translate}</h3>
                 {module name="dashboard/sidebar"}
             </div>
         </div>

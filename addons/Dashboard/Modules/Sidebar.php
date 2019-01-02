@@ -6,6 +6,7 @@
 
 namespace Addons\Dashboard\Modules;
 use Garden\Gdn;
+use Garden\Helpers\Arr;
 use Garden\Interfaces\Module;
 use Garden\Traits\Singleton;
 
@@ -147,7 +148,7 @@ class Sidebar implements Module {
             }
 
             if ($attributes) {
-                $attributes = implode_assoc('" ', '="', $attributes) . '"';
+                $attributes = Arr::implodeAssoc('" ', '="', $attributes) . '"';
             } else {
                 $attributes = null;
             }

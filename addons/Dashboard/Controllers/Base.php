@@ -4,6 +4,8 @@ namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Addons\Dashboard\Modules\Sidebar;
 use Garden\Exception;
+use Garden\Request;
+use Garden\Response;
 
 class Base extends \Garden\Template
 {
@@ -21,7 +23,7 @@ class Base extends \Garden\Template
 
     public function pageInit()
     {
-        if($this->renderType() == \Garden\Request::RENDER_ALL) {
+        if($this->renderType() === Request::RENDER_ALL) {
             $this->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
             $this->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700');
             $this->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
@@ -39,8 +41,8 @@ class Base extends \Garden\Template
     protected function checkAuth()
     {
         if ($this->needAuth && !Model\Auth::instance()->logined()) {
-            $uri = url_local();
-            redirect('/entry/login?target=' . $uri);
+            $uri = Request::current()->makeUrl();
+            Response::current()->redirect('/entry/login?target=' . $uri);
         }
     }
 

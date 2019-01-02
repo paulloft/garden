@@ -106,9 +106,9 @@ class Permission
         return true;
     }
 
-    public function get($userID = false)
+    public function get($userID = null)
     {
-        if (!$userID) {
+        if ($userID === null) {
             $userID = Gdn::session()->userID;
         }
 

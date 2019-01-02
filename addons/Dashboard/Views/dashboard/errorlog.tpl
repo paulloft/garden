@@ -2,7 +2,7 @@
     <div class="block">
         <div class="block-header bg-gray-lighter">
             <div class="block-title text-normal">
-                <span class="font-w400">{t('Count error in log')}:</span> <strong>{count($data)}</strong>
+                <span class="font-w400">{'Count error in log'|translate}:</span> <strong>{count($data)}</strong>
             </div>
         </div>
         <div class="block-content">
@@ -32,10 +32,10 @@
                             </td>
                             <td class="hidden-xs font-w600" style="width: 140px;">{$error.file}<span class="text-muted" title="Line {$error.line}">: {$error.line}</span></td>
                             <td>
-                                <div class="text-muted">{$error.text|format_form}</div>
+                                <div class="text-muted">{Text::safe($error.text)}</div>
                             </td>
                             <td class="visible-lg text-muted" style="width: 160px;">
-                                <nobr><em>{date_convert($error.date, 'datetime')}</em></nobr>
+                                <nobr><em>{Date::create($error.date)->toDateTime()}</em></nobr>
                             </td>
                         </tr>
                     {/foreach}

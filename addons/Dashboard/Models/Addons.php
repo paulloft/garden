@@ -2,7 +2,9 @@
 
 namespace Addons\Dashboard\Models;
 
+use Garden\Helpers\Arr;
 use Garden\Traits\Instance;
+use Garden\Translate;
 
 class Addons {
 
@@ -21,7 +23,7 @@ class Addons {
         $config = !$rewrite && file_exists($file) ? include($file) : [];
         $newConfig = array_merge($config, $data);
 
-        array_save($newConfig, $file);
+        Arr::save($newConfig, $file);
     }
 
     public function install($name)
@@ -54,7 +56,7 @@ class Addons {
                 return false;
             }
         } else {
-            $this->error = t('Addon not found');
+            $this->error = Translate::get('Addon not found');
             return false;
         }
     }

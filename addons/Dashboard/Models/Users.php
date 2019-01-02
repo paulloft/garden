@@ -205,7 +205,7 @@ class Users extends \Garden\Model
     public function initFormValidation(Form $form)
     {
         $this->_validation
-            ->rule('password', 'min_length', 6)
+            ->rule('password', 'minLength', 6)
             ->rule('login', [$this, 'loginAvailable'], ':id')
             ->rule('email', 'email')
             ->rule('email', [$this, 'emailAvailable'], ':id');

@@ -1,9 +1,11 @@
 <?php
+
 namespace Addons\Installer\Controllers;
 
 use Garden\Config;
 use Garden\Gdn;
 use \Addons\Installer\Models as Model;
+use Garden\Response;
 
 class Install extends \Garden\Template {
 
@@ -11,7 +13,7 @@ class Install extends \Garden\Template {
 
     public function initialize()
     {
-        if ($this->renderType() == \Garden\Request::RENDER_ALL) {
+        if ($this->renderType() === \Garden\Request::RENDER_ALL) {
             $this->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
             $this->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700');
             $this->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
@@ -26,7 +28,7 @@ class Install extends \Garden\Template {
 
     public function index()
     {
-        redirect('/install');
+        Response::current()->redirect('/install');
     }
 
     public function install()
@@ -53,23 +55,21 @@ class Install extends \Garden\Template {
     {
         $form = $this->form();
         $form->validation()
-            ->rule('sitename', 'not_empty')
-            ->rule('locale', 'not_empty');
+            ->rule('sitename', 'required')
+            ->rule('locale', 'required');
 
         $data = c('main');
         $form->setData($data);
 
-        if ($form->submitted()) {
-            if ($form->valid()) {
-                $post = $form->getFormValues();
-                $post['hashsalt'] = \Garden\SecureString::generateRandomKey(16);
-                $post['logs'] = val('logs', $post) ? true : false;
-                $post['debug'] = val('debug', $post) ? true : false;
+        if ($form->submitted() && $form->valid()) {
+            $post = $form->getFormValues();
+            $post['hashsalt'] = \Garden\SecureString::generateRandomKey(16);
+            $post['logs'] = val('logs', $post) ? true : false;
+            $post['debug'] = val('debug', $post) ? true : false;
 
-                Config::save($post, 'main');
+            Config::save($post, 'main');
 
-                redirect('/install?step=3');
-            }
+            Response::current()->redirect('/install?step=3');
         }
 
         $this->render('step_2.php');
@@ -103,7 +103,7 @@ class Install extends \Garden\Template {
 
             if ($form->valid()) {
                 Config::save($post, 'cache');
-                redirect('/install?step=4');
+                Response::current()->redirect('/install?step=4');
             }
         }
 
@@ -131,7 +131,7 @@ class Install extends \Garden\Template {
 
             if ($form->valid()) {
                 Config::save($post, 'database');
-                redirect('/install?step=5');
+                Response::current()->redirect('/install?step=5');
             }
         }
 
@@ -153,7 +153,7 @@ class Install extends \Garden\Template {
 
             if ($form->valid()) {
                 $model->saveAddons($install);
-                redirect('/install?step=6');
+                Response::current()->redirect('/install?step=6');
             }
         }
 
@@ -165,7 +165,7 @@ class Install extends \Garden\Template {
     protected function step_6()
     {
         if (!\Garden\Addons::enabled('dashboard')) {
-            redirect('/install?step=7');
+            Response::current()->redirect('/install?step=7');
         }
 
 
@@ -176,9 +176,11 @@ class Install extends \Garden\Template {
 
         if ($form->submitted()) {
             $form->setFormValue('admin', 1);
-            if ($id = $form->save()) {
+            $id = $form->save();
+
+            if ($id) {
                 Gdn::auth()->forceLogin($id);
-                redirect('/install?step=7');
+                Response::current()->redirect('/install?step=7');
             }
         }
 

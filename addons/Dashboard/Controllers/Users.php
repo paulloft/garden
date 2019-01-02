@@ -3,6 +3,7 @@ namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
 use Garden\Exception;
+use Garden\Response;
 
 class Users extends Base {
 
@@ -74,7 +75,7 @@ class Users extends Base {
             if ($id) {
                 $userGroups = val('groupsID', $user);
                 $userModel->updateGroups($id, $form->getValues(), $userGroups);
-                redirect('/dashboard/users');
+                Response::current()->redirect('/dashboard/users');
             }
         }
 
@@ -121,7 +122,7 @@ class Users extends Base {
             $id = $form->save();
             if ($id) {
                 $permission->saveGroup($id, $form->getValues(), $group);
-                redirect('/dashboard/users/groups');
+                Response::current()->redirect('/dashboard/users/groups');
             }
         }
 
@@ -140,7 +141,7 @@ class Users extends Base {
         $auth = Model\Auth::instance();
         $auth->forceLogin($id);
 
-        redirect('/dashboard');
+        Response::current()->redirect('/dashboard');
     }
 
     public function deleteUser($id)
@@ -148,13 +149,13 @@ class Users extends Base {
         $this->permission('dashboard.user.delete');
 
         if ($id == 1) {
-            return false;
+            return;
         }
 
         $userModel = Model\Users::instance();
         $userModel->deleteID($id);
 
-        redirect('/dashboard/users');
+        Response::current()->redirect('/dashboard/users');
     }
 
     public function deleteGroup($id)
@@ -162,13 +163,13 @@ class Users extends Base {
         $this->permission('dashboard.group.delete');
 
         if ($id == 1) {
-            return false;
+            return;
         }
 
         $groupModel = Model\Groups::instance();
         $groupModel->deleteID($id);
 
-        redirect('/dashboard/users/groups');
+        Response::current()->redirect('/dashboard/users/groups');
     }
 
 }

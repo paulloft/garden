@@ -14,17 +14,17 @@
 
 
             <ul class="dropdown-menu dropdown-menu-right">
-                <li class="dropdown-header">{t code="Profile"}</li>
+                <li class="dropdown-header">{"Profile"|translate}</li>
                 <li>
                     <a tabindex="-1" href="/dashboard/users/edit/{$user.id}">
-                        <i class="fa fa-cog pull-right"></i>{t code="Settings"}
+                        <i class="fa fa-cog pull-right"></i>{"Settings"|translate}
                     </a>
                 </li>
                 <li class="divider"></li>
-                <li class="dropdown-header">{t code="Actions"}</li>
+                <li class="dropdown-header">{"Actions"|translate}</li>
                 <li>
                     <a tabindex="-1" href="/entry/logout">
-                        <i class="fa fa-sign-out pull-right"></i>{t code="Sign out"}
+                        <i class="fa fa-sign-out pull-right"></i>{"Sign out"|translate}
                     </a>
                 </li>
             </ul>
@@ -36,7 +36,7 @@
 <!-- Header Navigation Left -->
 <ul class="nav-header pull-left">
     <li class="hidden-sm hidden-md hidden-lg">
-        <button class="btn btn-link" data-action="menu_toggle"><i class="fa fa-bars" title="{t code="Toggle menu"}"></i></button>
+        <button class="btn btn-link" data-action="menu_toggle"><i class="fa fa-bars" title="{"Toggle menu"|translate}"></i></button>
     </li>
 {foreach from=$buttons item=button}
     <li><{$button.type} {$button.attributes}>{if $button.icon}<i class="{$button.icon}"></i> <span class="hidden-xs">{$button.name}</span>{else}{$button.name}{/if}</{$button.type}></li>

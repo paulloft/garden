@@ -4,6 +4,8 @@ namespace Addons\Dashboard\Controllers;
 use Addons\Dashboard\Models as Model;
 use Garden\Request;
 use Garden\Gdn;
+use Garden\Response;
+use Garden\Translate;
 
 class Entry extends Base
 {
@@ -22,7 +24,7 @@ class Entry extends Base
 
     public function index()
     {
-        redirect('/entry/login');
+        Response::current()->redirect('/entry/login');
     }
 
     public function login()
@@ -49,11 +51,11 @@ class Entry extends Base
 
             if(val('active', $user)) {
                 $auth->completeLogin($user, $remember);
-                redirect($target ?: '/');
+                Response::current()->redirect($target ?: '/');
             } elseif($user) {
-                $error = t('Account has been deactivated');
+                $error = Translate::get('Account has been deactivated');
             } else {
-                $error = t('Login failed');
+                $error = Translate::get('Login failed');
             }
         }
 
@@ -72,6 +74,6 @@ class Entry extends Base
         $auth = Model\Auth::instance();
         $auth->logout();
 
-        redirect($redirect);
+        Response::current()->redirect($redirect);
     }
 }

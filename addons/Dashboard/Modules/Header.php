@@ -2,6 +2,7 @@
 
 namespace Addons\Dashboard\Modules;
 
+use Garden\Helpers\Arr;
 use Garden\Interfaces\Module;
 use Garden\Traits\Singleton;
 
@@ -40,7 +41,7 @@ class Header implements Module {
             'type' => $href ? 'a' : 'button',
             'name' => $name,
             'icon' => $icon,
-            'attributes' => implode_assoc('" ', '="', $attributes) . '"'
+            'attributes' => Arr::implodeAssoc('" ', '="', $attributes) . '"'
         ];
 
         return true;

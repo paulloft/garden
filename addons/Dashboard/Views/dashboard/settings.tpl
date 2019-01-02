@@ -4,12 +4,12 @@
         {form}
             {form_errors}
             <div class="form-group">
-                <label>{t code="Site name"}</label>
+                <label>{"Site name"|translate}</label>
                 {input type="text" name="sitename" required=true}
             </div>
 
             <div class="form-group">
-                <label>{t code="Localization"}</label>
+                <label>{"Localization"|translate}</label>
                 {select name="locale" options=$locales}
             </div>
 
@@ -17,7 +17,7 @@
                 <div class="checkbox">
                     <label>
                         {checkbox name="debug"}
-                        {t code="Enable debug messages"}
+                        {"Enable debug messages"|translate}
                     </label>
                 </div>
             </div>
@@ -26,13 +26,13 @@
                 <div class="checkbox">
                     <label>
                         {checkbox name="logs"}
-                        {t code="Enable error logs"}
+                        {"Enable error logs"|translate}
                     </label>
                 </div>
             </div>
 
             <p>
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {t code="Save"}</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> {"Save"|translate}</button>
             </p>
         {/form}
         </div>

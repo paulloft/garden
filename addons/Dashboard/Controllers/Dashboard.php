@@ -3,6 +3,8 @@ namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
 use Garden\Gdn;
+use Garden\Helpers\Date;
+use Garden\Response;
 
 class Dashboard extends Base {
 
@@ -50,7 +52,7 @@ class Dashboard extends Base {
 
         if (!$captureOnly) {
             \Garden\Cache::clear();
-            redirect('/dashboard/structure');
+            Response::current()->redirect('/dashboard/structure');
         }
 
         $this->setData('capturePerm', $permission->capture);
@@ -66,8 +68,8 @@ class Dashboard extends Base {
 
         $form = $this->form();
         $form->validation()
-            ->rule('sitename', 'not_empty')
-            ->rule('locale', 'not_empty');
+            ->rule('sitename', 'required')
+            ->rule('locale', 'required');
 
         $data = c('main');
         $form->setData($data);
@@ -110,7 +112,7 @@ class Dashboard extends Base {
             } else {
                 $model->save($name, $enable);
                 \Garden\Cache::clear();
-                redirect('/dashboard/addons');
+                Response::current()->redirect('/dashboard/addons');
             }
         }
 
@@ -143,7 +145,7 @@ class Dashboard extends Base {
             ];
         }
 
-        $this->setData('date', date_convert($date, 'Y-m-d'));
+        $this->setData('date', Date::create($date)->toSql(false));
         $this->setData('data', $result);
         $this->render();
     }

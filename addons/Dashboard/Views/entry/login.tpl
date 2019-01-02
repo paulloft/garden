@@ -12,7 +12,7 @@
                     
                     <div class="block block-themed animated fadeIn b-rounded">
                         <div class="block-header bg-success b-top-rounded">
-                            <h3 class="block-title">{t code="Authorization"}</h3>
+                            <h3 class="block-title">{"Authorization"|translate}</h3>
                         </div>
                         <div class="block-content">
                             <form method="post" action="/entry/login{$target}" class="form-horizontal push-5-t">
@@ -22,27 +22,27 @@
                                 </div>
                             {/if}
                                 <div class="form-group">
-                                    <label class="col-xs-12" for="login-username">{t code='Username'}</label>
+                                    <label class="col-xs-12" for="login-username">{'Username'|translate}</label>
                                     <div class="col-xs-12">
-                                        <input class="form-control" type="text" id="login-username" name="username" placeholder="{t code='Username'}">
+                                        <input class="form-control" type="text" id="login-username" name="username" placeholder="{'Username'|translate}">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-xs-12" for="login-password">{t code='Password'}</label>
+                                    <label class="col-xs-12" for="login-password">{'Password'|translate}</label>
                                     <div class="col-xs-12">
-                                        <input class="form-control" type="password" id="login-password" name="password" placeholder="{t code='Password'}" />
+                                        <input class="form-control" type="password" id="login-password" name="password" placeholder="{'Password'|translate}" />
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12">
                                         <label class="css-input switch switch-sm switch-success">
-                                            <input type="checkbox" id="login-remember" name="remember"><span></span> {t code="Remember me"}
+                                            <input type="checkbox" id="login-remember" name="remember"><span></span> {"Remember me"|translate}
                                         </label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12">
-                                        <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-arrow-right push-5-r"></i> {t code='Sign in'}</button>
+                                        <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-arrow-right push-5-r"></i> {'Sign in'|translate}</button>
                                     </div>
                                 </div>
                             </form>

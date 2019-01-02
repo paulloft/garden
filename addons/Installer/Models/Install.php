@@ -1,6 +1,8 @@
 <?php
 namespace Addons\Installer\Models;
 use Garden\Gdn;
+use Garden\Helpers\Arr;
+use Garden\Helpers\Text;
 use Garden\Traits\Instance;
 
 class Install {
@@ -13,7 +15,7 @@ class Install {
         $config = !$rewrite && file_exists($file) ? include($file) : [];
         $newConfig = array_merge($config, $data);
 
-        array_save($newConfig, $file);
+        Arr::save($newConfig, $file);
     }
 
     public function installAddons($addons)
@@ -57,9 +59,11 @@ class Install {
         $files = scandir(GDN_SRC . '/Cache');
 
         foreach ($files as $driver) {
-            $driver = rtrim_substr($driver, '.php');
-            if ($driver == '.' || $driver == '..' || $driver == 'System') continue;
-            $drivers[strtolower($driver)] = $driver == 'Dirty' ? 'Disabled' : $driver;
+            $driver = Text::rtrimSubstr($driver, '.php');
+            if ($driver === '.' || $driver === '..' || $driver === 'System') {
+                continue;
+            }
+            $drivers[strtolower($driver)] = $driver === 'Dirty' ? 'Disabled' : $driver;
         }
 
         return $drivers;

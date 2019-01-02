@@ -9,10 +9,10 @@
                     <thead>
                     <tr>
                         <th width="1%"></th>
-                        <th width="40%">{t code="Addon name"}</th>
-                        <th width="58%">{t code="Description"}</th>
-                        <th width="1%">{t code="Code"}</th>
-                        <th width="1%">{t code="Version"}</th>
+                        <th width="40%">{"Addon name"|translate}</th>
+                        <th width="58%">{"Description"|translate}</th>
+                        <th width="1%">{"Code"|translate}</th>
+                        <th width="1%">{"Version"|translate}</th>
                     </tr>
                     </thead>
                     <tbody>
