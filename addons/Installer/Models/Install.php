@@ -1,5 +1,6 @@
 <?php
 namespace Addons\Installer\Models;
+use Garden\Config;
 use Garden\Gdn;
 use Garden\Helpers\Arr;
 use Garden\Helpers\Text;
@@ -24,8 +25,10 @@ class Install {
         $allAddons = \Garden\Addons::all();
 
         foreach ($allAddons as $addon => $options) {
-            if (!val($addon, $addons)) continue;
-            $installed = c("addons.$addon", null) !== null;
+            if (!val($addon, $addons)) {
+                continue;
+            }
+            $installed = Config::get("addons.$addon") !== null;
             $dir = val('dir', $options);
 
             $structureFile = $dir.'/Settings/structure.php';

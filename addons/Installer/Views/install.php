@@ -3,9 +3,9 @@
 <head>
     <?php
     $meta = val('meta', $gdn);
-    $separator = c('main.titleSeparator', '-');
+    $separator = \Garden\Config::get('main.titleSeparator', '-');
 
-    echo "<title>".strip_tags($title.' '.$separator.' Garden framework')."</title>\n".(empty($meta) ? null : "    ");
+    echo '<title>'.strip_tags($title.' '.$separator.' Garden framework')."</title>\n".(empty($meta) ? null : "    ");
 
     if(!empty($meta)){
         $c = count($meta);

@@ -34,7 +34,7 @@ class Install extends \Garden\Template {
     public function install()
     {
         $this->title('Installation');
-        if (!c('main.install')) {
+        if (!Config::get('main.install')) {
             $step = Gdn::request()->getQuery('step');
             $step = 'step_' . ($step > 0 && $step < 10 ? (int)$step : 1);
 
@@ -58,7 +58,7 @@ class Install extends \Garden\Template {
             ->rule('sitename', 'required')
             ->rule('locale', 'required');
 
-        $data = c('main');
+        $data = Config::get('main');
         $form->setData($data);
 
         if ($form->submitted() && $form->valid()) {
@@ -83,7 +83,7 @@ class Install extends \Garden\Template {
 
         $cacheDrivers = $model->cacheDrivers();
 
-        $data = c('cache');
+        $data = Config::get('cache');
         $form->setData($data);
 
         if ($form->submitted()) {
@@ -116,7 +116,7 @@ class Install extends \Garden\Template {
     {
         $form = $this->form();
 
-        $data = c('database');
+        $data = Config::get('database');
         $form->setData($data);
 
         if ($form->submitted()) {
@@ -143,7 +143,7 @@ class Install extends \Garden\Template {
         $model = Model\Install::instance();
         $form = $this->form();
 
-        $data = c('addons');
+        $data = Config::get('addons');
         $form->setData($data);
         $addons = \Garden\Addons::all();
 

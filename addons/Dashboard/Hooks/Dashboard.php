@@ -14,8 +14,13 @@ use Garden\Translate;
  */
 class Dashboard
 {
-
     use Instance;
+
+    public static $errorData = [
+        400 => [
+            'description' => 'We are sorry but your request contains bad syntax and cannot be fulfilled'
+        ],
+    ];
 
     public function dispatch_handler()
     {
@@ -38,7 +43,23 @@ class Dashboard
             $template->pageInit();
             $template->template('empty');
 
-            return $template->fetchTemplate($code, 'exception');
+            switch ($code) {
+                case 404:
+                    $template->setData('subtitle', Translate::get('We are sorry but the page you are looking for was not found'));
+                    $template->setData('class', 'text-city flipInX');
+                    break;
+
+                case 403:
+                    $template->setData('subtitle', Translate::get('We are sorry but you do not have permission to access this page'));
+                    $template->setData('class', 'text-flat bounceIn');
+                    break;
+
+                default:
+                    $template->setData('subtitle', Translate::get('We are sorry but your request contains bad syntax and cannot be fulfilled'));
+                    $template->setData('class', 'text-primary bounceInDown');
+            }
+
+            return $template->fetchTemplate('error', 'exception');
         }
 
         return false;

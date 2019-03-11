@@ -10,9 +10,9 @@
     'Remember me' => 'Запомнить меня',
     'Settings' => 'Настройки',
 
-    'We are sorry but the page you are looking for was not found.' => 'Мы сожалеем, но страница, которую вы ищите, не найдена.',
-    'We are sorry but you do not have permission to access this page.' => 'Мы сожалеем, но у вас нет разрешения для доступа к этой странице.',
-    'We are sorry but your request contains bad syntax and cannot be fulfilled.' => 'Мы сожалеем, но ваш запрос содержит неверный синтаксис и не может быть выполнен.',
+    'We are sorry but the page you are looking for was not found' => 'Мы сожалеем, но страница, которую вы ищите, не найдена',
+    'We are sorry but you do not have permission to access this page' => 'Мы сожалеем, но у вас нет разрешения для доступа к этой странице',
+    'We are sorry but your request contains bad syntax and cannot be fulfilled' => 'Мы сожалеем, но ваш запрос содержит неверный синтаксис и не может быть выполнен',
 
     'Page not found' => 'Страница не найдена',
     'Would you like to do?' => 'Что бы вы хотели сделать?',

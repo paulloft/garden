@@ -11,7 +11,6 @@
 		"kuria/error": "^0.2.0"
 	},
 	"require-dev": {
-		"bobthecow/faker": "dev-master",
 		"paulloft/dumphper": "*"
 	},
 	"autoload": {

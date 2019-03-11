@@ -2,6 +2,7 @@
 namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
+use Garden\Config;
 use Garden\Gdn;
 use Garden\Helpers\Date;
 use Garden\Response;
@@ -71,7 +72,7 @@ class Dashboard extends Base {
             ->rule('sitename', 'required')
             ->rule('locale', 'required');
 
-        $data = c('main');
+        $data = Config::get('main');
         $form->setData($data);
 
         if ($form->submitted() && $form->valid()) {
@@ -98,7 +99,7 @@ class Dashboard extends Base {
 
         $form = $this->form();
 
-        $data = c('addons');
+        $data = Config::get('addons');
         $form->setData($data);
         $model = Model\Addons::instance();
         $addons = $model->getAll();

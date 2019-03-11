@@ -2,6 +2,7 @@
 
 namespace Addons\Dashboard\Models;
 
+use Garden\Config;
 use Garden\Helpers\Arr;
 use Garden\Traits\Instance;
 use Garden\Translate;
@@ -31,7 +32,7 @@ class Addons {
         $allAddons = $this->getAll();
         $addon = val($name, $allAddons);
         if ($addon) {
-            $installed = c("addons.$name", null) !== null;
+            $installed = Config::get("addons.$name") !== null;
             $dir = val('dir', $addon);
 
             try {

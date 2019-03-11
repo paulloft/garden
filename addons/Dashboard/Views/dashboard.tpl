@@ -18,7 +18,7 @@
         <div class="scroll-container">
             <div class="box-wrapper">
                 <div class="shortcut">
-                    <div class="sitename">{c('main.sitename')}</div>
+                    <div class="sitename">{$sitename}</div>
                     <div class="close" data-action="menu_close"><i class="fa fa-close"></i></div>
                 </div>
                 <h3>{"Navigation"|translate}</h3>

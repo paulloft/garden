@@ -3,8 +3,9 @@
     <div class="row">
         <div class="col-sm-8 col-sm-offset-2">
             <!-- Error Titles -->
-            <h1 class="font-s128 font-w300 text-flat animated bounceIn">403</h1>
-            <h2 class="h3 font-w300 push-50 animated fadeInUp">{"We are sorry but you do not have permission to access this page."|translate}</h2>
+            <h1 class="font-s128 font-w300 animated {$class}">{$code}</h1>
+            <h2 class="h3 font-w300 push-50 animated fadeInUp">{$subtitle}</h2>
+            {if $description}<p><small class="text-muted">{$description}</small></p>{/if}
             <!-- END Error Titles -->
         </div>
     </div>

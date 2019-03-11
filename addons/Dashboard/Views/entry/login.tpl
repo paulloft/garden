@@ -7,7 +7,7 @@
                 <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
                     <!-- Login Block -->
                     <div class="text-center mb-20">
-                        <h2 class="text-white">{c('main.sitename')}</h2>
+                        <h2 class="text-white">{$sitename}</h2>
                     </div>
                     
                     <div class="block block-themed animated fadeIn b-rounded">
