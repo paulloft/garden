@@ -9,14 +9,14 @@ ini_set('track_errors', 1);
 
 // Define the root path of the application.
 define('PATH_PUBLIC', __DIR__);
-define('PATH_ROOT', realpath(PATH_PUBLIC.'/../'));
+define('PATH_ROOT', dirname(__DIR__));
 
 // Require bootstrap.
-require_once PATH_ROOT.'/bootstrap.php';
+require_once PATH_ROOT . '/bootstrap.php';
 
 if (PHP_SAPI == 'cli') {
-    Gdn::tasks()->run();
+    Tasks::instance()->run();
 } else {
     // Instantiate and run the application.
-    Gdn::app()->run();
+    Application::instance()->run();
 }

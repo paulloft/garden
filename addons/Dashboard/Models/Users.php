@@ -2,7 +2,7 @@
 namespace Addons\Dashboard\Models;
 use Garden\Form;
 use Garden\Gdn;
-use Garden\DB;
+use Garden\Db\DB;
 use Garden\Model;
 
 /**

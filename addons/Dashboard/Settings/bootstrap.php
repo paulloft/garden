@@ -1,17 +1,16 @@
 <?php
-use Garden\Gdn;
-
+$app = \Garden\Application::instance();
 $defSpace = '\\Addons\\Dashboard\\Controllers';
 
-Gdn::app()->route('/entry/?(\?.*)?', $defSpace.'\\Entry');
-Gdn::app()->route('/entry/{action}/?(\?.*)?', $defSpace.'\\Entry')
+$app->route('/entry/?(\?.*)?', $defSpace.'\\Entry');
+$app->route('/entry/{action}/?(\?.*)?', $defSpace.'\\Entry')
     ->conditions(['action' => '[a-zA-Z]+']);
 
-// Gdn::app()->route('/dashboard/?(\?.*)?', $defSpace.'\\Dashboard');
-Gdn::app()->route('/dashboard/?{action}?/?(\?.*)?', $defSpace.'\\Dashboard')
+// $app->route('/dashboard/?(\?.*)?', $defSpace.'\\Dashboard');
+$app->route('/dashboard/?{action}?/?(\?.*)?', $defSpace.'\\Dashboard')
     ->conditions(['action' => '[a-zA-Z]+']);
 
-Gdn::app()->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpace.'\\%s')
+$app->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpace.'\\%s')
     ->conditions([
         'controller' => '[a-zA-Z]+',
         'action' => '\w+',

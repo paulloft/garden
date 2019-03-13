@@ -1,6 +1,6 @@
 <?php
 namespace Addons\Skeleton\Models;
-use Garden\DB;
+use Garden\Db\DB;
 
 /**
 * 

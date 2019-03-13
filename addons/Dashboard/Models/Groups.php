@@ -2,7 +2,7 @@
 
 namespace Addons\Dashboard\Models;
 
-use Garden\Db;
+use Garden\Db\DB;
 
 class Groups extends \Garden\Model
 {

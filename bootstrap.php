@@ -2,10 +2,12 @@
 namespace Garden;
 
 // Require composer's autoloader.
+use Garden\Db\Database;
+
 require_once PATH_ROOT.'/vendor/autoload.php';
 
 // Path to the primary configuration file
-define('GDN_CONF', PATH_ROOT.'/conf');
+define('GDN_CONF', PATH_ROOT.'/config');
 define('GDN_CACHE', PATH_ROOT.'/cache');
 define('GDN_LOGS', GDN_CACHE.'/logs');
 define('GDN_LOCALE', PATH_ROOT.'/locales');
@@ -37,3 +39,5 @@ Translate::autoload();
 
 // Saving all configurations in the cache
 Config::cache();
+
+Database::instance('default', Config::get('database'));

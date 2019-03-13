@@ -1,7 +1,7 @@
 <?php
 namespace Addons\Dashboard\Models;
 use Garden\Gdn;
-use Garden\DB;
+use Garden\Db\DB;
 use Garden\Model;
 use Garden\Traits\Instance;
 
@@ -119,7 +119,7 @@ class Permission
         $cacheKey = "permission_user_$userID";
 
         if (!$return = Gdn::cache()->get($cacheKey)) {
-            $result = DB::select_array(['p.id', 'p.code'])
+            $result = DB::selectArray(['p.id', 'p.code'])
                 ->from('users_groups', 'ug')
 
                 ->join('groups', 'g')

@@ -1,10 +1,11 @@
 <?php
+
 namespace Garden;
 
 define('PATH_PUBLIC', __DIR__);
-define('PATH_ROOT', realpath(PATH_PUBLIC.'/../'));
+define('PATH_ROOT', dirname(__DIR__));
 
-require_once PATH_ROOT.'/bootstrap.php';
+require_once PATH_ROOT . '/bootstrap.php';
 
 $request = new Request();
 
@@ -15,7 +16,7 @@ $addon = Addons::enabled($addonName);
 
 if ($addon) {
     $addonDir = val('dir', $addon);
-    $filePath = $addonDir.'/Assets/'.$path;
+    $filePath = $addonDir . '/Assets/' . $path;
     $filePath = str_replace('../', '/', $filePath);
     if (file_exists($filePath)) {
         $pathinfo = pathinfo($filePath);
@@ -27,19 +28,17 @@ if ($addon) {
             case 'js':
                 $mime = 'application/javascript';
                 break;
-            
+
             default:
                 $mime = mime_content_type($filePath);
                 break;
         }
 
-        header('Content-Type: '.$mime);
-        
-        $buffer = '';
+        header('Content-Type: ' . $mime);
         $handle = fopen($filePath, 'rb');
 
         while (!feof($handle)) {
-            $buffer = fread($handle, (1024*1024));
+            $buffer = fread($handle, (1024 * 1024));
             echo $buffer;
             ob_flush();
             flush();
@@ -50,5 +49,5 @@ if ($addon) {
         exit;
     }
 }
-    
-Gdn::app()->run();
+
+Application::instance()->run();
