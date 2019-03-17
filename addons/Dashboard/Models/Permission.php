@@ -109,7 +109,7 @@ class Permission
     public function get($userID = null)
     {
         if ($userID === null) {
-            $userID = Gdn::session()->userID;
+            $userID = Session::currentUserID();
         }
 
         if (!$userID) {
@@ -123,15 +123,15 @@ class Permission
                 ->from('users_groups', 'ug')
 
                 ->join('groups', 'g')
-                ->on('g.id', '=', 'ug.groupID')
+                ->on('g.id', '=', 'ug.group_id')
 
                 ->join($this->_groupTable, 'gp')
-                ->on('gp.groupID', '=', 'ug.groupID')
+                ->on('gp.group_id', '=', 'ug.group_id')
 
                 ->join($this->_table, 'p')
-                ->on('p.id', '=', 'gp.permissionID')
+                ->on('p.id', '=', 'gp.permission_id')
 
-                ->where('ug.userID', '=', $userID)
+                ->where('ug.user_id', '=', $userID)
                 ->where('g.active', '=', 1)
                 ->where('g.deleted', '=', 0)
 
@@ -187,14 +187,14 @@ class Permission
 
     public function getForGroup($groupID)
     {
-        $result = DB::select('gp.permissionID', 'id')
+        $result = DB::select('gp.permission_id', 'id')
             ->select('p.code', 'code')
             ->from($this->_groupTable, 'gp')
 
             ->join($this->_table, 'p')
-              ->on('gp.permissionID', '=', 'p.id')
+              ->on('gp.permission_id', '=', 'p.id')
 
-            ->where('gp.groupID', '=', $groupID)
+            ->where('gp.group_id', '=', $groupID)
             ->execute()
             ->as_array();
 
@@ -212,13 +212,13 @@ class Permission
         $groupModel = Model::instance($this->_groupTable);
         foreach ($insert as $permissionID) {
             $groupModel->insert([
-                'groupID'      => $groupID,
-                'permissionID' => $permissionID
+                'group_id'      => $groupID,
+                'permission_id' => $permissionID
             ]);
         }
 
         if (!empty($delete)) {
-            $groupModel->delete(['groupID' => $groupID, 'permissionID' => $delete]);
+            $groupModel->delete(['group_id' => $groupID, 'permission_id' => $delete]);
         }
     }
 

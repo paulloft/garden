@@ -2,6 +2,7 @@
 
 namespace Addons\Dashboard\Modules;
 
+use Addons\Dashboard\Models\Auth;
 use Garden\Helpers\Arr;
 use Garden\Interfaces\Module;
 use Garden\Traits\Singleton;
@@ -67,7 +68,7 @@ class Header implements Module {
      */
     public function render(array $params = [])
     {
-        $auth = \Garden\Gdn::auth();
+        $auth = Auth::instance();
         $controller = new \Garden\Controller;
 
         $username = val('name', $auth->user, '');

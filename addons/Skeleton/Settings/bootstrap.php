@@ -1,6 +1,9 @@
 <?php
-namespace Addons\Skeleton;
-use Garden\Gdn;
 
-Gdn::app()->route('/{action}?/?(\?.*)?', '\\Addons\\Skeleton\\Controllers\\Skeleton')
-    ->conditions(array('action'=>'\w+'));
+namespace Addons\Skeleton;
+
+use Addons\Skeleton\Controllers\Skeleton;
+use Garden\Application;
+
+Application::instance()->route('/{action}?/?(\?.*)?', Skeleton::class)
+    ->conditions(['action' => '\w+']);

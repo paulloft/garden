@@ -1,16 +1,18 @@
 <?php
-$app = \Garden\Application::instance();
-$defSpace = '\\Addons\\Dashboard\\Controllers';
 
-$app->route('/entry/?(\?.*)?', $defSpace.'\\Entry');
-$app->route('/entry/{action}/?(\?.*)?', $defSpace.'\\Entry')
+use \Addons\Dashboard\Controllers;
+
+$app = \Garden\Application::instance();
+
+$app->route('/entry/?(\?.*)?', Controllers\Entry::class);
+$app->route('/entry/{action}/?(\?.*)?', Controllers\Entry::class)
     ->conditions(['action' => '[a-zA-Z]+']);
 
 // $app->route('/dashboard/?(\?.*)?', $defSpace.'\\Dashboard');
-$app->route('/dashboard/?{action}?/?(\?.*)?', $defSpace.'\\Dashboard')
+$app->route('/dashboard/?{action}?/?(\?.*)?', Controllers\Dashboard::class)
     ->conditions(['action' => '[a-zA-Z]+']);
 
-$app->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpace.'\\%s')
+$app->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', '\\Addons\\Dashboard\\Controllers\\%s')
     ->conditions([
         'controller' => '[a-zA-Z]+',
         'action' => '\w+',
@@ -18,3 +20,4 @@ $app->route('/dashboard/{controller}/?{action}?/?{id}?/?(\?.*)?', $defSpace.'\\%
     ]);
 
 include 'functions.php';
+\Addons\Dashboard\Models\Session::init();

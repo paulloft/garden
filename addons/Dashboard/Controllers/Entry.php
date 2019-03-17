@@ -41,8 +41,6 @@ class Entry extends Base {
 
         $error = false;
 
-        Gdn::session();
-
         if ($request->isPost()) {
             $username = $request->getInput('username', false);
             $password = $request->getInput('password', false);

@@ -24,7 +24,7 @@ class Dashboard
 
     public function dispatch_handler()
     {
-        Models\Auth::instance()->autoLogin();
+        Models\Auth::instance()->authorize();
     }
 
     /**

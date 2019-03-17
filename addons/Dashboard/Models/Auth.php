@@ -1,13 +1,14 @@
 <?php
+
 namespace Addons\Dashboard\Models;
-use \Garden\Gdn;
+
+use Garden\Helpers\Arr;
 use \Garden\Traits\Singleton;
 
 /**
  * Basic auth model
- * @uses Auth::instance() 
+ * @uses Auth::instance()
  */
-
 class Auth {
     /**
      * @var array $user User data object
@@ -17,34 +18,26 @@ class Auth {
     protected $userModel;
     protected $session;
 
-    private static $loaded = false;
-
     use Singleton;
 
     private function __construct()
     {
         $this->userModel = Users::instance();
-        $this->session = Gdn::session();
-        self::$loaded = true;
-    }
-
-    public static function loaded()
-    {
-        return self::$loaded;
+        $this->session = Session::instance();
     }
 
     /**
-     * Check user logined 
+     * Check user logined
      *
      * @return boolean
      */
-    public function logined()
+    public function logined(): bool
     {
         return $this->session->valid();
     }
 
     /**
-     * Check user admin 
+     * Check user admin
      *
      * @return boolean
      */
@@ -54,10 +47,10 @@ class Auth {
     }
 
     /**
-     * Returns the user according to his login and password 
+     * Returns the user according to his login and password
      *
-     * @param string $username 
-     * @param string $password 
+     * @param string $username
+     * @param string $password
      * @return mixed
      */
     public function login($username, $password)
@@ -82,13 +75,13 @@ class Auth {
     /**
      * Authorizes the user who came for the data
      *
-     * @param array  $user     User data object
-     * @param boolean $remember if FALSE user will be authorized only for the current session 
+     * @param array $user User data object
+     * @param boolean $remember if FALSE user will be authorized only for the current session
      * @return bool
      */
     public function completeLogin(array $user, $remember = false)
     {
-        $userID = val('id', $user);
+        $userID = Arr::get($user, 'id');
 
         if ($userID) {
             $this->session->create($userID, $remember);
@@ -104,32 +97,29 @@ class Auth {
     /**
      * Check and autologin user, if cookie is exist and valid
      *
-     * @return boolean|array user data object
+     * @return void
      */
-    public function autoLogin()
+    public function authorize()
     {
-        $userID = $this->session->get();
+        $userID = Session::currentUserID();
         if (!$userID) {
-            return false;
+            return;
         }
 
         $user = $this->userModel->getID($userID);
+        $active = $user['active'] ?? false;
 
-        if ($user && $user['active']) {
-            $this->session->start($userID);
-
-            $this->user = $user;
-            $this->updateVisit($userID);
-
-            return true;
+        if (!$active) {
+            $this->session->end($userID);
+            return;
         }
 
-        $this->session->end($userID);
-        return false;
+        $this->user = $user;
+        $this->updateVisit($userID);
     }
 
     /**
-     * Forced login by user ID 
+     * Forced login by user ID
      *
      * @param integer $userID
      * @return boolean
@@ -164,7 +154,7 @@ class Auth {
     }
 
     /**
-     * Return hashed password 
+     * Return hashed password
      *
      * @param string $password
      * @return string md5

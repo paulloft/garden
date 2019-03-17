@@ -1,13 +1,13 @@
 <?php
+
 namespace Addons\Installer;
 
-use \Addons\Installer\Controllers\Install;
+use Addons\Installer\Controllers\Install;
+use Garden\Application;
 use Garden\Config;
-use Garden\Gdn;
-
 
 if (!Config::get('main.install')) {
-    Gdn::app()
+    Application::instance()
         ->route('/{action}?/?(\?.*)?', Install::class)
-        ->conditions(['action'=>'\w+']);
+        ->conditions(['action' => '\w+']);
 }

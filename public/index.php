@@ -14,7 +14,7 @@ define('PATH_ROOT', dirname(__DIR__));
 // Require bootstrap.
 require_once PATH_ROOT . '/bootstrap.php';
 
-if (PHP_SAPI == 'cli') {
+if (PHP_SAPI === 'cli') {
     Tasks::instance()->run();
 } else {
     // Instantiate and run the application.

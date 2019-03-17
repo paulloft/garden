@@ -2,6 +2,7 @@
 
 namespace Addons\Installer\Controllers;
 
+use Addons\Dashboard\Models\Auth;
 use Garden\Config;
 use Garden\Gdn;
 use \Addons\Installer\Models as Model;
@@ -179,7 +180,7 @@ class Install extends \Garden\Template {
             $id = $form->save();
 
             if ($id) {
-                Gdn::auth()->forceLogin($id);
+                Auth::instance()->forceLogin($id);
                 Response::current()->redirect('/install?step=7');
             }
         }

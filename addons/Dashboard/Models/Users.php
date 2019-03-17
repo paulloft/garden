@@ -11,7 +11,10 @@ use Garden\Model;
 
 class Users extends \Garden\Model
 {
-    public $table = 'users';
+    public function __construct()
+    {
+        parent::__construct('users');
+    }
 
     public function getID($id)
     {
@@ -24,13 +27,12 @@ class Users extends \Garden\Model
                 ->from($this->table, 'u')
 
                 ->join('users_groups', 'ug', 'LEFT')
-                  ->on('u.id', '=', 'ug.userID')
+                  ->on('u.id', '=', 'ug.user_id')
 
                 ->join('groups', 'g', 'LEFT')
-                  ->on('ug.groupID', '=', 'g.id')
+                  ->on('ug.group_id', '=', 'g.id')
 
                 ->where('u.id', '=', $id)
-                ->where('u.deleted', '=', 0)
                 ->limit(1);
 
             $result = $query->execute()->current();
@@ -71,12 +73,11 @@ class Users extends \Garden\Model
             ->from($this->table, 'u')
 
             ->join('users_groups', 'ug', 'LEFT')
-              ->on('u.id', '=', 'ug.userID')
+              ->on('u.id', '=', 'ug.user_id')
 
             ->join('groups', 'g', 'LEFT')
-              ->on('ug.groupID', '=', 'g.id')
+              ->on('ug.group_id', '=', 'g.id')
 
-            ->where('u.deleted', '=', 0)
             ->group_by('u.id');
 
         $this->_where($where);
@@ -122,7 +123,7 @@ class Users extends \Garden\Model
     public function updateVisit($userID)
     {
         DB::update($this->table)
-            ->set(['lastVisit' => DB::expr('now()')])
+            ->set(['last_visit' => DB::expr('now()')])
             ->where($this->primaryKey, '=', $userID)
             ->execute();
     }
@@ -144,26 +145,14 @@ class Users extends \Garden\Model
 
     public function deleteID($id)
     {
-        $data = [
-            'deleted' => 1,
-            'dateDeleted' => DB::expr('now()'),
-            'userDeleted' => $this->userID,
-        ];
+        Groups::instance()->delete(['user_id' => $id]);
 
-        $data = $this->fixPostData($data);
-
-        DB::update($this->table)
-            ->set($data)
-            ->where($this->primaryKey, '=', $id)
-            ->execute()
-        ;
-
-        return true;
+        return parent::deleteID($id);
     }
 
     public function updateGroups($userID, $post, $groups)
     {
-        $groupModel = Model::instance('users_groups');
+        $groupModel = Groups::instance();
         $groupsNew = val('groupsID', $post, []);
 
         $insert = array_diff($groupsNew, $groups);
@@ -171,13 +160,13 @@ class Users extends \Garden\Model
 
         foreach ($insert as $groupID) {
             $groupModel->insert([
-                'userID'  => $userID,
-                'groupID' => $groupID
+                'user_id'  => $userID,
+                'group_id' => $groupID
             ]);
         }
 
         if (!empty($delete)) {
-            $groupModel->delete(['userID' => $userID, 'groupID' => $delete]);
+            $groupModel->delete(['user_id' => $userID, 'group_id' => $delete]);
         }
 
     }

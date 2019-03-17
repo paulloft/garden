@@ -35,11 +35,11 @@ if ($addon) {
         }
 
         header('Content-Type: ' . $mime);
+
         $handle = fopen($filePath, 'rb');
 
         while (!feof($handle)) {
-            $buffer = fread($handle, (1024 * 1024));
-            echo $buffer;
+            echo fread($handle, (1024 * 1024));
             ob_flush();
             flush();
         }
