@@ -34,7 +34,7 @@
                             {/foreach}
                         </td>
                         <td class="hidden-xs hidden-sm hidden-md">
-                            <em class="text-muted">{Date::create($user.created_at)->toDateTime()}</em>
+                            <em class="text-muted">{$user.created_at|date_convert}</em>
                         </td>
                         <td class="hidden-xs hidden-sm text-center">
                             {if $user.active}{"Yes"|translate}{else}{"No"|translate}{/if}

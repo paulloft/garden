@@ -35,7 +35,7 @@
                                 <div class="text-muted">{Text::safe($error.text)}</div>
                             </td>
                             <td class="visible-lg text-muted" style="width: 160px;">
-                                <nobr><em>{Date::create($error.date)->toDateTime()}</em></nobr>
+                                <nobr><em>{$error.date|date_convert}</em></nobr>
                             </td>
                         </tr>
                     {/foreach}

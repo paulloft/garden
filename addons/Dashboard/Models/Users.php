@@ -9,7 +9,7 @@ use Garden\Model;
  * Base users model
  */
 
-class Users extends \Garden\Model
+class Users extends Model
 {
     public function __construct()
     {

@@ -7,16 +7,16 @@ use Garden\Db\Database;
 require_once PATH_ROOT.'/vendor/autoload.php';
 
 // Path to the primary configuration file
-define('GDN_CONF', PATH_ROOT.'/config');
-define('GDN_CACHE', PATH_ROOT.'/cache');
-define('GDN_LOGS', GDN_CACHE.'/logs');
-define('GDN_LOCALE', PATH_ROOT.'/locales');
+\define('GDN_CONF', PATH_ROOT.'/config');
+\define('GDN_CACHE', PATH_ROOT.'/cache');
+\define('GDN_LOGS', GDN_CACHE.'/logs');
+\define('GDN_LOCALE', PATH_ROOT.'/locales');
 
-if (!defined('GDN_SRC')) {
-    define('GDN_SRC', PATH_ROOT.'/system');
+if (!\defined('GDN_SRC')) {
+    \define('GDN_SRC', PATH_ROOT.'/system');
 }
-if (!defined('GDN_ADDONS')) {
-    define('GDN_ADDONS', PATH_ROOT.'/addons');
+if (!\defined('GDN_ADDONS')) {
+    \define('GDN_ADDONS', PATH_ROOT.'/addons');
 }
 
 // Make sure a default time zone is set

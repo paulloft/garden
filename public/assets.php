@@ -2,8 +2,8 @@
 
 namespace Garden;
 
-define('PATH_PUBLIC', __DIR__);
-define('PATH_ROOT', dirname(__DIR__));
+\define('PATH_PUBLIC', __DIR__);
+\define('PATH_ROOT', \dirname(__DIR__));
 
 require_once PATH_ROOT . '/bootstrap.php';
 

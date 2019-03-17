@@ -8,8 +8,8 @@ ini_set('display_errors', 1);
 ini_set('track_errors', 1);
 
 // Define the root path of the application.
-define('PATH_PUBLIC', __DIR__);
-define('PATH_ROOT', dirname(__DIR__));
+\define('PATH_PUBLIC', __DIR__);
+\define('PATH_ROOT', \dirname(__DIR__));
 
 // Require bootstrap.
 require_once PATH_ROOT . '/bootstrap.php';

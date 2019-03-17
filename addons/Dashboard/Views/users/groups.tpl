@@ -22,7 +22,7 @@
                         <td class="font-w600">{$group.name}</td>
                         <td class="hidden-xs hidden-sm hidden-md">{$group.description}</td>
                         <td class="hidden-xs hidden-sm hidden-md">
-                            <em class="text-muted">{Date::create($group.created_at)->toDateTime()}</em>
+                            <em class="text-muted">{$group.created_at|date_convert}</em>
                         </td>
                         <td class="hidden-xs hidden-sm text-center">
                             {if $group.active}{"Yes"|translate}{else}{"No"|translate}{/if}
