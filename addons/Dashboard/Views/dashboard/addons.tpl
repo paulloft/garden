@@ -17,7 +17,7 @@
                     </thead>
                     <tbody>
                     {foreach $addons as $name => $addon}
-                        {if valr('info.system', $addon)}{continue}{/if}
+                        {if  $addon.info.system}{continue}{/if}
                         <tr>
                             <td>
                                 <label class="css-input switch switch-sm switch-success mt-0 mb-0">
@@ -26,16 +26,16 @@
                                 </label>
                             </td>
                             <td>
-                                {valr('info.name', $addon, $name)}
+                                {$addon.info.name|default:$name}
                             </td>
                             <td>
-                                {valr('info.description', $addon)}
+                                {$addon.info.description}
                             </td>
                             <td>
                                 {$name}
                             </td>
                             <td>
-                                {valr('info.version', $addon)}
+                                {$addon.info.version}
                             </td>
                         </tr>
                     {/foreach}

@@ -1,7 +1,10 @@
 <?php
+
 namespace Addons\Installer\Models;
+
+use Garden\Addons;
 use Garden\Config;
-use Garden\Gdn;
+use Garden\Db\Structure;
 use Garden\Helpers\Arr;
 use Garden\Helpers\Text;
 use Garden\Traits\Instance;
@@ -21,8 +24,8 @@ class Install {
 
     public function installAddons($addons)
     {
-        Gdn::structure();
-        $allAddons = \Garden\Addons::all();
+        Structure::instance();
+        $allAddons = Addons::all();
 
         foreach ($allAddons as $addon => $options) {
             if (!val($addon, $addons)) {
@@ -31,17 +34,17 @@ class Install {
             $installed = Config::get("addons.$addon") !== null;
             $dir = val('dir', $options);
 
-            $structureFile = $dir.'/Settings/structure.php';
+            $structureFile = "$dir/Settings/structure.php";
             if (file_exists($structureFile)) {
-                call_user_func(function($structureFile) {
+                call_user_func(function ($structureFile) {
                     include_once $structureFile;
                 }, $structureFile);
             }
 
-            $installFile = $dir.'/Settings/install.php';
+            $installFile = "$dir/Settings/install.php";
 
             if (!$installed && file_exists($installFile)) {
-                call_user_func(function($installFile) {
+                call_user_func(function ($installFile) {
                     include_once $installFile;
                 }, $installFile);
             }
@@ -50,13 +53,13 @@ class Install {
 
     public function saveAddons($addons)
     {
-        foreach ($addons as $name=>$enabled) {
+        foreach ($addons as $name => $enabled) {
             $addons[$name] = (bool)$enabled;
         }
         $this->saveConfig($addons, 'addons', true);
     }
 
-    public function cacheDrivers()
+    public function cacheDrivers(): array
     {
         $drivers = [];
         $files = scandir(GDN_SRC . '/Cache');

@@ -70,7 +70,7 @@ class Session {
      * Check user authorization
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         return self::$userID > 0;
     }
@@ -98,13 +98,15 @@ class Session {
             ->addSeconds($remember ? $lifetime : 60 * 60 * 8)
             ->toSql();
 
+        $request = Request::current();
+
         $this->model->insert([
             'session_id' => $sessionID,
             'user_id' => $userID,
             'expire' => $expireDate,
-            'ip' => Gdn::request()->getIP(),
+            'ip' => $request->getIP(),
             'last_activity' => DB::expr('now()'),
-            'user_agent' => Gdn::request()->getEnvKey('HTTP_USER_AGENT'),
+            'user_agent' => $request->getEnvKey('HTTP_USER_AGENT'),
         ]);
 
         self::$userID = $userID;
@@ -123,7 +125,7 @@ class Session {
         self::deleteCookie(self::SESSION_KEY);
 
         $where = $endAll ? ['user_id' => $userID ?: self::$userID] : ['session_id' => $sessionID];
-        $this->model->delete($where);
+        $this->model->deleteWhere($where);
 
         if (self::$userID === $userID) {
             self::$userID = 0;
@@ -170,7 +172,7 @@ class Session {
 
         $this->model->update($sessionID, [
             'last_activity' => DB::expr('now()'),
-            'last_ip' => Gdn::request()->getIP()
+            'last_ip' => Request::current()->getIP()
         ]);
     }
 
@@ -187,7 +189,7 @@ class Session {
         $domain = Config::get('session.cookie.domain');
 
         // If the domain being set is completely incompatible with the current domain then make the domain work.
-        $host = Gdn::request()->getHost();
+        $host = Request::current()->getHost();
         if (!Text::strEnds($host, trim($domain, '.'))) {
             $domain = '';
         }

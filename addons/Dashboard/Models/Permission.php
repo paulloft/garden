@@ -2,6 +2,7 @@
 namespace Addons\Dashboard\Models;
 use Garden\Gdn;
 use Garden\Db\DB;
+use Garden\Helpers\Arr;
 use Garden\Model;
 use Garden\Traits\Instance;
 
@@ -77,7 +78,7 @@ class Permission
                 ];
             } else {
                 $this->delete($id);
-                $groupModel->delete(['id'=>$id]);
+                $groupModel->deleteWhere(['id'=>$id]);
             }
         }
 
@@ -98,7 +99,7 @@ class Permission
         $arrPerm = (array)$permission;
 
         foreach ($arrPerm as $perm) {
-            if (!valr($perm, $permissions)) {
+            if (!Arr::path($permissions, $perm)) {
                 return false;
             }
         }
@@ -218,7 +219,7 @@ class Permission
         }
 
         if (!empty($delete)) {
-            $groupModel->delete(['group_id' => $groupID, 'permission_id' => $delete]);
+            $groupModel->deleteWhere(['group_id' => $groupID, 'permission_id' => $delete]);
         }
     }
 

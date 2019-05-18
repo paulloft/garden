@@ -1,8 +1,9 @@
 <?php
 
-use Garden\Gdn;
+use Addons\Dashboard\Models\Permission;
+use Garden\Db\Structure;
 
-$construct = Gdn::structure();
+$construct = Structure::instance();
 
 // User Table
 $explicit = true;
@@ -73,7 +74,7 @@ $construct
     ->set($explicit, $drop);
 
 
-\Addons\Dashboard\Models\Permission::instance()
+Permission::instance()
     ->define('dashboard.user.view')
     ->define('dashboard.user.add')
     ->define('dashboard.user.edit')

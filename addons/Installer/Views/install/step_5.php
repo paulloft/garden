@@ -13,7 +13,7 @@
             </thead>
             <tbody>
             <?php foreach ($addons as $name => $addon): ?>
-                <?php if ($name == 'installer') continue; ?>
+                <?php if ($name === 'installer') {continue;} ?>
                 <tr>
                     <td>
                         <label class="css-input switch switch-sm switch-success mt-0 mb-0">
@@ -22,13 +22,13 @@
                         </label>
                     </td>
                     <td>
-                        <?php echo valr('info.name', $addon, $name); ?>
+                        <?php echo $addon['info']['name'] ?? $name; ?>
                     </td>
                     <td>
-                        <?php echo valr('info.description', $addon); ?>
+                        <?php echo $addon['info']['description']; ?>
                     </td>
                     <td>
-                        <?php echo valr('info.version', $addon); ?>
+                        <?php echo $addon['info']['version']; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

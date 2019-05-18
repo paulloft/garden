@@ -3,18 +3,25 @@
 namespace Addons\Installer\Controllers;
 
 use Addons\Dashboard\Models\Auth;
+use Addons\Dashboard\Models\Users;
+use Exception;
+use Garden\Addons;
+use Garden\Cache;
 use Garden\Config;
-use Garden\Gdn;
-use \Addons\Installer\Models as Model;
+use Garden\Db\Database;
+use Addons\Installer\Models as Model;
+use Garden\Request;
 use Garden\Response;
+use Garden\SecureString;
+use Garden\Template;
 
-class Install extends \Garden\Template {
+class Install extends Template {
 
     public $template = 'install.php';
 
     public function initialize()
     {
-        if ($this->renderType() === \Garden\Request::RENDER_ALL) {
+        if ($this->renderType() === Request::RENDER_ALL) {
             $this->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
             $this->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700');
             $this->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
@@ -35,15 +42,15 @@ class Install extends \Garden\Template {
     public function install()
     {
         $this->title('Installation');
-        if (!Config::get('main.install')) {
-            $step = Gdn::request()->getQuery('step');
+        if (Config::get('main.install')) {
+            $this->render('installed.php');
+        } else {
+            $step = Request::current()->getQuery('step');
             $step = 'step_' . ($step > 0 && $step < 10 ? (int)$step : 1);
 
-            \Garden\Cache::clear();
+            Cache::clear();
 
             $this->$step();
-        } else {
-            $this->render('installed.php');
         }
     }
 
@@ -64,7 +71,7 @@ class Install extends \Garden\Template {
 
         if ($form->submitted() && $form->valid()) {
             $post = $form->getFormValues();
-            $post['hashsalt'] = \Garden\SecureString::generateRandomKey(16);
+            $post['hashsalt'] = SecureString::generateRandomKey(16);
             $post['logs'] = val('logs', $post) ? true : false;
             $post['debug'] = val('debug', $post) ? true : false;
 
@@ -94,11 +101,11 @@ class Install extends \Garden\Template {
             $options = val($driver, $post, []);
 
             try {
-                $cache = \Garden\Cache::instance($driver, $options);
+                $cache = Cache::instance($driver, $options);
                 $cache->add('test', 'test');
                 $cache->get('test');
                 $cache->delete('test');
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $form->addError($exception->getMessage());
             }
 
@@ -124,9 +131,9 @@ class Install extends \Garden\Template {
             $post = $form->getFormValues();
 
             try {
-                $db = \Garden\Db\Database::instance('test', $post);
+                $db = Database::instance('test', $post);
                 $db->connect();
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $form->addError($exception->getMessage());
             }
 
@@ -146,7 +153,7 @@ class Install extends \Garden\Template {
 
         $data = Config::get('addons');
         $form->setData($data);
-        $addons = \Garden\Addons::all();
+        $addons = Addons::all();
 
         if ($form->submitted()) {
             $install = $form->getFormValues();
@@ -165,14 +172,14 @@ class Install extends \Garden\Template {
 
     protected function step_6()
     {
-        if (!\Garden\Addons::enabled('dashboard')) {
+        if (!Addons::enabled('dashboard')) {
             Response::current()->redirect('/install?step=7');
         }
 
 
         $form = $this->form();
 
-        $userModel = Gdn::users();
+        $userModel = Users::instance();
         $form->setModel($userModel);
 
         if ($form->submitted()) {

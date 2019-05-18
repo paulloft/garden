@@ -1,5 +1,7 @@
 <?php
+
 namespace Addons\Dashboard\Models;
+
 use Garden\Form;
 use Garden\Gdn;
 use Garden\Db\DB;
@@ -8,9 +10,7 @@ use Garden\Model;
 /**
  * Base users model
  */
-
-class Users extends Model
-{
+class Users extends Model {
     public function __construct()
     {
         parent::__construct('users');
@@ -25,13 +25,10 @@ class Users extends Model
                 ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
                 ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
                 ->from($this->table, 'u')
-
                 ->join('users_groups', 'ug', 'LEFT')
-                  ->on('u.id', '=', 'ug.user_id')
-
+                ->on('u.id', '=', 'ug.user_id')
                 ->join('groups', 'g', 'LEFT')
-                  ->on('ug.group_id', '=', 'g.id')
-
+                ->on('ug.group_id', '=', 'g.id')
                 ->where('u.id', '=', $id)
                 ->limit(1);
 
@@ -71,13 +68,10 @@ class Users extends Model
             ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
             ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
             ->from($this->table, 'u')
-
             ->join('users_groups', 'ug', 'LEFT')
-              ->on('u.id', '=', 'ug.user_id')
-
+            ->on('u.id', '=', 'ug.user_id')
             ->join('groups', 'g', 'LEFT')
-              ->on('ug.group_id', '=', 'g.id')
-
+            ->on('ug.group_id', '=', 'g.id')
             ->group_by('u.id');
 
         $this->_where($where);
@@ -128,24 +122,20 @@ class Users extends Model
             ->execute();
     }
 
-    public function delete(array $where = [])
+    public function deleteWhere(array $where = []): int
     {
-        $this->_query = DB::update($this->table)
-            ->set([
-                'deleted'     => 1,
-                'dateDeleted' => DB::expr('now()'),
-                'userDeleted' => $this->userID,
-            ]);
+        $usersID = $this->getWhere($where)->as_array(null, 'id');
 
-        $this->_where($where);
-        $this->_query->execute();
+        if (!empty($usersID)) {
+            Groups::instance()->deleteWhere(['user_id' => $usersID]);
+        }
 
-        return true;
+        return parent::deleteWhere($where);
     }
 
-    public function deleteID($id)
+    public function deleteID($id): int
     {
-        Groups::instance()->delete(['user_id' => $id]);
+        Groups::instance()->deleteWhere(['user_id' => $id]);
 
         return parent::deleteID($id);
     }
@@ -160,13 +150,13 @@ class Users extends Model
 
         foreach ($insert as $groupID) {
             $groupModel->insert([
-                'user_id'  => $userID,
+                'user_id' => $userID,
                 'group_id' => $groupID
             ]);
         }
 
         if (!empty($delete)) {
-            $groupModel->delete(['user_id' => $userID, 'group_id' => $delete]);
+            $groupModel->deleteWhere(['user_id' => $userID, 'group_id' => $delete]);
         }
 
     }
@@ -178,7 +168,7 @@ class Users extends Model
             $where['id<>'] = $id;
         }
 
-        return  $this->getCount($where) <= 0;
+        return $this->getCount($where) <= 0;
     }
 
     public function emailAvailable($email, $id = false)
@@ -188,7 +178,7 @@ class Users extends Model
             $where['id<>'] = $id;
         }
 
-        return  $this->getCount($where) <= 0;
+        return $this->getCount($where) <= 0;
     }
 
     public function initFormValidation(Form $form)

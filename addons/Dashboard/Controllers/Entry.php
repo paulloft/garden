@@ -68,7 +68,7 @@ class Entry extends Base {
 
     public function logout()
     {
-        $target = Gdn::request()->getQuery('target');
+        $target = Request::current()->getQuery('target');
         $redirect = ($target ? '?target=' . $target : '/');
 
         $auth = Model\Auth::instance();

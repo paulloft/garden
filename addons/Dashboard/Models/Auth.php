@@ -2,6 +2,7 @@
 
 namespace Addons\Dashboard\Models;
 
+use Garden\Event;
 use Garden\Helpers\Arr;
 use \Garden\Traits\Singleton;
 
@@ -79,7 +80,7 @@ class Auth {
      * @param boolean $remember if FALSE user will be authorized only for the current session
      * @return bool
      */
-    public function completeLogin(array $user, $remember = false)
+    public function completeLogin(array $user, $remember = false): bool
     {
         $userID = Arr::get($user, 'id');
 
@@ -87,7 +88,7 @@ class Auth {
             $this->session->create($userID, $remember);
             $this->updateVisit($userID);
 
-            \Garden\Event::fire('after_login');
+            Event::fire('after_login');
             return true;
         }
 
@@ -124,7 +125,7 @@ class Auth {
      * @param integer $userID
      * @return boolean
      */
-    public function forceLogin($userID)
+    public function forceLogin($userID): bool
     {
         $user = $this->userModel->getID($userID);
         if ($user) {
@@ -139,7 +140,7 @@ class Auth {
     public function logout($logoutAll = false)
     {
         $this->session->end($logoutAll);
-        \Garden\Event::fire('after_logout');
+        Event::fire('after_logout');
     }
 
     /**
@@ -148,7 +149,7 @@ class Auth {
      * @param string $password
      * @return boolean
      */
-    public function checkPassword($password)
+    public function checkPassword($password): bool
     {
         return ($this->user && $this->user['password'] === $this->hash($password));
     }
@@ -159,7 +160,7 @@ class Auth {
      * @param string $password
      * @return string md5
      */
-    public function hash($password)
+    public function hash($password): string
     {
         return md5($password);
     }

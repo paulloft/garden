@@ -2,7 +2,9 @@
 
 namespace Addons\Dashboard\Models;
 
-class Groups extends \Garden\Model
+use Garden\Model;
+
+class Groups extends Model
 {
     public function __construct()
     {

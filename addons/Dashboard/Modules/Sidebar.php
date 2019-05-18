@@ -5,9 +5,10 @@
  */
 
 namespace Addons\Dashboard\Modules;
-use Garden\Gdn;
+
 use Garden\Helpers\Arr;
 use Garden\Interfaces\Module;
+use Garden\Request;
 use Garden\Traits\Singleton;
 
 class Sidebar implements Module {
@@ -31,7 +32,7 @@ class Sidebar implements Module {
         }
 
         if (!$this->current) {
-            $this->current = trim(Gdn::request()->getPath(), '/');
+            $this->current = trim(Request::current()->getPath(), '/');
         }
 
         return $this->current;
@@ -56,7 +57,7 @@ class Sidebar implements Module {
             'name'  => $name,
             'url'   => $url,
             'sort'  => $sort ?: $this->sort++,
-            'items' => valr("$group.items", $this->menu, []),
+            'items' => Arr::path($this->menu, "$group.items", []),
             'attributes' => $attributes
         ];
 

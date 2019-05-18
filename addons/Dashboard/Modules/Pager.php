@@ -6,8 +6,8 @@
  */
 namespace Addons\Dashboard\Modules;
 
-use Garden\Gdn;
 use Garden\Interfaces\Module;
+use Garden\Request;
 use Garden\Traits\Instance;
 
 class Pager implements Module {
@@ -41,7 +41,7 @@ class Pager implements Module {
         $this->count = $count;
         $this->options = array_merge($this->options, $options);
 
-        $this->request = Gdn::request();
+        $this->request = Request::current();
     }
 
     /**
