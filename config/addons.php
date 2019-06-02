@@ -1,5 +1,5 @@
 <?php
 return [
     "dashboard" => true,
-    "skeleton" => false
+    "skeleton" => true
 ];

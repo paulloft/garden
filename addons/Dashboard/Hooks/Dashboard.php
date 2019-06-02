@@ -6,42 +6,39 @@ use Addons\Dashboard\Models;
 use Addons\Dashboard\Controllers;
 use Addons\Dashboard\Modules\Header as HeaderModule;
 use Addons\Dashboard\Modules\Sidebar;
+use Garden\Exception\Client;
+use Garden\Exception\NotFound;
+use Garden\Renderers\Template;
 use Garden\Traits\Instance;
 use Garden\Translate;
+use function in_array;
 
 /**
  * Dashboard hooks
  */
-class Dashboard
-{
+class Dashboard {
     use Instance;
-
-    public static $errorData = [
-        400 => [
-            'description' => 'We are sorry but your request contains bad syntax and cannot be fulfilled'
-        ],
-    ];
 
     public function dispatch_handler()
     {
-        Models\Auth::instance()->authorize();
+        Models\Auth::instance()->autoLogin();
     }
 
     /**
-     * @param $exception \Garden\Exception\Client
-     * @throws \Garden\Exception\NotFound
+     * @param $exception Client
      * @return bool|string
+     * @throws NotFound
      */
     public function exception_handler($exception)
     {
         $code = $exception->getCode();
-        if (in_array($code, [400, 401, 403, 404])) {
-            $template = new Controllers\Base(false);
-            $template->title($exception->getMessage());
+        if (in_array($code, [400, 401, 403, 404], true)) {
+            $template = new Template('empty', 'templates', 'dashboard');
+            $template->setView('error', 'exceptions', 'dashboard');
+            $template->setTitle($exception->getMessage());
             $template->setData('description', $exception->getDescription());
             $template->setData('code', $code);
-            $template->pageInit();
-            $template->template('empty');
+            Models\Template::assignResources($template);
 
             switch ($code) {
                 case 404:
@@ -59,13 +56,13 @@ class Dashboard
                     $template->setData('class', 'text-primary bounceInDown');
             }
 
-            return $template->fetchTemplate('error', 'exception');
+            return $template;
         }
 
-        return false;
+        return '';
     }
 
-    public function dashboard_page_init_handler()
+    public function dashboard_template_init_handler()
     {
         $sidebar = Sidebar::instance();
 
@@ -82,10 +79,5 @@ class Dashboard
         $sidebar->addItem('system', Translate::get('Error log'), '/dashboard/errorlog', 40, 'dashboard.admin');
 
         HeaderModule::instance()->addLink(Translate::get('Clear cache'), '?nocache', 'success', false, ['icon' => 'fa fa-refresh']);
-    }
-
-    public function install()
-    {
-
     }
 }

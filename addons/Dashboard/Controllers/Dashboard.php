@@ -7,29 +7,33 @@ use Garden\Addons;
 use Garden\Cache;
 use Garden\Config;
 use Garden\Db\Structure;
+use Garden\Form;
 use Garden\Helpers\Date;
+use Garden\Renderers\Template;
 use Garden\Request;
 use Garden\Response;
 use function count;
 
-class Dashboard extends Base {
+class Dashboard extends Model\Page {
 
-    public function initialize()
-    {
-        $this->pageInit();
-    }
-
-    public function index()
-    {
-        $this->title('Dashboard');
-
-        $this->render();
-    }
-
-    public function structure()
+    /**
+     * Dashboard main page
+     *
+     * @return Template
+     */
+    public function index(): Template
     {
         $this->permission('dashboard.admin');
-        $this->title('Update database structure');
+
+        return Model\Template::get()->setTitle('Dashboard');
+    }
+
+    /**
+     * @return Template
+     */
+    public function structure(): Template
+    {
+        $this->permission('dashboard.admin');
 
         $captureOnly = Request::current()->getQuery('update', false) === false;
 
@@ -61,18 +65,20 @@ class Dashboard extends Base {
             Response::current()->redirect('/dashboard/structure');
         }
 
-        $this->setData('capturePerm', $permission->capture);
-        $this->setData('capturedSql', $capture);
-
-        $this->render();
+        return Model\Template::get()
+            ->setTitle('Update database structure')
+            ->setData('capturePerm', $permission->capture)
+            ->setData('capturedSql', $capture);
     }
 
-    public function settings()
+    /**
+     * @return Template
+     */
+    public function settings(): Template
     {
         $this->permission('dashboard.admin');
-        $this->title('System settings');
 
-        $form = $this->form();
+        $form = new Form();
         $form->validation()
             ->rule('sitename', 'required')
             ->rule('locale', 'required');
@@ -88,21 +94,20 @@ class Dashboard extends Base {
             Config::save($post, 'main');
         }
 
-        $locales = [
-            'en_US' => '[en_US] English',
-            'ru_RU' => '[ru_RU] Русский'
-        ];
-
-        $this->setData('locales', $locales);
-        $this->render();
+        return Model\Template::get()
+            ->setTitle('System settings')
+            ->setData('form', $form)
+            ->setData('locales', [
+                'en_US' => '[en_US] English',
+                'ru_RU' => '[ru_RU] Русский'
+            ]);
     }
 
     public function addons()
     {
         $this->permission('dashboard.admin');
-        $this->title('Addon manager');
 
-        $form = $this->form();
+        $form = new Form();
 
         $data = Config::get('addons');
         $form->setData($data);
@@ -122,14 +127,15 @@ class Dashboard extends Base {
             }
         }
 
-        $this->setData('addons', $addons);
-        $this->render();
+        return Model\Template::get()
+            ->setTitle('Addon manager')
+            ->setData('form', $form)
+            ->setData('addons', $addons);
     }
 
     public function errorlog()
     {
         $this->permission('dashboard.admin');
-        $this->title('Error log');
         $timestamp = strtotime(Request::current()->getQuery('date', 'now'));
 
         $pattern = '/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.*|.*\n.*) in file (.+) on line (\d+)/u';
@@ -151,8 +157,9 @@ class Dashboard extends Base {
             ];
         }
 
-        $this->setData('date', Date::createTimestamp($timestamp)->toSql(false));
-        $this->setData('data', $result);
-        $this->render();
+        return Model\Template::get()
+            ->setTitle('Error log')
+            ->setData('date', Date::createTimestamp($timestamp)->toSql(false))
+            ->setData('data', $result);
     }
 }

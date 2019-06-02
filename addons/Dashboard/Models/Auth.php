@@ -9,6 +9,7 @@ use \Garden\Traits\Singleton;
 /**
  * Basic auth model
  * @uses Auth::instance()
+ * @property $user
  */
 class Auth {
     /**
@@ -40,9 +41,9 @@ class Auth {
     /**
      * Check user admin
      *
-     * @return boolean
+     * @return bool
      */
-    public function admin()
+    public function admin(): bool
     {
         return ($this->user && $this->user['admin']);
     }
@@ -100,7 +101,7 @@ class Auth {
      *
      * @return void
      */
-    public function authorize()
+    public function autoLogin()
     {
         $userID = Session::currentUserID();
         if (!$userID) {

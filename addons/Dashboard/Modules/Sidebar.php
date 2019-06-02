@@ -7,93 +7,109 @@
 namespace Addons\Dashboard\Modules;
 
 use Garden\Helpers\Arr;
-use Garden\Interfaces\Module;
+use Addons\Dashboard\Interfaces\Module;
 use Garden\Request;
 use Garden\Traits\Singleton;
 
 class Sidebar implements Module {
 
-    protected $current;
+    use Singleton;
+
+    protected $currentUrl;
     protected $menu = [];
 
     private $sort = 1000;
+    private $open = false;
 
-    use Singleton;
+    public function __construct()
+    {
+        $this->currentUrl = trim(Request::current()->getPath(), '/');
+    }
 
     /**
      * Set the url to select the active menu item
-     * @param bool $uri
+     *
+     * @param string $uri
      * @return string
      */
-    public function currentUrl($uri = false)
+    public function setCurrentUrl(string $uri): string
     {
-        if ($uri) {
-            $this->current = trim($uri, '/');
-        }
+        $this->currentUrl = trim($uri, '/');
 
-        if (!$this->current) {
-            $this->current = trim(Request::current()->getPath(), '/');
-        }
+        return $this->currentUrl;
+    }
 
-        return $this->current;
+    /**
+     * Returns current url from sidebar
+     *
+     * @return string
+     */
+    public function getCurrentUrl(): string
+    {
+        return $this->currentUrl;
     }
 
     /**
      * Add menu group
+     *
      * @param string $group group name
      * @param string $name
-     * @param bool $url
-     * @param bool $sort
-     * @param bool $permission
+     * @param string $url
+     * @param int $sort
+     * @param string $permission
      * @param array $attributes html attributes
+     * @return self
      */
-    public function addGroup($group, $name, $url = false, $sort = false, $permission = false, $attributes = [])
+    public function addGroup(string $group, string $name, string $url = '', int $sort = 0, string $permission = '', array $attributes = []): self
     {
         if ($permission && !\checkPermission($permission)) {
-            return false;
+            return $this;
         }
 
         $this->menu[$group] = [
-            'name'  => $name,
-            'url'   => $url,
-            'sort'  => $sort ?: $this->sort++,
+            'name' => $name,
+            'url' => $url,
+            'sort' => $sort ?: $this->sort++,
             'items' => Arr::path($this->menu, "$group.items", []),
             'attributes' => $attributes
         ];
 
-        return true;
+        return $this;
     }
 
     /**
      * Add menu group link
+     *
      * @param string $group group name
      * @param string $name
-     * @param $url
-     * @param bool $sort
-     * @param bool $permission
+     * @param string $url
+     * @param int $sort
+     * @param string $permission
      * @param array $attributes html attributes
+     * @return self
      */
-    public function addItem($group, $name, $url, $sort = false, $permission = false, $attributes = [])
+    public function addItem(string $group, string $name, string $url, int $sort = 0, string $permission = '', array $attributes = []): self
     {
         if ($permission && !\checkPermission($permission)) {
-            return false;
+            return $this;
         }
 
         $this->menu[$group]['items'][] = [
             'name' => $name,
-            'url'  => $url,
+            'url' => $url,
             'sort' => $sort ?: $this->sort++,
             'attributes' => $attributes
         ];
 
-        return true;
+        return $this;
     }
 
     /**
      * Rendering function
+     *
      * @return string
      */
-    public function render(array $params = [])
+    public function render(array $params = []): string
     {
         $html = '<ul class="nav-main">';
         $html .= $this->generateItems($this->menu, true);
@@ -102,8 +118,13 @@ class Sidebar implements Module {
         return $html;
     }
 
-    private $open = false;
-    private function generateItems(array $array, $groups = false)
+
+    /**
+     * @param array $array
+     * @param bool $groups
+     * @return string
+     */
+    private function generateItems(array $array, bool $groups = false): string
     {
         uasort($array, [$this, 'cmp']);
         $html = '';
@@ -128,7 +149,7 @@ class Sidebar implements Module {
                 $this->open = false;
             }
 
-            if (trim($url, '/') == $this->currentUrl()) {
+            if (trim($url, '/') === $this->currentUrl) {
                 $class .= ' active';
                 if (!$groups) {
                     $this->open = true;
@@ -140,7 +161,7 @@ class Sidebar implements Module {
                 $class .= ' nav-submenu';
                 $attributes['data-toggle'] = 'nav-submenu';
                 $htmlItems = $this->generateItems($items);
-            } elseif ($url == '#') {
+            } elseif ($url === '#') {
                 continue;
             }
 
@@ -171,12 +192,8 @@ class Sidebar implements Module {
         return $html;
     }
 
-    protected function cmp(array $a, array $b)
+    protected function cmp(array $a, array $b): int
     {
-        if ($a['sort'] == $b['sort']) {
-            return 0;
-        }
-
-        return ($a['sort'] < $b['sort']) ? -1 : 1;
+        return $a['sort'] <=> $b['sort'];
     }
 }

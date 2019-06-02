@@ -3,8 +3,12 @@
 namespace Addons\Dashboard\Modules;
 
 use Addons\Dashboard\Models\Auth;
+use Addons\Dashboard\Models\Permission;
+use Garden\Exception\NotFound;
 use Garden\Helpers\Arr;
-use Garden\Interfaces\Module;
+use Addons\Dashboard\Interfaces\Module;
+use Garden\Renderers\View;
+use Garden\Response;
 use Garden\Traits\Singleton;
 
 class Header implements Module {
@@ -20,20 +24,21 @@ class Header implements Module {
      * @param string $type bootstrap class
      * @param bool $permission
      * @param array $attributes html attributes
-     * @return bool
+     * @return self
      */
-    public function addLink($name, $href, $type = 'default', $permission = false, $attributes = array())
+    public function addLink(string $name, string $href, string $type = 'default', string $permission = '', array $attributes = []): self
     {
-        if ($permission && !\checkPermission($permission)) {
-            return false;
+        if ($permission && !Permission::instance()->check($permission)) {
+            return $this;
         }
 
         if ($href) {
             $attributes['href'] = $href;
         }
-        $class = val('class', $attributes, null);
-        $icon = val('icon', $attributes);
-        $class = trim('btn btn-' . $type . ' ' . $class);
+
+        $class = $attributes['class'] ?? null;
+        $icon = $attributes['icon'] ?? null;
+        $class = trim("btn btn-$type $class");
         $attributes['class'] = $class;
 
         unset($attributes['icon']);
@@ -45,7 +50,7 @@ class Header implements Module {
             'attributes' => Arr::implodeAssoc('" ', '="', $attributes) . '"'
         ];
 
-        return true;
+        return $this;
     }
 
     /**
@@ -54,30 +59,28 @@ class Header implements Module {
      * @param string $type bootstrap class
      * @param bool $permission
      * @param array $attributes html attributes
-     * @return bool
+     * @return self
      */
-    public function addButton($name, $type = 'default', $permission = false, $attributes = [])
+    public function addButton(string $name, string $type = 'default', string $permission = '', array $attributes = []): self
     {
-        return $this->addLink($name, false, $type, $permission, $attributes);
+        $this->addLink($name, false, $type, $permission, $attributes);
+
+        return $this;
     }
 
     /**
      * Rendering functtion
-     * @throws \Garden\Exception\NotFound
      * @return string
+     * @throws NotFound
      */
-    public function render(array $params = [])
+    public function render(array $params = []): string
     {
         $auth = Auth::instance();
-        $controller = new \Garden\Controller;
+        $view = new View('header', 'modules', 'dashboard');
 
-        $username = val('name', $auth->user, '');
-        $shortName = mb_strlen($username) > 12 ? mb_substr($username, 0, 12) . '...' : $username;
+        $view->setData('buttons', $this->buttons);
+        $view->setData('user', $auth->user);
 
-        $controller->setData('buttons', $this->buttons);
-        $controller->setData('user', $auth->user);
-        $controller->setData('shortName', $shortName);
-
-        return $controller->fetchView('header', 'modules', 'dashboard');
+        return $view->fetch(Response::current());
     }
 }

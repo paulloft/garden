@@ -37,7 +37,7 @@ class Session {
         session_start();
         self::$_instance = new self;
         self::$userID = self::$_instance->getUserID();
-        Request::current()->setEnv('USER_ID', self::$userID);
+        Request::current()->setEnvKey('user_id', self::$userID);
     }
 
     /**

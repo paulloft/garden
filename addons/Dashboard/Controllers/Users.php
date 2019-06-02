@@ -1,55 +1,53 @@
 <?php
+
 namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
+use Addons\Dashboard\Modules\Sidebar;
 use Garden\Exception;
+use Garden\Form;
+use Garden\Renderers\Template;
 use Garden\Response;
 
-class Users extends Base {
+class Users extends Model\Page {
 
-    public function initialize()
+    /**
+     * User list page
+     *
+     * @return Template
+     */
+    public function index(): Template
     {
-        $this->pageInit();
-    }
-
-    public function index()
-    {
-        $this->title('Users');
         $this->permission('dashboard.user.view');
 
         $userModel = Model\Users::instance();
         $users = $userModel->getWhere();
 
-        $this->setData('users', $users->as_array());
-        $this->render();
+        return Model\Template::get()
+            ->setTitle('Users')
+            ->setData('users', $users->as_array());
     }
 
-    public function groups()
+    /**
+     * Add new user
+     *
+     * @return Template
+     */
+    public function add(): Template
     {
-        $this->title('User groups');
-        $this->permission('dashboard.group.view');
-
-        $groupModel = Model\Groups::instance();
-        $groups = $groupModel->getWhere();
-
-        $this->setData('groups', $groups->as_array());
-        $this->render();
+        return $this->edit(false);
     }
 
-    public function add()
+    /**
+     * Edit user
+     *
+     * @param $id
+     * @return Template
+     */
+    public function edit($id): Template
     {
-        $this->edit(false);
-    }
-
-    public function edit($id)
-    {
-        $this->title($id ? 'Edit user' : 'New user');
-        $this->currentUrl('/dashboard/users');
-
         $userModel = Model\Users::instance();
         $groupModel = Model\Groups::instance();
-
-        $groups = $groupModel->getWhere(['active'=>1])->as_array();
 
         if ($id) {
             $this->permission('dashboard.user.edit');
@@ -63,7 +61,9 @@ class Users extends Base {
             $user = ['active' => 1, 'groupsID' => []];
         }
 
-        $form = $this->form($userModel, $user);
+        $groups = $groupModel->getWhere(['active' => 1])->as_array();
+
+        $form = new Form($userModel, $user);
 
         if ($form->submitted()) {
             $newPass = $form->getValue('newpassword');
@@ -71,37 +71,84 @@ class Users extends Base {
                 $form->setFormValue('password', $newPass);
             }
 
-            $id = $form->save();
-            if ($id) {
+            $savedID = $form->save();
+            if ($savedID) {
                 $userGroups = val('groupsID', $user);
-                $userModel->updateGroups($id, $form->getValues(), $userGroups);
+                $userModel->updateGroups($savedID, $form->getValues(), $userGroups);
                 Response::current()->redirect('/dashboard/users');
             }
         }
 
-        $this->setData('data', $form->getValues());
-        $this->setData('user', $user);
-        $this->setData('errors', $form->errors());
-        $this->setData('groups', $groups);
+        Sidebar::instance()->setCurrentUrl('/dashboard/users');
 
-        $this->render('user_edit');
+        return Model\Template::get()
+            ->setView('user_edit')
+            ->setTitle($id ? 'Edit user' : 'New user')
+            ->setDataArray([
+                'user' => $user,
+                'groups' => $groups,
+                'form' => $form,
+                'errors' => $form->errors(),
+                'data' => $form->getValues(),
+            ]);
     }
 
-    public function groupAdd()
+    /**
+     * Deleting user
+     *
+     * @param $id
+     */
+    public function deleteUser($id)
     {
-        $this->groupEdit();
+        $this->permission('dashboard.user.delete');
+
+        if ((int)$id === 1) {
+            throw new Exception\Forbidden('This operation is not allowed for this user');
+        }
+
+        $userModel = Model\Users::instance();
+        $userModel->deleteID($id);
+
+        Response::current()->redirect('/dashboard/users');
     }
 
-    public function groupEdit($id = false)
+    /**
+     * User groups list
+     *
+     * @return Template
+     */
+    public function groups(): Template
     {
-        $this->title($id ? 'Edit user group' : 'New user group');
-        $this->addJs('user_group.js');
-        $this->currentUrl('/dashboard/users/groups');
+        $this->permission('dashboard.group.view');
 
         $groupModel = Model\Groups::instance();
-        $permission = Model\Permission::instance();
+        $groups = $groupModel->getWhere();
 
-        $permList = $permission->getList(true);
+        return Model\Template::get()
+            ->setTitle('User groups')
+            ->setData('groups', $groups->as_array());
+    }
+
+    /**
+     * Add new user group
+     *
+     * @return Template
+     */
+    public function groupAdd(): Template
+    {
+        return $this->groupEdit(false);
+    }
+
+    /**
+     * Edit user group
+     *
+     * @param bool $id
+     * @return Template
+     */
+    public function groupEdit($id): Template
+    {
+        $groupModel = Model\Groups::instance();
+        $permission = Model\Permission::instance();
 
         if ($id) {
             $this->permission('dashboard.group.edit');
@@ -116,24 +163,35 @@ class Users extends Base {
             $group = ['active' => 1];
         }
 
-        $form = $this->form($groupModel, $group);
+        $permList = $permission->getList(true);
+
+        $form = new Form($groupModel, $group);
 
         if ($form->submitted()) {
-            $id = $form->save();
-            if ($id) {
-                $permission->saveGroup($id, $form->getValues(), $group);
+            $savedID = $form->save();
+            if ($savedID) {
+                $permission->saveGroup($savedID, $form->getValues(), $group);
                 Response::current()->redirect('/dashboard/users/groups');
             }
         }
 
-        $this->setData('group', $group);
-        $this->setData('permList', $permList);
-        $this->setData('data', $form->getValues());
-        $this->setData('errors', $form->errors());
+        Sidebar::instance()->setCurrentUrl('/dashboard/users/groups');
 
-        $this->render('group_edit');
+        return Model\Template::get()
+            ->setTitle($id ? 'Edit user group' : 'New user group')
+            ->setView('group_edit')
+            ->addJs('user_group.js')
+            ->setData('group', $group)
+            ->setData('permList', $permList)
+            ->setData('form', $form)
+            ->setData('data', $form->getValues())
+            ->setData('errors', $form->errors());
     }
 
+    /**
+     * Authorize as another user
+     * @param $id
+     */
     public function forceAuth($id)
     {
         $this->permission('dashboard.user.view');
@@ -144,26 +202,17 @@ class Users extends Base {
         Response::current()->redirect('/dashboard');
     }
 
-    public function deleteUser($id)
-    {
-        $this->permission('dashboard.user.delete');
-
-        if ($id == 1) {
-            return;
-        }
-
-        $userModel = Model\Users::instance();
-        $userModel->deleteID($id);
-
-        Response::current()->redirect('/dashboard/users');
-    }
-
+    /**
+     * Deleting group
+     *
+     * @param $id
+     */
     public function deleteGroup($id)
     {
         $this->permission('dashboard.group.delete');
 
-        if ($id == 1) {
-            return;
+        if ((int)$id === 1) {
+            throw new Exception\Forbidden('This operation is not allowed for this group');
         }
 
         $groupModel = Model\Groups::instance();

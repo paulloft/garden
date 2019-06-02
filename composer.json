@@ -5,7 +5,6 @@
 		"ext-PDO": "*",
 		"ext-pdo_mysql": "*",
 		"ext-Reflection": "*",
-		"ext-mbstring": "*",
 		"lib-curl": "*",
 		"lib-pcre": "*",
 		"smarty/smarty": "~3.1",

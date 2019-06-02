@@ -15,6 +15,7 @@
 <!-- Error Footer -->
 <div class="content pulldown text-muted text-center">
     {"Would you like to do?"|translate}<br>
-    <a class="link-effect" href="javascript:window.history.back();">{"Go back"|translate}</a> {"or"|translate} <a class="link-effect" href="/">{"Back to main"|translate}</a>
+    <a class="link-effect" href="javascript:window.history.back();">{"Go back"|translate}</a>
+    {"or"|translate} <a class="link-effect" href="/">{"Back to main"|translate}</a>
 </div>
 <!-- END Error Footer -->

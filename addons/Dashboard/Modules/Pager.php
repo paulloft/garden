@@ -4,10 +4,14 @@
  * Class PagerModule
  * For page output switch module
  */
+
 namespace Addons\Dashboard\Modules;
 
-use Garden\Interfaces\Module;
+use Addons\Dashboard\Interfaces\Module;
+use Garden\Exception\NotFound;
+use Garden\Renderers\View;
 use Garden\Request;
+use Garden\Response;
 use Garden\Traits\Instance;
 
 class Pager implements Module {
@@ -17,10 +21,10 @@ class Pager implements Module {
     protected $perPage = 20;
     protected $count = 0;
     protected $options = [
-        'parameter'  => 'p',
+        'parameter' => 'p',
         'showAlways' => true,
-        'arrows'     => true,
-        'range'      => 3
+        'arrows' => true,
+        'range' => 3
     ];
 
     protected $request;
@@ -46,9 +50,9 @@ class Pager implements Module {
 
     /**
      * Returned offset from sql query
-     * @return int|null
+     * @return int
      */
-    public function offset()
+    public function offset(): int
     {
         return ($this->curentPage() - 1) * $this->perPage;
     }
@@ -57,26 +61,26 @@ class Pager implements Module {
      * Return count of pages
      * @return int
      */
-    public function countPage()
+    public function countPage(): int
     {
-        if(!$this->pageCount) {
+        if (!$this->pageCount) {
             $this->pageCount = (int)ceil($this->count / $this->perPage) ?: 1;
         }
-        
+
         return $this->pageCount;
     }
 
     /**
      * Return number of current page
-     * @param null $num
-     * @return int|null
+     * @param int $num
+     * @return int
      */
-    public function curentPage($num = null)
+    public function curentPage($num = null): int
     {
         if ($num) {
-            $this->current = $num;
+            $this->current = (int)$num;
         } elseif (!$this->current) {
-            $param = val('parameter', $this->options);
+            $param = $this->options['parameter'];
             $pageCount = $this->countPage();
             $current = (int)$this->request->getQuery($param, 0);
             $this->current = ($current > 0 && $current <= $pageCount) ? $current : 1;
@@ -87,36 +91,40 @@ class Pager implements Module {
 
     /**
      * Rendering function
-     * @return bool|string
+     * @return string
+     * @throws NotFound
      */
-    public function render(array $params = [])
+    public function render(array $params = []): string
     {
         $pageCount = $this->countPage();
 
-        if ($pageCount <= 1 && !val('showAlways', $this->options)) {
+        if ($pageCount <= 1 && !$this->options['showAlways']) {
             return false;
         }
 
         $current = $this->curentPage();
 
         $defaultStart = 1;
-        $defaultEnd   = $pageCount;
+        $defaultEnd = $pageCount;
 
         $pages = $this->getPages($current, $defaultStart, $defaultEnd);
 
-        $controller = new \Garden\Controller;
+        $view = new View('pager', 'modules', 'dashboard');
 
-        $controller->setData('pages', $pages);
-        $controller->setData('current', $current);
-        $controller->setData('start', $defaultStart);
-        $controller->setData('end', $defaultEnd);
-        $controller->setData('uri', $this->getUri());
-        $controller->setData('showArrows', val('arrows', $this->options));
+        $view->setData('pages', $pages);
+        $view->setData('current', $current);
+        $view->setData('start', $defaultStart);
+        $view->setData('end', $defaultEnd);
+        $view->setData('uri', $this->getUri());
+        $view->setData('showArrows', $this->options['arrows']);
 
-        return $controller->fetchView('pager', 'modules', 'dashboard');
+        return $view->fetch(Response::current());
     }
 
-    protected function getUri()
+    /**
+     * @return string
+     */
+    protected function getUri(): string
     {
         $path = $this->request->getPath();
         $query = $this->request->getQuery();
@@ -124,44 +132,50 @@ class Pager implements Module {
 
         $query = http_build_query($query);
 
-        return $path.'?p=<page>'.($query ? '&'.$query : null);
+        return $path . '?p=<page>' . ($query ? '&' . $query : null);
     }
 
-    protected function getPages($current, $defaultStart, $defaultEnd)
+    /**
+     * @param $current
+     * @param $defaultStart
+     * @param $defaultEnd
+     * @return array
+     */
+    protected function getPages(int $current, int $defaultStart, int $defaultEnd): array
     {
-        
-        $range = val('range', $this->options);
+
+        $range = (int)$this->options['range'];
         $displayPages = ($range * 2) + 1;
 
         if ($defaultEnd <= $displayPages) {
             //(ex. 1 2 3 4 5 6 7)
-            $start = $defaultStart; 
-            $end   = $defaultEnd;
-        } elseif ($current + $range  <= $displayPages + 1) {
+            $start = $defaultStart;
+            $end = $defaultEnd;
+        } elseif ($current + $range <= $displayPages + 1) {
             // (ex: 1 2 3 4 5 6 7 ... 81)
-            $start = $defaultStart; 
-            $end   = $displayPages;
+            $start = $defaultStart;
+            $end = $displayPages;
         } elseif ($current + $range >= $defaultEnd - 1) {
             // (ex: 1 ... 75 76 77 78 79 80 81)
             $start = $current - $range;
-            $end   = $defaultEnd;
+            $end = $defaultEnd;
         } else {
             // (ex: 1 ... 4 5 6 7 8 9 10 ... 81)
             $start = $current - $range;
-            $end   = $current + $range;
+            $end = $current + $range;
         }
 
         $pages = [];
-        if($start !== $defaultStart) {
+        if ($start !== $defaultStart) {
             $pages[] = $defaultStart;
             $pages[] = null;
         }
 
-        for ($i=$start; $i <= $end; $i++) { 
+        for ($i = $start; $i <= $end; $i++) {
             $pages[] = $i;
         }
 
-        if($end !== $defaultEnd) {
+        if ($end !== $defaultEnd) {
             $pages[] = null;
             $pages[] = $defaultEnd;
         }

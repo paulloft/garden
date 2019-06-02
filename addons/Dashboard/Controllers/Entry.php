@@ -4,36 +4,25 @@ namespace Addons\Dashboard\Controllers;
 
 use Addons\Dashboard\Models as Model;
 use Garden\Config;
+use Garden\Renderers\Template;
 use Garden\Request;
-use Garden\Gdn;
 use Garden\Response;
 use Garden\Translate;
 
-class Entry extends Base {
-    public function __construct()
-    {
-        parent::__construct(false);
-    }
-
-    public function pageInit()
-    {
-        parent::pageInit();
-        $this->addJs('entry.js');
-        $this->addCss('entry.css');
-        $this->template('empty', 'Dashboard');
-    }
+class Entry {
 
     public function index()
     {
         Response::current()->redirect('/entry/login');
     }
 
-    public function login()
+    /**
+     * Login page
+     *
+     * @return Template
+     */
+    public function login(): Template
     {
-        $this->pageInit();
-
-        $this->title('Authorization');
-
         $auth = Model\Auth::instance();
         $request = Request::current();
 
@@ -58,18 +47,25 @@ class Entry extends Base {
             }
         }
 
-        $target = htmlspecialchars($target ? '?target=' . $target : null);
+        $target = htmlspecialchars($target ? "?target=$target"  : null);
 
-        $this->setData('error', $error);
-        $this->setData('target', $target);
-        $this->setData('sitename', Config::get('main.sitename'));
-        $this->render();
+        return  Model\Template::getEmpty()
+            ->addJs('entry.js')
+            ->addCss('entry.css')
+            ->setTitle('Authorization')
+            ->setData('error', $error)
+            ->setData('target', $target)
+            ->setData('sitename', Config::get('main.sitename'));
     }
 
+
+    /**
+     * Logout page
+     */
     public function logout()
     {
         $target = Request::current()->getQuery('target');
-        $redirect = ($target ? '?target=' . $target : '/');
+        $redirect = ($target ? "?target=$target" : '/');
 
         $auth = Model\Auth::instance();
         $auth->logout();

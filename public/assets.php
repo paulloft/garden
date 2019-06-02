@@ -2,8 +2,11 @@
 
 namespace Garden;
 
-\define('PATH_PUBLIC', __DIR__);
-\define('PATH_ROOT', \dirname(__DIR__));
+use function define;
+use function dirname;
+
+define('PATH_PUBLIC', __DIR__);
+define('PATH_ROOT', dirname(__DIR__));
 
 require_once PATH_ROOT . '/bootstrap.php';
 
@@ -16,7 +19,7 @@ $addon = Addons::enabled($addonName);
 
 if ($addon) {
     $addonDir = val('dir', $addon);
-    $filePath = $addonDir . '/Assets/' . $path;
+    $filePath = "$addonDir/Assets/$path";
     $filePath = str_replace('../', '/', $filePath);
     if (file_exists($filePath)) {
         $pathinfo = pathinfo($filePath);
@@ -39,7 +42,7 @@ if ($addon) {
         $handle = fopen($filePath, 'rb');
 
         while (!feof($handle)) {
-            echo fread($handle, (1024 * 1024));
+            echo fread($handle, 1024 * 1024);
             ob_flush();
             flush();
         }

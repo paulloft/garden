@@ -10,28 +10,35 @@ use Garden\Cache;
 use Garden\Config;
 use Garden\Db\Database;
 use Addons\Installer\Models as Model;
+use Garden\Form;
+use Garden\Renderers\Template;
 use Garden\Request;
 use Garden\Response;
 use Garden\SecureString;
-use Garden\Template;
 
-class Install extends Template {
+class Install {
 
     public $template = 'install.php';
 
-    public function initialize()
+    /**
+     * Instalator template
+     *
+     * @return Template
+     */
+    protected function template(): Template
     {
-        if ($this->renderType() === Request::RENDER_ALL) {
-            $this->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
-            $this->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700');
-            $this->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
-            $this->addCss('bootstrap.theme.css');
+        $template = new Template('install.php');
+        $template
+            ->setTitle('Installation')
+            ->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+            ->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700')
+            ->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
+            ->addCss('bootstrap.theme.css')
+            ->addCss('install.css')
+            ->addJs('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js')
+            ->addJs('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
 
-            $this->addJs('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
-            $this->addJs('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
-
-            $this->addCss('install.css');
-        }
+        return $template;
     }
 
     public function index()
@@ -39,29 +46,32 @@ class Install extends Template {
         Response::current()->redirect('/install');
     }
 
-    public function install()
+    public function install(): Template
     {
-        $this->title('Installation');
         if (Config::get('main.install')) {
-            $this->render('installed.php');
-        } else {
-            $step = Request::current()->getQuery('step');
-            $step = 'step_' . ($step > 0 && $step < 10 ? (int)$step : 1);
-
-            Cache::clear();
-
-            $this->$step();
+            return $this->template()->setView('installed.php');
         }
+
+        $step = Request::current()->getQuery('step');
+        $step = 'step_' . ($step > 0 && $step < 10 ? (int)$step : 1);
+
+        Cache::clear();
+
+        $data = $this->$step();
+
+        return $this->template()
+            ->setView("$step.php")
+            ->setDataArray($data);
     }
 
-    protected function step_1()
+    protected function step_1(): array
     {
-        $this->render('step_1.php');
+        return [];
     }
 
-    protected function step_2()
+    protected function step_2(): array
     {
-        $form = $this->form();
+        $form = new Form();
         $form->validation()
             ->rule('sitename', 'required')
             ->rule('locale', 'required');
@@ -80,19 +90,13 @@ class Install extends Template {
             Response::current()->redirect('/install?step=3');
         }
 
-        $this->render('step_2.php');
+        return ['form' => $form];
     }
 
-    protected function step_3()
+    protected function step_3(): array
     {
-        $this->addJs('step_3.js');
-        $model = Model\Install::instance();
-        $form = $this->form();
-
-        $cacheDrivers = $model->cacheDrivers();
-
         $data = Config::get('cache');
-        $form->setData($data);
+        $form = new Form(null, $data);
 
         if ($form->submitted()) {
             $post = $form->getFormValues();
@@ -115,14 +119,17 @@ class Install extends Template {
             }
         }
 
-        $this->setData('cacheDrivers', $cacheDrivers);
+        $this->template()->addJs('step_3.js');
 
-        $this->render('step_3.php');
+        return [
+            'form' => $form,
+            'cacheDrivers' => Model\Install::instance()->cacheDrivers()
+        ];
     }
 
-    protected function step_4()
+    protected function step_4(): array
     {
-        $form = $this->form();
+        $form = new Form();
 
         $data = Config::get('database');
         $form->setData($data);
@@ -143,17 +150,16 @@ class Install extends Template {
             }
         }
 
-        $this->render('step_4.php');
+        return ['form' => $form];
     }
 
-    protected function step_5()
+    protected function step_5(): array
     {
         $model = Model\Install::instance();
-        $form = $this->form();
+        $form = new Form();
 
         $data = Config::get('addons');
         $form->setData($data);
-        $addons = Addons::all();
 
         if ($form->submitted()) {
             $install = $form->getFormValues();
@@ -165,22 +171,19 @@ class Install extends Template {
             }
         }
 
-        $this->setData('addons', $addons);
-
-        $this->render('step_5.php');
+        return [
+            'addons' => Addons::all(),
+            'form' => $form,
+        ];
     }
 
-    protected function step_6()
+    protected function step_6(): array
     {
         if (!Addons::enabled('dashboard')) {
             Response::current()->redirect('/install?step=7');
         }
 
-
-        $form = $this->form();
-
-        $userModel = Users::instance();
-        $form->setModel($userModel);
+        $form = new Form(Users::instance());
 
         if ($form->submitted()) {
             $form->setFormValue('admin', 1);
@@ -192,14 +195,14 @@ class Install extends Template {
             }
         }
 
-        $this->render('step_6.php');
+        return ['form' => $form];
     }
 
-    protected function step_7()
+    protected function step_7(): array
     {
         Config::save(['install' => true], 'main');
 
-        $this->render('step_7.php');
+        return [];
     }
 
 }
