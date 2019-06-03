@@ -1,7 +1,7 @@
 <?php
 
 use Addons\Dashboard\Models\Permission;
-use Garden\Db\Structure;
+use Addons\Dashboard\Models\Db\Structure;
 
 $construct = Structure::instance();
 

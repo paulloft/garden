@@ -9,12 +9,14 @@ use Garden\Form;
 use Garden\Renderers\Template;
 use Garden\Response;
 
-class Users extends Model\Page {
+class Users extends Model\Page
+{
 
     /**
      * User list page
      *
      * @return Template
+     * @throws Exception\Forbidden
      */
     public function index(): Template
     {
@@ -32,6 +34,8 @@ class Users extends Model\Page {
      * Add new user
      *
      * @return Template
+     * @throws Exception\Forbidden
+     * @throws Exception\NotFound
      */
     public function add(): Template
     {
@@ -43,6 +47,8 @@ class Users extends Model\Page {
      *
      * @param $id
      * @return Template
+     * @throws Exception\Forbidden
+     * @throws Exception\NotFound
      */
     public function edit($id): Template
     {
@@ -89,7 +95,7 @@ class Users extends Model\Page {
                 'groups' => $groups,
                 'form' => $form,
                 'errors' => $form->errors(),
-                'data' => $form->getValues(),
+                'data' => $form->getValues()
             ]);
     }
 
@@ -97,6 +103,7 @@ class Users extends Model\Page {
      * Deleting user
      *
      * @param $id
+     * @throws Exception\Forbidden
      */
     public function deleteUser($id)
     {
@@ -116,6 +123,7 @@ class Users extends Model\Page {
      * User groups list
      *
      * @return Template
+     * @throws Exception\Forbidden
      */
     public function groups(): Template
     {
@@ -133,6 +141,8 @@ class Users extends Model\Page {
      * Add new user group
      *
      * @return Template
+     * @throws Exception\Forbidden
+     * @throws Exception\NotFound
      */
     public function groupAdd(): Template
     {
@@ -144,6 +154,8 @@ class Users extends Model\Page {
      *
      * @param bool $id
      * @return Template
+     * @throws Exception\Forbidden
+     * @throws Exception\NotFound
      */
     public function groupEdit($id): Template
     {
@@ -191,6 +203,7 @@ class Users extends Model\Page {
     /**
      * Authorize as another user
      * @param $id
+     * @throws Exception\Forbidden
      */
     public function forceAuth($id)
     {
@@ -206,6 +219,7 @@ class Users extends Model\Page {
      * Deleting group
      *
      * @param $id
+     * @throws Exception\Forbidden
      */
     public function deleteGroup($id)
     {

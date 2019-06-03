@@ -4,7 +4,7 @@ namespace Addons\Installer\Models;
 
 use Garden\Addons;
 use Garden\Config;
-use Garden\Db\Structure;
+use Addons\Dashboard\Models\Db\Structure;
 use Garden\Helpers\Arr;
 use Garden\Helpers\Text;
 use Garden\Traits\Instance;

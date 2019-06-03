@@ -6,20 +6,23 @@ use Addons\Dashboard\Models as Model;
 use Garden\Addons;
 use Garden\Cache;
 use Garden\Config;
-use Garden\Db\Structure;
+use Addons\Dashboard\Models\Db\Structure;
 use Garden\Form;
 use Garden\Helpers\Date;
 use Garden\Renderers\Template;
 use Garden\Request;
 use Garden\Response;
+use Garden\Exception;
 use function count;
 
-class Dashboard extends Model\Page {
+class Dashboard extends Model\Page
+{
 
     /**
      * Dashboard main page
      *
      * @return Template
+     * @throws Exception\Forbidden
      */
     public function index(): Template
     {
@@ -29,7 +32,10 @@ class Dashboard extends Model\Page {
     }
 
     /**
+     * Update DB structure
+     *
      * @return Template
+     * @throws Exception\Forbidden
      */
     public function structure(): Template
     {
@@ -46,7 +52,7 @@ class Dashboard extends Model\Page {
         $enabled = Addons::enabled();
 
         foreach ($addons as $addon => $options) {
-            $addonEnabled = val($addon, $enabled) ? true : false;
+            $addonEnabled = isset($enabled[$addon]);
             $permission->addonEnabled = $addonEnabled;
             $structure->addonEnabled = $addonEnabled;
             $dir = $options['dir'] ?? '';
@@ -72,7 +78,10 @@ class Dashboard extends Model\Page {
     }
 
     /**
+     * Settings page
+     *
      * @return Template
+     * @throws Exception\Forbidden
      */
     public function settings(): Template
     {
@@ -103,7 +112,13 @@ class Dashboard extends Model\Page {
             ]);
     }
 
-    public function addons()
+    /**
+     * Addons page
+     *
+     * @return Template
+     * @throws Exception\Forbidden
+     */
+    public function addons(): Template
     {
         $this->permission('dashboard.admin');
 
@@ -133,7 +148,13 @@ class Dashboard extends Model\Page {
             ->setData('addons', $addons);
     }
 
-    public function errorlog()
+    /**
+     * Error logs page
+     *
+     * @return Template
+     * @throws Exception\Forbidden
+     */
+    public function errorlog(): Template
     {
         $this->permission('dashboard.admin');
         $timestamp = strtotime(Request::current()->getQuery('date', 'now'));
@@ -153,7 +174,7 @@ class Dashboard extends Model\Page {
                 'date' => $matches[1][$i],
                 'text' => $matches[2][$i],
                 'file' => str_replace([PATH_ROOT, '/'], ['', '/<wbr>'], $matches[3][$i]),
-                'line' => $matches[4][$i],
+                'line' => $matches[4][$i]
             ];
         }
 
