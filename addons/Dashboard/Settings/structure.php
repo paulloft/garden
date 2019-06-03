@@ -82,4 +82,5 @@ Permission::instance()
     ->define('dashboard.group.view')
     ->define('dashboard.group.add')
     ->define('dashboard.group.edit')
+    ->define('dashboard.group.edit2')
     ->define('dashboard.group.delete');

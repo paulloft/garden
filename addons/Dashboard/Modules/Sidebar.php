@@ -130,7 +130,7 @@ class Sidebar implements Module {
         $html = '';
 
         foreach ($array as $group => $option) {
-            $name = val('name', $option);
+            $name = $option['name'];
 
             if ($name === false) {
                 continue;
@@ -139,8 +139,8 @@ class Sidebar implements Module {
             $url = $option['url'] ?: '#';
             $items = $option['items'];
             $attributes = $option['attributes'];
-            $icon = val('icon', $attributes);
-            $class = val('class', $attributes, null);
+            $icon = $attributes['icon'];
+            $class = $attributes['class'] ?? null;
             $icon = $icon ? '<i class="' . $icon . '"></i>' : null;
 
             unset($attributes['icon'], $attributes['class']);

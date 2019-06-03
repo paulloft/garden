@@ -1,10 +1,10 @@
-<?php echo $gdn_form->open(['action' => '/install?step=4']); ?>
+<?php echo $form->open(['action' => '/install?step=4']); ?>
     <div class="block-content">
         <h3>MySQL connection</h3>
-        <?php echo $gdn_form->errors(); ?>
+        <?php echo $form->errors(); ?>
         <div class="form-group">
             <label>MySQL driver</label>
-            <?php echo $gdn_form->select('driver', [
+            <?php echo $form->select('driver', [
                 'PDO' => 'PDO',
                 'MySQLi' => 'MySQLi',
                 'MySQL' => 'MySQL',
@@ -13,27 +13,27 @@
 
         <div class="form-group">
             <label>Host</label>
-            <?php echo $gdn_form->input('host'); ?>
+            <?php echo $form->input('host'); ?>
         </div>
 
         <div class="form-group">
             <label>Database name</label>
-            <?php echo $gdn_form->input('database'); ?>
+            <?php echo $form->input('database'); ?>
         </div>
 
         <div class="form-group">
             <label>Username</label>
-            <?php echo $gdn_form->input('username'); ?>
+            <?php echo $form->input('username'); ?>
         </div>
 
         <div class="form-group">
             <label>Password</label>
-            <?php echo $gdn_form->input('password'); ?>
+            <?php echo $form->input('password'); ?>
         </div>
 
         <div class="form-group">
             <label>Table prefix</label>
-            <?php echo $gdn_form->input('tablePrefix'); ?>
+            <?php echo $form->input('tablePrefix'); ?>
         </div>
     </div>
     <hr>
@@ -51,4 +51,4 @@
             </div>
         </div>
     </div>
-<?php echo $gdn_form->close(); ?>
+<?php echo $form->close(); ?>

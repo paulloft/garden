@@ -1,11 +1,11 @@
-<?php echo $gdn_form->open(['action' => '/install?step=3']); ?>
+<?php echo $form->open(['action' => '/install?step=3']); ?>
 <div class="block-content">
     <h3>Cache configuration</h3>
-    <?php echo $gdn_form->errors(); ?>
+    <?php echo $form->errors(); ?>
 
     <div class="form-group">
         <label>Cache type</label>
-        <?php echo $gdn_form->select('driver', [
+        <?php echo $form->select('driver', [
             'dirty' => 'Disable caching',
             'memcached' => 'Memcached',
             'memcache' => 'Memcache',
@@ -17,17 +17,17 @@
         
         <div class="form-group">
             <label>Host</label>
-            <?php echo $gdn_form->input('memcached[host]'); ?>
+            <?php echo $form->input('memcached[host]'); ?>
         </div>
 
         <div class="form-group">
             <label>Port</label>
-            <?php echo $gdn_form->input('memcached[port]'); ?>
+            <?php echo $form->input('memcached[port]'); ?>
         </div>
 
         <div class="form-group">
             <label>Key prefix</label>
-            <?php echo $gdn_form->input('memcached[keyPrefix]'); ?>
+            <?php echo $form->input('memcached[keyPrefix]'); ?>
         </div>
 
     </div>
@@ -37,17 +37,17 @@
 
         <div class="form-group">
             <label>Host</label>
-            <?php echo $gdn_form->input('memcache[host]'); ?>
+            <?php echo $form->input('memcache[host]'); ?>
         </div>
 
         <div class="form-group">
             <label>Port</label>
-            <?php echo $gdn_form->input('memcache[port]'); ?>
+            <?php echo $form->input('memcache[port]'); ?>
         </div>
 
         <div class="form-group">
             <label>Key prefix</label>
-            <?php echo $gdn_form->input('memcache[keyPrefix]'); ?>
+            <?php echo $form->input('memcache[keyPrefix]'); ?>
         </div>
 
     </div>
@@ -68,4 +68,4 @@
         </div>
     </div>
 </div>
-<?php echo $gdn_form->close(); ?>
+<?php echo $form->close(); ?>

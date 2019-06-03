@@ -18,8 +18,7 @@ $path = $request->getQuery('path');
 $addon = Addons::enabled($addonName);
 
 if ($addon) {
-    $addonDir = val('dir', $addon);
-    $filePath = "$addonDir/Assets/$path";
+    $filePath = "{$addon['dir']}/Assets/$path";
     $filePath = str_replace('../', '/', $filePath);
     if (file_exists($filePath)) {
         $pathinfo = pathinfo($filePath);

@@ -1,7 +1,7 @@
 <div class="block-content">
     <h3>Requirements</h3>
     <ul>
-        <li>PHP >= 5.4</li>
+        <li>PHP >= 7.0</li>
         <li>ext-json</li>
         <li>ext-pdo</li>
         <li>ext-pdo_mysql</li>

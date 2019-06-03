@@ -1,8 +1,6 @@
     <div class="block-content">
         <h3>Instalation complete</h3>
         <p></p>
-
-
     </div>
     <hr>
     <div class="block-header text-center">

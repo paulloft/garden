@@ -6,6 +6,7 @@ use Garden\Addons;
 use Garden\Config;
 use Addons\Dashboard\Models\Db\Structure;
 use Garden\Helpers\Arr;
+use Garden\Helpers\Files;
 use Garden\Helpers\Text;
 use Garden\Traits\Instance;
 
@@ -28,25 +29,20 @@ class Install {
         $allAddons = Addons::all();
 
         foreach ($allAddons as $addon => $options) {
-            if (!val($addon, $addons)) {
+            if (!isset($addons[$addon])) {
                 continue;
             }
             $installed = Config::get("addons.$addon") !== null;
-            $dir = val('dir', $options);
 
-            $structureFile = "$dir/Settings/structure.php";
+            $structureFile = "{$options['dir']}/Settings/structure.php";
             if (file_exists($structureFile)) {
-                call_user_func(function ($structureFile) {
-                    include_once $structureFile;
-                }, $structureFile);
+                Files::getInclude($structureFile);
             }
 
-            $installFile = "$dir/Settings/install.php";
+            $installFile = "{$options['dir']}/Settings/install.php";
 
             if (!$installed && file_exists($installFile)) {
-                call_user_func(function ($installFile) {
-                    include_once $installFile;
-                }, $installFile);
+                Files::getInclude($installFile);
             }
         }
     }

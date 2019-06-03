@@ -1,23 +1,23 @@
-<?php echo $gdn_form->open(['action' => '/install?step=6']); ?>
+<?php echo $form->open(['action' => '/install?step=6']); ?>
     <div class="block-content">
         <h3>Dashboard administrator</h3>
         <p>Create new user</p>
 
-        <?php echo $gdn_form->errors(); ?>
+        <?php echo $form->errors(); ?>
 
         <div class="form-group">
             <label>User name</label>
-            <?php echo $gdn_form->input('name'); ?>
+            <?php echo $form->input('name'); ?>
         </div>
 
         <div class="form-group">
             <label>Login *</label>
-            <?php echo $gdn_form->input('login', 'text', ['required' => true]); ?>
+            <?php echo $form->input('login', 'text', ['required' => true]); ?>
         </div>
 
         <div class="form-group">
             <label>Password *</label>
-            <?php echo $gdn_form->input('password', 'password', ['required' => true]); ?>
+            <?php echo $form->input('password', 'password', ['required' => true]); ?>
         </div>
     </div>
     <hr>
@@ -35,4 +35,4 @@
             </div>
         </div>
     </div>
-<?php echo $gdn_form->close(); ?>
+<?php echo $form->close(); ?>

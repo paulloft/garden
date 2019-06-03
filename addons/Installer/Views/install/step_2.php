@@ -1,21 +1,21 @@
-<?php echo $gdn_form->open(['action' => '/install?step=2']); ?>
+<?php echo $form->open(['action' => '/install?step=2']); ?>
 <div class="block-content">
     <h3>Site configuration</h3>
-    <?php echo $gdn_form->errors(); ?>
+    <?php echo $form->errors(); ?>
     <div class="form-group">
         <label>Site name</label>
-        <?php echo $gdn_form->input('sitename', 'text', ['placeholder' => 'Enter your site name', 'required' => true]); ?>
+        <?php echo $form->input('sitename', 'text', ['placeholder' => 'Enter your site name', 'required' => true]); ?>
     </div>
 
     <div class="form-group">
         <label>Localization</label>
-        <?php echo $gdn_form->select('locale', ['en_US' => '[en_US] English', 'ru_RU' => '[ru_RU] Русский']); ?>
+        <?php echo $form->select('locale', ['en_US' => '[en_US] English', 'ru_RU' => '[ru_RU] Русский']); ?>
     </div>
 
     <div class="form-group">
         <div class="checkbox">
             <label>
-                <?php echo $gdn_form->checkbox('debug'); ?>
+                <?php echo $form->checkbox('debug'); ?>
                 Enable debug messages
             </label>
         </div>
@@ -24,7 +24,7 @@
     <div class="form-group">
         <div class="checkbox">
             <label>
-                <?php echo $gdn_form->checkbox('logs'); ?>
+                <?php echo $form->checkbox('logs'); ?>
                 Enable error logs
             </label>
         </div>
@@ -46,4 +46,4 @@
         </div>
     </div>
 </div>
-<?php echo $gdn_form->close(); ?>
+<?php echo $form->close(); ?>

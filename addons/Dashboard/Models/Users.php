@@ -2,8 +2,8 @@
 
 namespace Addons\Dashboard\Models;
 
+use Garden\Cache;
 use Garden\Form;
-use Garden\Gdn;
 use Garden\Db\DB;
 use Garden\Model;
 
@@ -11,31 +11,40 @@ use Garden\Model;
  * Base users model
  */
 class Users extends Model {
+
     public function __construct()
     {
         parent::__construct('users');
     }
 
+    /**
+     * Get user by ID
+     *
+     * @param int $id
+     * @return array
+     */
     public function getID($id)
     {
-        $result = Gdn::cache('dirty')->get('user_' . $id);
+        $result = Cache::lazyGet("user_$id");
 
-        if (!$result) {
-            $query = DB::select('u.*')
-                ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
-                ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
-                ->from($this->table, 'u')
-                ->join('users_groups', 'ug', 'LEFT')
-                ->on('u.id', '=', 'ug.user_id')
-                ->join('groups', 'g', 'LEFT')
-                ->on('ug.group_id', '=', 'g.id')
-                ->where('u.id', '=', $id)
-                ->limit(1);
-
-            $result = $query->execute()->current();
-
-            Gdn::cache('dirty')->set('user_' . $id, $result);
+        if ($result !== null) {
+            return $result;
         }
+
+        $query = DB::select('u.*')
+            ->select(DB::expr("GROUP_CONCAT(DISTINCT g.id ORDER BY g.sort ASC SEPARATOR ';') AS groupsID"))
+            ->select(DB::expr("GROUP_CONCAT(DISTINCT g.name ORDER BY g.sort ASC SEPARATOR ';') AS groups"))
+            ->from($this->table, 'u')
+            ->join('users_groups', 'ug', 'LEFT')
+            ->on('u.id', '=', 'ug.user_id')
+            ->join('groups', 'g', 'LEFT')
+            ->on('ug.group_id', '=', 'g.id')
+            ->where('u.id', '=', $id)
+            ->limit(1);
+
+        $result = $query->execute()->current();
+
+        Cache::lazySet("user_$id", $result);
 
         return $result;
     }
@@ -43,13 +52,13 @@ class Users extends Model {
     public function getUserName($id)
     {
         $user = $this->getID($id);
-        return val('name', $user);
+        return $user['name'] ?? '';
     }
 
     public function getUserLogin($id)
     {
         $user = $this->getID($id);
-        return val('login', $user);
+        return $user['login'] ?? '';
     }
 
     public function getByLogin($username)
@@ -143,7 +152,7 @@ class Users extends Model {
     public function updateGroups($userID, $post, $groups)
     {
         $groupModel = Groups::instance();
-        $groupsNew = val('groupsID', $post, []);
+        $groupsNew = $post['groupsID'] ?? [];
 
         $insert = array_diff($groupsNew, $groups);
         $delete = array_diff($groups, $groupsNew);
@@ -192,10 +201,8 @@ class Users extends Model {
 
     public function save(array $post, $id = false)
     {
-        $password = val('password', $post);
-        if ($password) {
-            $password = Auth::instance()->hash($password);
-            $post['password'] = $password;
+        if (isset($post['password'])) {
+            $post['password'] = Auth::instance()->hash($post['password']);
         }
 
         return parent::save($post, $id);

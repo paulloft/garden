@@ -79,8 +79,7 @@ class Users extends Model\Page
 
             $savedID = $form->save();
             if ($savedID) {
-                $userGroups = val('groupsID', $user);
-                $userModel->updateGroups($savedID, $form->getValues(), $userGroups);
+                $userModel->updateGroups($savedID, $form->getValues(), $user['groupsID']);
                 Response::current()->redirect('/dashboard/users');
             }
         }
@@ -182,7 +181,7 @@ class Users extends Model\Page
         if ($form->submitted()) {
             $savedID = $form->save();
             if ($savedID) {
-                $permission->saveGroup($savedID, $form->getValues(), $group);
+                $permission->saveForGroup($savedID, $form->getValues(), $group);
                 Response::current()->redirect('/dashboard/users/groups');
             }
         }

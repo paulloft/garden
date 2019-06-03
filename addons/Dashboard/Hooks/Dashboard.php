@@ -9,6 +9,7 @@ use Addons\Dashboard\Modules\Sidebar;
 use Garden\Exception\Client;
 use Garden\Exception\NotFound;
 use Garden\Renderers\Template;
+use Garden\Response;
 use Garden\Traits\Instance;
 use Garden\Translate;
 use function in_array;

@@ -1,7 +1,7 @@
 <?php
 return [
-    "sitename" => "Garden",
-    "hashsalt" => "Z6j3kz65qE4HT3V2",
+    "sitename" => "Garden12",
+    "hashsalt" => "xIK_rADbGDv2AjAF",
     "install" => true,
     "locale" => "ru_RU",
     "logs" => true,

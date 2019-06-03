@@ -37,7 +37,7 @@ class Entry {
 
             $user = $auth->login($username, $password);
 
-            if (val('active', $user)) {
+            if ($user['active'] ?? false) {
                 $auth->completeLogin($user, $remember);
                 Response::current()->redirect($target ?: '/');
             } elseif ($user) {

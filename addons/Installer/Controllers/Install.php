@@ -28,15 +28,7 @@ class Install {
     protected function template(): Template
     {
         $template = new Template('install.php');
-        $template
-            ->setTitle('Installation')
-            ->addCss('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
-            ->addCss('//fonts.googleapis.com/css?family=Open+Sans:300,400,400italic,600,700')
-            ->addCss('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
-            ->addCss('bootstrap.theme.css')
-            ->addCss('install.css')
-            ->addJs('//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js')
-            ->addJs('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
+        $template->setTitle('Installation');
 
         return $template;
     }
@@ -82,8 +74,8 @@ class Install {
         if ($form->submitted() && $form->valid()) {
             $post = $form->getFormValues();
             $post['hashsalt'] = SecureString::generateRandomKey(16);
-            $post['logs'] = val('logs', $post) ? true : false;
-            $post['debug'] = val('debug', $post) ? true : false;
+            $post['logs'] = $post['logs'] ? true : false;
+            $post['debug'] = $post['debug'] ? true : false;
 
             Config::save($post, 'main');
 
@@ -101,8 +93,8 @@ class Install {
         if ($form->submitted()) {
             $post = $form->getFormValues();
 
-            $driver = val('driver', $post);
-            $options = val($driver, $post, []);
+            $driver = $post['driver'];
+            $options = $post[$driver] ?? [];
 
             try {
                 $cache = Cache::instance($driver, $options);

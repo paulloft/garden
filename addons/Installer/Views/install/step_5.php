@@ -1,4 +1,4 @@
-<?php echo $gdn_form->open(['action' => '/install?step=5']); ?>
+<?php echo $form->open(['action' => '/install?step=5']); ?>
     <div class="block-content">
         <h3>Addons</h3>
         <p>Select the addons to be installed</p>
@@ -17,7 +17,7 @@
                 <tr>
                     <td>
                         <label class="css-input switch switch-sm switch-success mt-0 mb-0">
-                            <?php echo $gdn_form->checkbox($name); ?>
+                            <?php echo $form->checkbox($name); ?>
                             <span></span>
                         </label>
                     </td>
@@ -52,4 +52,4 @@
             </div>
         </div>
     </div>
-<?php echo $gdn_form->close(); ?>
+<?php echo $form->close(); ?>

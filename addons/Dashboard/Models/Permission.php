@@ -1,14 +1,15 @@
 <?php
+
 namespace Addons\Dashboard\Models;
+
+use Garden\Cache;
 use Garden\Gdn;
 use Garden\Db\DB;
 use Garden\Helpers\Arr;
 use Garden\Model;
 use Garden\Traits\Instance;
 
-
-class Permission
-{
+class Permission {
     public $capture = [];
     public $captureOnly = false;
     public $addonEnabled = true;
@@ -21,7 +22,14 @@ class Permission
 
     use Instance;
 
-    public function define($permission, $default = false)
+    /**
+     * Define permission
+     *
+     * @param $permission
+     * @param bool $default
+     * @return $this
+     */
+    public function define($permission, $default = false): self
     {
         $permission = strtolower($permission);
         if ($this->addonEnabled) {
@@ -33,6 +41,9 @@ class Permission
         return $this;
     }
 
+    /**
+     * save permission
+     */
     public function save()
     {
         $permissions = $this->getList();
@@ -47,12 +58,12 @@ class Permission
         $sort = count($permissions) - count($delete) + 1;
 
         foreach ($insert as $permission) {
-            if (val($permission, $this->disabled) !== false) {
+            if (isset($this->disabled[$permission])) {
                 continue;
             }
             $fields = [
                 'code' => $permission,
-                'def'  => val($permission, $this->define),
+                'def' => $this->define[$permission],
                 'sort' => $sort++
             ];
 
@@ -66,26 +77,33 @@ class Permission
 
         $groupModel = Model::instance($this->_groupTable);
         foreach ($delete as $permission) {
-            if (val($permission, $this->disabled) !== false) {
+            if (isset($this->disabled[$permission])) {
                 continue;
             }
 
-            $id = val($permission, $permissions);
+            $id = $permissions[$permission];
             if ($this->captureOnly) {
                 $this->capture[] = [
-                    'code'   => $permission,
+                    'code' => $permission,
                     'action' => 'delete'
                 ];
             } else {
-                $this->delete($id);
-                $groupModel->deleteWhere(['id'=>$id]);
+                $this->deleteID($id);
+                $groupModel->deleteWhere(['id' => $id]);
             }
         }
 
         $this->define = [];
     }
 
-    public function check($permission, $userID = false)
+    /**
+     * Сhecks if the user has selected permissions
+     *
+     * @param string $permission
+     * @param int $userID
+     * @return bool
+     */
+    public function check(string $permission, $userID = null): bool
     {
         if (Auth::instance()->admin()) {
             return true;
@@ -107,94 +125,108 @@ class Permission
         return true;
     }
 
-    public function get($userID = null)
+    /**
+     * Get all user permissions
+     *
+     * @param int $userID
+     * @return array
+     */
+    public function get($userID = null): array
     {
         if ($userID === null) {
             $userID = Session::currentUserID();
         }
 
         if (!$userID) {
-            return false;
+            return [];
         }
 
+        $cache = Cache::instance();
         $cacheKey = "permission_user_$userID";
+        $return = $cache->get($cacheKey);
 
-        if (!$return = Gdn::cache()->get($cacheKey)) {
-            $result = DB::selectArray(['p.id', 'p.code'])
-                ->from('users_groups', 'ug')
-
-                ->join('groups', 'g')
-                ->on('g.id', '=', 'ug.group_id')
-
-                ->join($this->_groupTable, 'gp')
-                ->on('gp.group_id', '=', 'ug.group_id')
-
-                ->join($this->_table, 'p')
-                ->on('p.id', '=', 'gp.permission_id')
-
-                ->where('ug.user_id', '=', $userID)
-                ->where('g.active', '=', 1)
-                ->where('g.deleted', '=', 0)
-
-                ->group_by('p.id')
-                ->as_object()
-                ->execute()
-                ->as_array();
-
-            $return = [];
-            foreach ($result as $permission) {
-                list($group, $module, $action) = explode('.', $permission->code);
-                $return[$group][$module][$action] = $permission->id;
-            }
-
-            Gdn::cache()->set($cacheKey, $return);
+        if ($return !== null) {
+            return (array)$return;
         }
+
+        $result = DB::selectArray(['p.id', 'p.code'])
+            ->from('users_groups', 'ug')
+            ->join('groups', 'g')
+            ->on('g.id', '=', 'ug.group_id')
+            ->join($this->_groupTable, 'gp')
+            ->on('gp.group_id', '=', 'ug.group_id')
+            ->join($this->_table, 'p')
+            ->on('p.id', '=', 'gp.permission_id')
+            ->where('ug.user_id', '=', $userID)
+            ->where('g.active', '=', 1)
+            ->where('g.deleted', '=', 0)
+            ->group_by('p.id')
+            ->as_object()
+            ->execute()
+            ->as_array();
+
+        $return = [];
+        foreach ($result as $permission) {
+            list($group, $module, $action) = explode('.', $permission->code);
+            $return[$group][$module][$action] = $permission->id;
+        }
+
+        $cache->set($cacheKey, $return);
 
         return $return;
     }
 
-    public function getList($formatted = false)
+    /**
+     * Get list of all permisions
+     * @param bool $formatted
+     * @return array
+     */
+    public function getList(bool $formatted = false): array
     {
         $query = DB::select('*')
             ->from($this->_table)
             ->order_by('sort', 'asc');
 
-        if (!$formatted) {
-            return $query->execute()->as_array();
-        }
+        $permissions = $query->execute()->as_array();
 
-        $permissions = $query->as_object()->execute()->as_array();
+        if (!$formatted) {
+            return $permissions;
+        }
 
         $result = [];
         foreach ($permissions as $permission) {
-            list($group, $module, $action) = explode('.', $permission->code);
+            list($group, $module, $action) = explode('.', $permission['code']);
             if (!$action) {
                 $action = 'view';
             }
 
-            if (!in_array($action, $result[$group]['columns'])) {
+            if (!in_array($action, $result[$group]['columns'], true)) {
                 $result[$group]['columns'][] = $action;
             }
 
             $result[$group]['items'][$module][$action] = [
-                'id' => $permission->id,
-                'code' => $permission->code,
-                'default' => $permission->def
+                'id' => $permission['id'],
+                'code' => $permission['code'],
+                'default' => $permission['def']
             ];
         }
 
         return $result;
     }
 
-    public function getForGroup($groupID)
+    /**
+     * Get all group permissions
+     *
+     * @param $groupID
+     * @return array
+     */
+    public function getForGroup($groupID): array
     {
         $result = DB::select('gp.permission_id', 'id')
             ->select('p.code', 'code')
             ->from($this->_groupTable, 'gp')
-
             ->join($this->_table, 'p')
-              ->on('gp.permission_id', '=', 'p.id')
-
+            ->on('gp.permission_id', '=', 'p.id')
             ->where('gp.group_id', '=', $groupID)
             ->execute()
             ->as_array();
@@ -202,10 +234,17 @@ class Permission
         return $result;
     }
 
-    public function saveGroup($groupID, $data, $oldData)
+    /**
+     * save new permissions for group
+     *
+     * @param int $groupID
+     * @param array $data
+     * @param array $oldData
+     */
+    public function saveForGroup($groupID, $data, $oldData)
     {
-        $oldPerm = val('permission', $oldData, []);
-        $newPerm = val('permission', $data, []);
+        $newPerm = $data['permission'] ?? [];
+        $oldPerm = $oldData['permission'] ?? [];
 
         $insert = array_diff($newPerm, $oldPerm);
         $delete = array_diff($oldPerm, $newPerm);
@@ -213,7 +252,7 @@ class Permission
         $groupModel = Model::instance($this->_groupTable);
         foreach ($insert as $permissionID) {
             $groupModel->insert([
-                'group_id'      => $groupID,
+                'group_id' => $groupID,
                 'permission_id' => $permissionID
             ]);
         }
@@ -223,18 +262,29 @@ class Permission
         }
     }
 
-    public function getID($permission)
+    /**
+     * Get permission ID
+     *
+     * @param $permission
+     * @return mixed
+     */
+    public function getID(string $permission)
     {
         $query = DB::select('id')
             ->from($this->_table)
             ->where('code', '=', $permission)
             ->limit(1);
 
-        $result = $query->execute()->current();
-        return val('id', $result);
+        return $query->execute()->get('id');
     }
 
-    protected function update($id, $data)
+    /**
+     * Update permission
+     *
+     * @param int $id
+     * @param array $data
+     */
+    protected function update($id, array $data)
     {
         DB::update($this->_table)
             ->set($data)
@@ -242,20 +292,32 @@ class Permission
             ->execute();
     }
 
+    /**
+     * Insert new permission
+     *
+     * @param $data
+     * @return mixed
+     */
     protected function insert($data)
     {
         $columns = array_keys($data);
 
-        $query = DB::insert($this->_table, $columns)
+        $result = DB::insert($this->_table, $columns)
             ->values($data)
             ->execute();
 
-        return val(0, $query, false);
+        list($insertID) = $result;
+
+        return $insertID;
     }
 
-    protected function delete($id)
+    /**
+     * @param $id
+     * @return int
+     */
+    protected function deleteID($id): int
     {
-        DB::delete($this->_table)
+        return (int)DB::delete($this->_table)
             ->where('id', '=', $id)
             ->execute();
     }

@@ -8,6 +8,7 @@ use Garden\Cache;
 use Garden\Config;
 use Addons\Dashboard\Models\Db\Structure;
 use Garden\Form;
+use Garden\Helpers\Arr;
 use Garden\Helpers\Date;
 use Garden\Renderers\Template;
 use Garden\Request;
@@ -15,8 +16,7 @@ use Garden\Response;
 use Garden\Exception;
 use function count;
 
-class Dashboard extends Model\Page
-{
+class Dashboard extends Model\Page {
 
     /**
      * Dashboard main page
@@ -97,8 +97,8 @@ class Dashboard extends Model\Page
 
         if ($form->submitted() && $form->valid()) {
             $post = $form->getFormValues();
-            $post['logs'] = val('logs', $post) ? true : false;
-            $post['debug'] = val('debug', $post) ? true : false;
+            $post['logs'] = Arr::get($post, 'logs') ? true : false;
+            $post['debug'] = Arr::get($post, 'debug') ? true : false;
 
             Config::save($post, 'main');
         }
@@ -123,19 +123,23 @@ class Dashboard extends Model\Page
         $this->permission('dashboard.admin');
 
         $form = new Form();
+        $model = Model\Addons::instance();
 
+        $addons = Addons::all();
         $data = Config::get('addons');
         $form->setData($data);
-        $model = Model\Addons::instance();
-        $addons = $model->getAll();
 
         if ($form->submitted()) {
             $name = $form->getFormValue('addon');
             $enable = $form->getFormValue('enable');
 
-            if ($enable && !$model->install($name)) {
-                $form->addError($model->error);
-            } else {
+            try {
+                $enable AND $model->install($name);
+            } catch (\Exception $exception) {
+                $form->addError($exception->getMessage());
+            }
+
+            if ($form->valid()) {
                 $model->save($name, $enable);
                 Cache::clear();
                 Response::current()->redirect('/dashboard/addons');
