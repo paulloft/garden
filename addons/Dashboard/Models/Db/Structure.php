@@ -6,7 +6,7 @@ use Garden\Db\Database;
 use Garden\Event;
 use Garden\Exception;
 use Garden\Helpers\Arr;
-use Garden\Helpers\Object;
+use Garden\Helpers\Obj;
 use stdClass;
 use function count;
 use function in_array;
