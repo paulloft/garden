@@ -1,10 +1,11 @@
 <?php
 
-namespace Garden;
-
+use Garden\Event;
+use Garden\Addons;
+use Garden\Config;
+use Garden\Translate;
 use Garden\Db\Database;
-use function define;
-use function defined;
+use Garden\ErrorHandler;
 
 // Require composer's autoloader.
 require_once PATH_ROOT . '/vendor/autoload.php';

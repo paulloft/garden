@@ -11,16 +11,14 @@
 		"kuria/error": "^0.2.0"
 	},
 	"require-dev": {
+		"roave/security-advisories": "dev-master",
 		"paulloft/dumphper": "*",
-		"paulloft/gdn-db": "*"
+		"paulloft/gdn-db": "dev-master",
+		"paulloft/gdn-core": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {
-			"Garden\\": "system",
 			"Addons\\": "addons"
-		},
-		"files": [
-			"system/functions/autoload.php"
-		]
+		}
 	}
 }
